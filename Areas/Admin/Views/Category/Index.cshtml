@@ -1,0 +1,47 @@
+﻿@model IEnumerable<CategoryModel>
+@{
+    ViewData["Title"] = "Danh sách danh mục";
+}
+
+<h1>Danh mục</h1>
+<a class="btn btn-primary mb-3" asp-action="Create">Thêm danh mục mới</a>
+
+<table class="table table-bordered" id="myTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên</th>
+            <th>Mô tả</th>
+            <th>Loại</th>
+            <th>Danh mục chính</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>@item.Description</td>
+                <td>@(item.Level == 1 ? "Danh mục chính" : "Danh mục phụ")</td>
+                <td>@(item.ParentCategory?.Name ?? "-")</td>
+                <td>
+                    @if (item.Status == 1)
+                    {
+                        <span class="text text-success">Hiển thị</span>
+                    }
+                    else
+                    {
+                        <span class="text text-danger">Ẩn</span>
+                    }
+                </td>
+                <td>
+                    <a class="btn btn-warning" asp-action="Edit" asp-route-id="@item.Id">Sửa</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id" onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

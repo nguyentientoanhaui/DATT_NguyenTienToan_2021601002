@@ -1,0 +1,456 @@
+@model Shopping_Demo.Models.ViewModels.ExternalLoginConfirmationViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Complete Registration | Aurum</title>
+
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="~/css/sweetalert2.min.css" rel="stylesheet">
+    <link href="~/css/main.css" rel="stylesheet">
+    <link rel="shortcut icon" href="images/ico/favicon.ico">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .login-header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .logo-aurum {
+            color: #000;
+        }
+
+        .help-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .help-link:hover {
+            color: #000;
+            text-decoration: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .confirmation-wrapper {
+            display: flex;
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .confirmation-image {
+            flex: 1;
+            background: linear-gradient(135deg, #000 0%, #333 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confirmation-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        }
+
+        .image-content {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .image-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .watch-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .confirmation-form-section {
+            flex: 1;
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .provider-info {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .provider-info .provider-name {
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        .provider-info .user-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .confirmation-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #000;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #999;
+        }
+
+        .form-input[readonly] {
+            background: #f1f3f4;
+            color: #666;
+        }
+
+        .complete-btn {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+
+        .complete-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .complete-btn:active {
+            transform: translateY(0);
+        }
+
+        .validation-error {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .validation-summary {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .confirmation-wrapper {
+                flex-direction: column;
+                max-width: 500px;
+            }
+
+            .confirmation-image {
+                padding: 40px 20px;
+            }
+
+            .image-content h2 {
+                font-size: 2rem;
+            }
+
+            .confirmation-form-section {
+                padding: 40px 30px;
+            }
+
+            .form-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .confirmation-form-section {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Animation */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .confirmation-wrapper {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="login-header">
+        <div class="header-content">
+            <a href="/" class="logo">
+                <span class="logo-aurum">Aurum</span>
+            </a>
+            <a href="/Home/Contact" class="help-link">
+                <i class="fas fa-question-circle"></i> Need Help?
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="confirmation-wrapper">
+            <!-- Left Side - Image/Content -->
+            <div class="confirmation-image">
+                <div class="image-content">
+                    <div class="watch-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h2>Complete Registration</h2>
+                    <p>Please provide additional information to complete your account setup with Aurum.</p>
+                </div>
+            </div>
+
+            <!-- Right Side - Confirmation Form -->
+            <div class="confirmation-form-section">
+                <div class="form-header">
+                    <h1>Account Details</h1>
+                    <p>Complete your profile information</p>
+                </div>
+
+                <div class="provider-info">
+                    <div class="provider-name">
+                        <i class="fab fa-@(Model.Provider.ToLower())"></i>
+                        Connected with @Model.Provider
+                    </div>
+                    <div class="user-info">
+                        <strong>@Model.Name</strong><br>
+                        @Model.Email
+                    </div>
+                </div>
+
+                <form class="confirmation-form" asp-action="ExternalLoginConfirmation" asp-controller="Account" method="post">
+                    <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Email">Email</label>
+                        <input asp-for="Email" class="form-input" readonly />
+                        <span asp-validation-for="Email" class="validation-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Name">Full Name</label>
+                        <input asp-for="Name" class="form-input" readonly />
+                        <span asp-validation-for="Name" class="validation-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" asp-for="PhoneNumber">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-input" placeholder="Enter your phone number" />
+                        <span asp-validation-for="PhoneNumber" class="validation-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Address">Address</label>
+                        <input asp-for="Address" class="form-input" placeholder="Enter your address" />
+                        <span asp-validation-for="Address" class="validation-error"></span>
+                    </div>
+
+                                         <div class="form-group">
+                         <label class="form-label" asp-for="Gender">Gender</label>
+                         <select asp-for="Gender" class="form-select">
+                             <option value="">Select gender</option>
+                             <option value="Male">Male</option>
+                             <option value="Female">Female</option>
+                             <option value="Other">Other</option>
+                         </select>
+                         <span asp-validation-for="Gender" class="validation-error"></span>
+                     </div>
+
+                     <div class="form-group">
+                         <label class="form-label" asp-for="Age">Age</label>
+                         <input asp-for="Age" type="number" min="1" max="120" class="form-input" placeholder="Enter your age (1-120)" />
+                         <span asp-validation-for="Age" class="validation-error"></span>
+                     </div>
+
+                     <input type="hidden" asp-for="Provider" />
+                    <input type="hidden" asp-for="ProviderKey" />
+                    <input type="hidden" asp-for="PictureUrl" />
+
+                    <button type="submit" class="complete-btn">
+                        <i class="fas fa-check"></i> Complete Registration
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="~/js/jquery.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/sweetalert2.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        // Add smooth scrolling and other enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus on phone number field when page loads
+            const phoneInput = document.querySelector('input[asp-for="PhoneNumber"]');
+            if (phoneInput) {
+                phoneInput.focus();
+            }
+
+            // Add loading state to complete button
+            const confirmationForm = document.querySelector('.confirmation-form');
+            const completeBtn = document.querySelector('.complete-btn');
+            
+            confirmationForm.addEventListener('submit', function() {
+                completeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                completeBtn.disabled = true;
+            });
+        });
+    </script>
+</body>
+</html>

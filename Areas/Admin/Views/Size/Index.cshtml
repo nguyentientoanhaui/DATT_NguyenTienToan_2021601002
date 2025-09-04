@@ -1,0 +1,36 @@
+﻿@model IEnumerable<SizeModel>
+
+@{
+    ViewData["Title"] = "Danh sách kích thước";
+}
+
+<h3>Danh sách kích thước</h3>
+<a asp-action="Create" class="btn btn-primary mb-3">Thêm kích thước mới</a>
+
+<table class="table table-bordered" id="myTable">
+    <thead class="thead-dark">
+        <tr>
+            <th>ID</th>
+            <th>Tên kích thước</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@item.Id"
+                       class="btn btn-warning btn-sm">Sửa</a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@item.Id"
+                       class="btn btn-danger btn-sm confirmDeletion">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

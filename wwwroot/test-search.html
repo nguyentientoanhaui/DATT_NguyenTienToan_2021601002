@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Search Suggestions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .results {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background: #f9f9f9;
+            min-height: 200px;
+        }
+        .result-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 5px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>Test Search Suggestions API</h2>
+        
+        <input type="text" id="searchInput" class="search-input" placeholder="Gõ từ khóa tìm kiếm (ví dụ: rolex)">
+        
+        <div>
+            <button onclick="testSearch()">Test Search</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div class="results" id="results">
+            <p>Kết quả sẽ hiển thị ở đây...</p>
+        </div>
+    </div>
+
+    <script>
+        function testSearch() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('results');
+            
+            if (!searchTerm) {
+                resultsDiv.innerHTML = '<p class="error">Vui lòng nhập từ khóa tìm kiếm</p>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<p>Đang tìm kiếm...</p>';
+            
+            fetch(`/Product/GetSearchSuggestions?searchTerm=${encodeURIComponent(searchTerm)}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Search suggestions data:', data);
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultsDiv.innerHTML = `<p class="error">Lỗi: ${error.message}</p>`;
+                });
+        }
+        
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            let html = '<h3>Kết quả tìm kiếm:</h3>';
+            
+            // Recently Searched
+            if (data.recentlySearched && data.recentlySearched.length > 0) {
+                html += '<h4>Recently Searched:</h4>';
+                data.recentlySearched.forEach(item => {
+                    html += `<div class="result-item">${item.term}</div>`;
+                });
+            }
+            
+            // Top Suggestions
+            if (data.topSuggestions && data.topSuggestions.length > 0) {
+                html += '<h4>Top Suggestions:</h4>';
+                data.topSuggestions.forEach(item => {
+                    html += `<div class="result-item">${item.term}</div>`;
+                });
+            }
+            
+            // Product Suggestions
+            if (data.productSuggestions && data.productSuggestions.length > 0) {
+                html += '<h4>Product Suggestions:</h4>';
+                data.productSuggestions.forEach(product => {
+                    html += `<div class="result-item">
+                        <strong>${product.name}</strong><br>
+                        <small>${product.brand} • ${product.category} • $${product.price}</small><br>
+                        <small>Image: ${product.imageUrl}</small>
+                    </div>`;
+                });
+            }
+            
+            if (html === '<h3>Kết quả tìm kiếm:</h3>') {
+                html += '<p>Không có kết quả nào</p>';
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '<p>Kết quả sẽ hiển thị ở đây...</p>';
+            document.getElementById('searchInput').value = '';
+        }
+        
+        // Auto-search when typing
+        document.getElementById('searchInput').addEventListener('input', function() {
+            if (this.value.length >= 2) {
+                setTimeout(() => testSearch(), 500); // Debounce
+            }
+        });
+    </script>
+</body>
+</html>

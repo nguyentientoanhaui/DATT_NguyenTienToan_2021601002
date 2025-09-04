@@ -1,0 +1,37 @@
+@{
+    ViewData["Title"] = "Test Admin Layout";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Test Admin Layout</h1>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Admin Layout Test</h6>
+                </div>
+                <div class="card-body">
+                    <p>Nếu bạn thấy trang này với sidebar bên trái, thì admin layout đang hoạt động bình thường.</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>Kiểm tra:</strong>
+                        <ul>
+                            <li>Sidebar có hiển thị bên trái không?</li>
+                            <li>Các menu trong sidebar có hiển thị không?</li>
+                            <li>Header có hiển thị không?</li>
+                            <li>CSS có được load đúng không?</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <a href="/Admin/Dashboard" class="btn btn-primary">Go to Dashboard</a>
+                        <a href="/Admin/User/FixUserRoles" class="btn btn-warning">Fix User Roles</a>
+                        <a href="/Admin/Dashboard/CheckUserRoles" class="btn btn-info">Check User Roles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,114 @@
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test OAuth Configuration</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .google-btn { background: #4285f4; color: white; border: none; border-radius: 5px; }
+        .facebook-btn { background: #1877f2; color: white; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test OAuth Configuration</h1>
+    
+    <div class="test-section">
+        <h2>📋 Configuration Check</h2>
+        <p><strong>Google ClientId:</strong> 
+            @if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientId"]))
+            {
+                <span class="success">✅ SET</span>
+            }
+            else
+            {
+                <span class="error">❌ NOT SET</span>
+            }
+        </p>
+        <p><strong>Google ClientSecret:</strong> 
+            @if (!string.IsNullOrEmpty(Configuration["Authentication:Google:ClientSecret"]))
+            {
+                <span class="success">✅ SET</span>
+            }
+            else
+            {
+                <span class="error">❌ NOT SET</span>
+            }
+        </p>
+        <p><strong>Facebook AppId:</strong> 
+            @if (!string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppId"]))
+            {
+                <span class="success">✅ SET</span>
+            }
+            else
+            {
+                <span class="warning">⚠️ PLACEHOLDER</span>
+            }
+        </p>
+        <p><strong>Facebook AppSecret:</strong> 
+            @if (!string.IsNullOrEmpty(Configuration["Authentication:Facebook:AppSecret"]))
+            {
+                <span class="success">✅ SET</span>
+            }
+            else
+            {
+                <span class="warning">⚠️ PLACEHOLDER</span>
+            }
+        </p>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test OAuth Buttons</h2>
+        <p>Click these buttons to test OAuth flow:</p>
+        
+        <form asp-action="ExternalLogin" asp-controller="Account" method="post" style="display: inline;">
+            <input type="hidden" name="provider" value="Google" />
+            <button type="submit" class="google-btn">
+                🔍 Test Google Login
+            </button>
+        </form>
+        
+        <form asp-action="ExternalLogin" asp-controller="Account" method="post" style="display: inline;">
+            <input type="hidden" name="provider" value="Facebook" />
+            <button type="submit" class="facebook-btn">
+                🔍 Test Facebook Login
+            </button>
+        </form>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Debug Information</h2>
+        <p><strong>Current URL:</strong> @Context.Request.Scheme://@Context.Request.Host@Context.Request.Path</p>
+        <p><strong>Expected Redirect URL:</strong> @Context.Request.Scheme://@Context.Request.Host/Account/ExternalLoginCallback</p>
+        <p><strong>Google OAuth Redirect URI should be:</strong> @Context.Request.Scheme://@Context.Request.Host/signin-google</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 Quick Links</h2>
+        <p><a href="/Account/Login">← Back to Login Page</a></p>
+        <p><a href="/">← Back to Home</a></p>
+    </div>
+
+    <script>
+        // Add some client-side logging
+        console.log('OAuth Test Page Loaded');
+        console.log('Current URL:', window.location.href);
+        
+        // Log form submissions
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                console.log('OAuth form submitted:', this.querySelector('input[name="provider"]').value);
+            });
+        });
+    </script>
+</body>
+</html>

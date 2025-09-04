@@ -1,0 +1,358 @@
+@model List<ProductModel>
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+@{
+    ViewData["Title"] = "Trang Chủ";
+    ViewBag.BodyClass = "index-page";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/aurum-style.css?v=@DateTime.Now.Ticks" />
+}
+
+
+<!-- Hero Section with Integrated Header -->
+<section class="hero-section">
+    <!-- Video Background -->
+    <video autoplay muted loop class="hero-video">
+        <source src="~/media/sliders/demo.webm" type="video/webm">
+        Your browser does not support the video tag.
+    </video>
+    
+    <!-- Dark Overlay -->
+    <div class="hero-overlay"></div>
+    
+    <!-- Hero Content -->
+    <div class="hero-content">
+        <div class="container hero-container">
+            <!-- Logo Aurum - Moved to top -->
+            <div class="hero-logo" style="position: absolute !important; top: 1% !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 999 !important;">
+                <h1 style="font-size: 7rem !important; font-weight: 900 !important; color: white !important; margin: 0 !important; text-shadow: 4px 4px 8px rgba(0,0,0,0.8) !important;">Aurum</h1>
+            </div>
+            <h1 class="hero-title" style="font-family: 'Merriweather', serif !important; font-weight: 900 !important; letter-spacing: 2px !important; text-shadow: 4px 4px 8px rgba(0,0,0,0.8) !important; font-size: 5rem !important; margin-top: 80px !important;">Đồng Hồ Cao Cấp Chính Hãng</h1>
+            <div class="hero-buttons" style="margin-top: 40px !important;">
+                <a href="/Product" class="hero-btn">Mua Đồng Hồ</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Brand Carousel Section -->
+<section class="brand-section">
+    <div class="container">
+        <div class="brand-carousel">
+            <div class="brand-items">
+                @if (ViewBag.Brands != null)
+                {
+                    foreach (var brand in ViewBag.Brands)
+                    {
+                        <div class="brand-item">
+                            <a href="@Url.Action("Brand", "Product", new { brandId = brand.Id })" class="brand-link">
+                                <div class="brand-logo">
+                                    <span>@brand.Name.Substring(0, Math.Min(2, brand.Name.Length))</span>
+                                </div>
+                                <div class="brand-name">@brand.Name</div>
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+                 
+            </div>
+        </div>
+    </div>
+</section>
+
+@Html.AntiForgeryToken()
+
+<!-- Products Section -->
+<section class="products-section">
+    <div class="container">
+        <div class="features_items">
+            <h2 class="title text-center">Sản Phẩm Nổi Bật</h2>
+            <p class="subtitle text-center mb-5">Khám phá những sản phẩm nổi bật của chúng tôi</p>
+            
+            <div class="row">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var product in Model.Take(8)) // Hiển thị tối đa 8 sản phẩm nổi bật
+                    {
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-5">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="product-link">
+                                        <img src="@Url.Action("GetProductImage", "Home", new { productId = product.Id })" alt="@product.Name" class="product-img" />
+                                    </a>
+                                    <button class="wishlist-btn" data-product-id="@product.Id">
+                                        <i class="fa fa-heart"></i>
+                                    </button>
+                                    @await Html.PartialAsync("_CompareButton", product.Id)
+                                    @if (product.Quantity <= 0)
+                                    {
+                                        <div class="out-of-stock-badge">Hết hàng</div>
+                                    }
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-title">
+                                        <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="product-link">
+                                            @product.Name
+                                        </a>
+                                    </div>
+                                    <div class="product-specs">
+                                        <p>Danh mục: @product.Category?.Name</p>
+                                        <p>Thương hiệu: @product.Brand?.Name</p>
+                                    </div>
+                                    <div class="price">@product.Price.ToString("N0").Replace(",", ".") VNĐ</div>
+                                    <div class="product-actions">
+                                        @if (product.Quantity > 0)
+                                        {
+                                            <a href="#" class="buy-btn">MUA NGAY</a>
+                                            <div class="sell-container">
+                                                <a href="javascript:void(0)" onclick="getQuote(@product.Id)" class="sell-btn">THU MUA</a>
+                                                <div class="quote-text" onclick="getQuote(@product.Id)">Báo Giá</div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <button class="buy-btn disabled" disabled>Hết hàng</button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center">
+                        <div class="no-products">
+                            <i class="fa fa-box-open fa-3x mb-3"></i>
+                            <p>Không có sản phẩm nào để hiển thị</p>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            @if (Model != null && Model.Count > 8)
+            {
+                <div class="text-center mt-4">
+                    <a href="@Url.Action("Index", "Product")" class="view-all-btn">
+                        Xem tất cả sản phẩm <i class="fa fa-arrow-right"></i>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Promise Section -->
+<section class="promise-section">
+    <div class="container">
+        <div class="promise-header">
+            <div class="promise-overline">NIỀM TIN | TRUNG THỰC | MINH BẠCH</div>
+            <h2 class="promise-title">Cam Kết Của Chúng Tôi</h2>
+        </div>
+
+        <div class="promise-grid">
+            <div class="promise-item">
+                <div class="promise-icon">
+                    <i class="fa fa-shield-check"></i>
+                </div>
+                <h3 class="promise-item-title">100% Chính Hãng</h3>
+                <p class="promise-item-text">Tất cả đồng hồ đều 100% chính hãng.</p>
+            </div>
+
+            <div class="promise-item">
+                <div class="promise-icon">
+                    <i class="fa fa-adjust"></i>
+                </div>
+                <h3 class="promise-item-title">Minh Bạch Hoàn Toàn</h3>
+                <p class="promise-item-text">Công khai giá mua và bán dựa trên giá trị thị trường công bằng.</p>
+            </div>
+
+            <div class="promise-item">
+                <div class="promise-icon">
+                    <i class="fa fa-box-open"></i>
+                </div>
+                <h3 class="promise-item-title">Tồn Kho Thời Gian Thực</h3>
+                <p class="promise-item-text">Mọi đồng hồ trên website đều còn hàng và sẵn sàng bán.</p>
+            </div>
+
+            <div class="promise-item">
+                <div class="promise-icon">
+                    <i class="fa fa-truck-fast"></i>
+                </div>
+                <h3 class="promise-item-title">Giao Hàng Miễn Phí</h3>
+                <p class="promise-item-text">Miễn phí vận chuyển nhanh cho tất cả đơn hàng.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Aurum Watches Section -->
+<section class="about-aurum-section">
+    <div class="container">
+        <div class="about-aurum-wrapper about-compact">
+            <h2 class="about-title about-compact-title">Aurum Watches: Nơi Thời Gian Kể Lại Câu Chuyện</h2>
+            <p class="about-intro">Chào mừng bạn đến với Aurum Watches. Đây không chỉ là một cửa hàng, mà là một giấc mơ đã thành hiện thực. Giấc mơ về một không gian nơi những chiếc đồng hồ được trân trọng đúng với giá trị của chúng.</p>
+
+            <p class="about-paragraph">Mỗi chiếc đồng hồ, với chúng tôi, đều là một tác phẩm nghệ thuật có trái tim, một vật phẩm kể lại lịch sử, một di sản được truyền qua nhiều thế hệ. Chúng tôi hiểu rằng, để bạn an tâm sở hữu một di sản như vậy, cần có một nền tảng vững chắc. Đó chính là lý do Aurum Watches ra đời với ba giá trị cốt lõi: NIỀM TIN, TRUNG THỰC, và MINH BẠCH.</p>
+
+            <p class="about-paragraph"><strong>Niềm tin:</strong> Niềm tin của bạn là tài sản quý giá nhất của chúng tôi. Từng chiếc Rolex huyền thoại, từng chiếc Cartier tinh tế hay Breitling mạnh mẽ đều được đội ngũ chuyên gia của chúng tôi kiểm tra, thẩm định bằng cả trái tim và kiến thức, đảm bảo tính xác thực tuyệt đối.</p>
+
+            <p class="about-paragraph"><strong>Trung thực:</strong> Chúng tôi cam kết về sự trung thực trong mọi thông tin. Từ tình trạng sản phẩm, lịch sử bảo dưỡng đến giá trị thực, mọi điều đều được công khai. Bạn có thể tin tưởng vào những gì chúng tôi giới thiệu, không có bất kỳ thông tin sai lệch nào.</p>
+
+            <p class="about-paragraph"><strong>Minh bạch:</strong> Sự minh bạch trong mọi quy trình giúp bạn hoàn toàn yên tâm. Mức giá được niêm yết rõ ràng, chính sách bảo hành và đổi trả cụ thể. Chúng tôi muốn mọi giao dịch đều công khai, để bạn không chỉ mua một chiếc đồng hồ, mà còn mua sự an tâm tuyệt đối.</p>
+
+            <h3 class="about-subtitle about-compact-subtitle">Cộng Đồng Dành Cho Người Yêu Đồng Hồ</h3>
+            <p class="about-paragraph">Chúng tôi không chỉ bán đồng hồ, chúng tôi đang xây dựng một Cộng Đồng Dành Cho Người Yêu Đồng Hồ. Nơi bạn có thể chia sẻ, học hỏi và cùng nhau trân trọng vẻ đẹp của thời gian.</p>
+
+            <p class="about-paragraph">Hãy để Aurum Watches là điểm đến tin cậy của bạn, nơi bạn không chỉ mua một chiếc đồng hồ, mà còn tìm thấy một người bạn đồng hành, viết nên câu chuyện của riêng mình.</p>
+
+            <div class="about-signature">
+                <div class="signature-name">Phạm Gia Vinh</div>
+                <div class="signature-role">Nhà sáng lập | Aurum Watches</div>
+            </div>
+        </div>
+    </div>
+    
+</section>
+
+
+
+<script>
+// Brand Carousel Navigation
+$(document).ready(function() {
+    const brandItems = $('.brand-items');
+    const scrollAmount = 200;
+    
+    // Auto scroll
+    setInterval(function() {
+        brandItems.animate({
+            scrollLeft: '+=' + scrollAmount
+        }, 1000);
+        
+        // Reset to beginning when reaching end
+        if (brandItems.scrollLeft() >= brandItems[0].scrollWidth - brandItems.width()) {
+            brandItems.animate({
+                scrollLeft: 0
+            }, 1000);
+        }
+    }, 3000);
+
+    // Header Icons Functionality
+    initializeHeaderIcons();
+});
+
+// Close mobile menu when clicking outside
+$(document).on('click', '#mobileMenu', function(e) {
+    if (e.target.id === 'mobileMenu') {
+        closeMobileMenu();
+    }
+});
+
+// Add to Cart Function
+function addToCart(productId) {
+    $.ajax({
+        url: '/Home/AddToCart',
+        type: 'POST',
+        data: { productId: productId },
+        success: function(response) {
+            if (response.success) {
+                Swal.fire({
+                    title: 'Thành công!',
+                    text: response.message,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                // Cập nhật số lượng giỏ hàng
+                if (typeof updateCartCount === 'function') {
+                    updateCartCount();
+                }
+            } else {
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: response.message,
+                    icon: 'error'
+                });
+            }
+        },
+        error: function() {
+            Swal.fire({
+                title: 'Lỗi!',
+                text: 'Không thể thêm sản phẩm vào giỏ hàng',
+                icon: 'error'
+            });
+        }
+    });
+}
+
+// Add to Wishlist Function
+function addToWishlist(productId) {
+    console.log('Adding to wishlist, productId:', productId);
+    
+    // Show loading state
+    var $button = $(`button[onclick="addToWishlist(${productId})"]`);
+    var $icon = $button.find('i');
+    var originalColor = $icon.css('color');
+    $button.prop('disabled', true);
+    $icon.css('color', '#999');
+    
+    $.ajax({
+        url: '/Home/AddWishList',
+        type: 'POST',
+        data: { 
+            Id: productId,
+            __RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        success: function(response) {
+            console.log('Wishlist response:', response);
+            if (response.success) {
+                Swal.fire({
+                    title: 'Thành công!',
+                    text: response.message,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                // Update heart icon color to indicate it's in wishlist
+                $icon.css('color', '#ff4d4d');
+                $button.attr('title', 'Đã thêm vào danh sách yêu thích');
+            } else {
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: response.message || 'Có lỗi xảy ra khi thêm vào danh sách yêu thích!',
+                    icon: 'error'
+                });
+                // Restore original color
+                $icon.css('color', originalColor);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Wishlist error:', xhr.responseText, status, error);
+            Swal.fire({
+                title: 'Lỗi!',
+                text: 'Không thể thêm sản phẩm vào danh sách yêu thích. Vui lòng thử lại!',
+                icon: 'error'
+            });
+            // Restore original color
+            $icon.css('color', originalColor);
+        },
+        complete: function() {
+            // Re-enable button
+            $button.prop('disabled', false);
+        }
+    });
+}
+
+// Get Quote Function
+function getQuote(productId) {
+    window.location.href = '/Sell/Create?productId=' + productId;
+}
+</script>
+
+@section Scripts {
+    <script src="~/js/simple-wishlist.js"></script>
+}

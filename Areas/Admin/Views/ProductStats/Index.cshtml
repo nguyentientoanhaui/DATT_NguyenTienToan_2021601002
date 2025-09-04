@@ -1,0 +1,729 @@
+﻿@model StatisticalModel
+
+@{
+    ViewData["Title"] = "Thống kê sản phẩm";
+}
+
+<style>
+    .stat-card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        height: 100%;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-right: 10px;
+        color: #007bff;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .section-title {
+        border-left: 4px solid #007bff;
+        padding-left: 10px;
+        margin-bottom: 20px;
+    }
+
+    .progress {
+        height: 10px;
+    }
+
+    .alert-inventory {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+    }
+
+    .product-chart {
+        height: 350px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h3 class="section-title">Thống kê sản phẩm</h3>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="@Url.Action("Index", "Dashboard")" class="btn btn-outline-primary">
+                        <i class="fas fa-chart-pie"></i> Thống kê số lượng
+                    </a>
+                    <a href="@Url.Action("SalesStats", "Dashboard")" class="btn btn-outline-primary ml-2">
+                        <i class="fas fa-chart-line"></i> Thống kê bán hàng
+                    </a>
+                </div>
+                <div>
+                    <button id="refreshData" class="btn btn-success">
+                        <i class="fas fa-sync-alt"></i> Cập nhật dữ liệu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Inventory Overview Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-boxes mr-2"></i> Tổng quan tồn kho</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card stat-card" data-toggle="modal" data-target="#inventoryModal">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-cubes stat-icon"></i>
+                                        <div>
+                                            <div class="text-muted">Tổng sản phẩm tồn kho</div>
+                                            <h4 id="totalInventory">Loading...</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card stat-card" data-toggle="modal" data-target="#inventoryValueModal">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-money-bill-wave stat-icon"></i>
+                                        <div>
+                                            <div class="text-muted">Giá trị tồn kho</div>
+                                            <h4 id="inventoryValue">Loading...</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Phân bố tồn kho theo danh mục</h6>
+                        <div class="chart-container product-chart">
+                            <canvas id="inventoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Products Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle mr-2"></i> Sản phẩm sắp hết hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-inventory">
+                        <i class="fas fa-info-circle"></i> Hiển thị các sản phẩm có số lượng < 10 trong kho
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover" id="lowStockTable">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Tồn kho</th>
+                                    <th>Đã bán</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be loaded dynamically -->
+                                <tr>
+                                    <td colspan="4" class="text-center">Đang tải dữ liệu...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3 text-right">
+                        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#allLowStockModal">
+                            Xem tất cả
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Top Products Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-crown mr-2"></i> Top 5 sản phẩm bán chạy nhất</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover" id="topProductsTable">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Đã bán</th>
+                                    <th>Doanh thu</th>
+                                    <th>Lợi nhuận</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be loaded dynamically -->
+                                <tr>
+                                    <td colspan="4" class="text-center">Đang tải dữ liệu...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <div class="chart-container product-chart">
+                            <canvas id="topProductsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Worst Selling Products Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line fa-flip-vertical mr-2"></i> Top 5 sản phẩm ít người mua nhất</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover" id="worstProductsTable">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Đã bán</th>
+                                    <th>Tồn kho</th>
+                                    <th>Ngày cập nhật</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be loaded dynamically -->
+                                <tr>
+                                    <td colspan="4" class="text-center">Đang tải dữ liệu...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <div class="chart-container product-chart">
+                            <canvas id="worstProductsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Profit Margin Section -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-percentage mr-2"></i> Tỷ suất lợi nhuận theo sản phẩm</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="chart-container product-chart">
+                                <canvas id="profitMarginChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Top 5 sản phẩm có tỷ suất lợi nhuận cao nhất</h6>
+                            <table class="table table-sm table-hover" id="highProfitTable">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th>Giá bán</th>
+                                        <th>Giá vốn</th>
+                                        <th>Tỷ suất LN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Data will be loaded dynamically -->
+                                    <tr>
+                                        <td colspan="4" class="text-center">Đang tải dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#profitMarginModal">
+                                    Xem chi tiết
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for detailed information will be defined here -->
+<!-- Modal: Inventory Distribution -->
+<div class="modal fade" id="inventoryModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Phân bố hàng tồn kho chi tiết</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="inventoryTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="category-tab" data-toggle="tab" href="#categoryTab" role="tab" aria-selected="true">Theo danh mục</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="brand-tab" data-toggle="tab" href="#brandTab" role="tab" aria-selected="false">Theo thương hiệu</a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3" id="inventoryTabContent">
+                    <div class="tab-pane fade show active" id="categoryTab" role="tabpanel">
+                        <div style="height: 400px;">
+                            <canvas id="inventoryCategoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="brandTab" role="tabpanel">
+                        <div style="height: 400px;">
+                            <canvas id="inventoryBrandChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Profit Margin Details -->
+<div class="modal fade" id="profitMarginModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết tỷ suất lợi nhuận</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="profitMarginDetailTable">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Giá bán</th>
+                                <th>Giá vốn</th>
+                                <th>Tỷ suất LN</th>
+                                <th>Đã bán</th>
+                                <th>Tổng lợi nhuận</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Other modals will follow similar pattern -->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Function to format currency in VND
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+            }
+
+            // Initialize all charts
+            function initializeCharts() {
+                // Load data for inventory chart
+                $.ajax({
+                    url: "@Url.Action("GetInventoryDistribution", "ProductStats")",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        // Display total inventory and value
+                        $('#totalInventory').text(data.totalQuantity.toLocaleString() + " sản phẩm");
+                        $('#inventoryValue').text(formatCurrency(data.totalValue));
+
+                        // Create inventory distribution chart
+                        var ctx = document.getElementById('inventoryChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: data.categories.map(c => c.name),
+                                datasets: [{
+                                    data: data.categories.map(c => c.quantity),
+                                    backgroundColor: [
+                                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                                        '#5a5c69', '#6610f2', '#fd7e14', '#20c997', '#6f42c1'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'right',
+                                        labels: {
+                                            font: {
+                                                size: 12
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching inventory data:", error);
+                    }
+                });
+
+                // Load data for low stock products
+                $.ajax({
+                    url: "@Url.Action("GetLowStockProducts", "ProductStats")",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        var tableBody = $('#lowStockTable tbody');
+                        tableBody.empty();
+
+                        if (data.length === 0) {
+                            tableBody.append('<tr><td colspan="4" class="text-center">Không có sản phẩm nào sắp hết hàng</td></tr>');
+                            return;
+                        }
+
+                        // Show only first 5 items in the main view
+                        var displayData = data.slice(0, 5);
+
+                        displayData.forEach(function(item) {
+                            var statusClass = item.quantity <= 5 ? 'badge-danger' : 'badge-warning';
+                            var row = `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>${item.sold}</td>
+                                    <td><span class="badge ${statusClass}">${item.quantity <= 5 ? 'Cấp bách' : 'Cần nhập thêm'}</span></td>
+                                </tr>
+                            `;
+                            tableBody.append(row);
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching low stock data:", error);
+                    }
+                });
+
+                // Load data for top selling products
+                $.ajax({
+                    url: "@Url.Action("GetTopSellingProducts", "ProductStats")",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        var tableBody = $('#topProductsTable tbody');
+                        tableBody.empty();
+
+                        if (data.length === 0) {
+                            tableBody.append('<tr><td colspan="4" class="text-center">Không có dữ liệu</td></tr>');
+                            return;
+                        }
+
+                        // Display in table
+                        data.forEach(function(item) {
+                            var row = `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${item.sold}</td>
+                                    <td>${formatCurrency(item.revenue)}</td>
+                                    <td>${formatCurrency(item.profit)}</td>
+                                </tr>
+                            `;
+                            tableBody.append(row);
+                        });
+
+                        // Create chart
+                        var ctx = document.getElementById('topProductsChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: data.map(p => p.name),
+                                datasets: [{
+                                    label: 'Số lượng đã bán',
+                                    data: data.map(p => p.sold),
+                                    backgroundColor: '#4e73df',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching top products data:", error);
+                    }
+                });
+
+                // Load data for worst selling products
+                $.ajax({
+                    url: "@Url.Action("GetWorstSellingProducts", "ProductStats")",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        var tableBody = $('#worstProductsTable tbody');
+                        tableBody.empty();
+
+                        if (data.length === 0) {
+                            tableBody.append('<tr><td colspan="4" class="text-center">Không có dữ liệu</td></tr>');
+                            return;
+                        }
+
+                        // Display in table
+                        data.forEach(function(item) {
+                            var row = `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${item.sold}</td>
+                                    <td>${item.inventory}</td>
+                                    <td>${new Date(item.lastUpdate).toLocaleDateString('vi-VN')}</td>
+                                </tr>
+                            `;
+                            tableBody.append(row);
+                        });
+
+                        // Create chart
+                        var ctx = document.getElementById('worstProductsChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: data.map(p => p.name),
+                                datasets: [{
+                                    label: 'Số lượng đã bán',
+                                    data: data.map(p => p.sold),
+                                    backgroundColor: '#e74a3b',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching worst products data:", error);
+                    }
+                });
+
+                // Load data for profit margin products
+                $.ajax({
+                    url: "@Url.Action("GetHighProfitMarginProducts", "ProductStats")",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        var tableBody = $('#highProfitTable tbody');
+                        tableBody.empty();
+
+                        if (data.length === 0) {
+                            tableBody.append('<tr><td colspan="4" class="text-center">Không có dữ liệu</td></tr>');
+                            return;
+                        }
+
+                        // Display in table
+                        data.forEach(function(item) {
+                            var profitMargin = (item.profitMargin * 100).toFixed(1) + '%';
+                            var row = `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${formatCurrency(item.price)}</td>
+                                    <td>${formatCurrency(item.cost)}</td>
+                                    <td>${profitMargin}</td>
+                                </tr>
+                            `;
+                            tableBody.append(row);
+                        });
+
+                        // Create chart
+                        var ctx = document.getElementById('profitMarginChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: data.map(p => p.name),
+                                datasets: [{
+                                    label: 'Tỷ suất lợi nhuận (%)',
+                                    data: data.map(p => p.profitMargin * 100),
+                                    backgroundColor: '#1cc88a',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching profit margin data:", error);
+                    }
+                });
+            }
+
+            // Initialize charts on page load
+            initializeCharts();
+
+            // Refresh data when button clicked
+            $('#refreshData').click(function() {
+                initializeCharts();
+            });
+
+            // Modal charts initialization
+            $('#inventoryModal').on('shown.bs.modal', function () {
+                // Load more detailed data for inventory by category
+                $.ajax({
+                    url: "@Url.Action("GetDetailedInventoryByCategory", "ProductStats")",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        var ctx = document.getElementById('inventoryCategoryChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: data.map(c => c.name),
+                                datasets: [{
+                                    label: 'Số lượng tồn kho',
+                                    data: data.map(c => c.quantity),
+                                    backgroundColor: '#4e73df',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching detailed inventory data:", error);
+                    }
+                });
+            });
+
+            // Handle tab changes for inventory modal
+            $('#brand-tab').on('shown.bs.tab', function (e) {
+                // Load inventory by brand data when tab is activated
+                $.ajax({
+                    url: "@Url.Action("GetDetailedInventoryByBrand", "ProductStats")",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        var ctx = document.getElementById('inventoryBrandChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: data.map(b => b.name),
+                                datasets: [{
+                                    label: 'Số lượng tồn kho',
+                                    data: data.map(b => b.quantity),
+                                    backgroundColor: '#1cc88a',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching brand inventory data:", error);
+                    }
+                });
+            });
+            $('#profitMarginModal').on('shown.bs.modal', function () {
+                $.ajax({
+                    url: "@Url.Action("GetAllProfitMarginProducts", "ProductStats")",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        var tableBody = $('#profitMarginDetailTable tbody');
+                        tableBody.empty();
+
+                        if (data.length === 0) {
+                            tableBody.append('<tr><td colspan="7" class="text-center">Không có dữ liệu</td></tr>');
+                            return;
+                        }
+
+                        // Display in table
+                        data.forEach(function(item) {
+                            var profitMargin = (item.profitMargin * 100).toFixed(1) + '%';
+                            var row = `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${item.category}</td>
+                                    <td>${formatCurrency(item.price)}</td>
+                                    <td>${formatCurrency(item.cost)}</td>
+                                    <td>${profitMargin}</td>
+                                    <td>${item.sold}</td>
+                                    <td>${formatCurrency(item.totalProfit)}</td>
+                                </tr>
+                            `;
+                            tableBody.append(row);
+                        });
+                    },
+                    error: function (error) {
+                        console.error("Error fetching profit margin detail data:", error);
+                    }
+                });
+            });
+        });
+    </script>
+}

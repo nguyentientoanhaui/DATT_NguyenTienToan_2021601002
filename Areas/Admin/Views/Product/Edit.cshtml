@@ -1,0 +1,408 @@
+﻿@model ProductModel
+@{
+    ViewData["title"] = "Chỉnh sửa sản phẩm";
+}
+<h4>Chỉnh sửa sản phẩm</h4>
+<div class="col-md-9">
+    <form asp-action="Edit" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label>Tên</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Giá bán</label>
+            <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
+            <span id="price-convert"></span>
+            <span asp-validation-for="Price" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Giá nhập</label>
+            <input asp-for="CapitalPrice" pattern="[0-9.,]+" class="form-control typing-price" />
+            <span id="price-convert"></span>
+            <span asp-validation-for="CapitalPrice" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Mô tả</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Thương hiệu</label>
+            <select asp-for="BrandId" id="MainBrandId" class="form-control" asp-items="ViewBag.Brands">
+                <option>--Chọn thương hiệu--</option>
+            </select>
+            <span asp-validation-for="BrandId" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Phân loại sản phẩm</label>
+            <select asp-for="CategoryId" id="SubCategoryId" class="form-control" asp-items="ViewBag.Categories">
+                <option>--Chọn phân loại--</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger" />
+        </div>
+        <!-- Watch Specific Information -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Mẫu đồng hồ</label>
+                    <input asp-for="Model" class="form-control" placeholder="Ví dụ: Submariner" />
+                    <span asp-validation-for="Model" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Số hiệu mẫu</label>
+                    <input asp-for="ModelNumber" class="form-control" placeholder="Ví dụ: 126610LN" />
+                    <span asp-validation-for="ModelNumber" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Năm sản xuất</label>
+                    <input asp-for="Year" type="number" class="form-control" placeholder="Ví dụ: 2023" />
+                    <span asp-validation-for="Year" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Giá thẻ tín dụng</label>
+                    <input asp-for="CreditCardPrice" pattern="[0-9.,]+" class="form-control typing-price" />
+                    <span asp-validation-for="CreditCardPrice" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Giới tính</label>
+                    <select asp-for="Gender" class="form-control" asp-items="ViewBag.GenderOptions">
+                        <option value="">-- Chọn giới tính --</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Tình trạng</label>
+                    <select asp-for="Condition" class="form-control" asp-items="ViewBag.ConditionOptions">
+                        <option value="">-- Chọn tình trạng --</option>
+                    </select>
+                    <span asp-validation-for="Condition" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Kích cỡ case</label>
+                    <input asp-for="CaseSize" class="form-control" placeholder="Ví dụ: 41mm" />
+                    <span asp-validation-for="CaseSize" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Chất liệu case</label>
+                    <select asp-for="CaseMaterial" class="form-control" asp-items="ViewBag.CaseMaterialOptions">
+                        <option value="">-- Chọn chất liệu --</option>
+                    </select>
+                    <span asp-validation-for="CaseMaterial" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Loại máy</label>
+                    <select asp-for="MovementType" class="form-control" asp-items="ViewBag.MovementTypeOptions">
+                        <option value="">-- Chọn loại máy --</option>
+                    </select>
+                    <span asp-validation-for="MovementType" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Cỡ máy (Calibre)</label>
+                    <input asp-for="Calibre" class="form-control" placeholder="Ví dụ: 3235" />
+                    <span asp-validation-for="Calibre" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Chất liệu dây</label>
+                    <select asp-for="BraceletMaterial" class="form-control" asp-items="ViewBag.BraceletMaterialOptions">
+                        <option value="">-- Chọn chất liệu dây --</option>
+                    </select>
+                    <span asp-validation-for="BraceletMaterial" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Màu mặt đồng hồ</label>
+                    <input asp-for="DialColor" class="form-control" placeholder="Ví dụ: Black, Blue, Green" />
+                    <span asp-validation-for="DialColor" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Serial Number</label>
+                    <input asp-for="SerialNumber" class="form-control" placeholder="Serial number của đồng hồ" />
+                    <span asp-validation-for="SerialNumber" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Số lượng</label>
+                    <input asp-for="Quantity" type="number" class="form-control" />
+                    <span asp-validation-for="Quantity" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Hộp và giấy tờ</label>
+                    <select asp-for="BoxAndPapers" class="form-control">
+                        <option value="">-- Chọn --</option>
+                        <option value="Both">Có cả hộp và giấy tờ</option>
+                        <option value="Box Only">Chỉ có hộp</option>
+                        <option value="Papers Only">Chỉ có giấy tờ</option>
+                        <option value="None">Không có</option>
+                    </select>
+                    <span asp-validation-for="BoxAndPapers" class="text-danger" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Chứng nhận</label>
+                    <input asp-for="Certificate" class="form-control" placeholder="Ví dụ: COSC, Chronometer" />
+                    <span asp-validation-for="Certificate" class="text-danger" />
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Quản lý hình ảnh sản phẩm</h5>
+        </div>
+        <div class="card-body">
+            <!-- Current Product Images -->
+            <div class="mb-4">
+                <h6>Ảnh sản phẩm hiện tại</h6>
+                
+                <div class="d-flex flex-wrap" id="existing-images">
+
+                    
+                    @* Hiển thị ảnh sản phẩm từ ProductImages.ImageUrl *@
+                    @if (Model.ProductImages != null && Model.ProductImages.Count > 0)
+                    {
+                        @foreach (var img in Model.ProductImages)
+                        {
+                            <div class="position-relative m-2 image-container">
+                                @{
+                                    string imageSrc = "";
+                                    if (!string.IsNullOrEmpty(img.ImageUrl))
+                                    {
+                                        if (img.ImageUrl.StartsWith("http"))
+                                        {
+                                            imageSrc = img.ImageUrl;  // URL trực tiếp
+                                        }
+                                        else
+                                        {
+                                            imageSrc = $"~/media/products/{img.ImageUrl}";  // Thêm ~ cho relative path
+                                        }
+                                    }
+                                    else if (!string.IsNullOrEmpty(img.ImageName))
+                                    {
+                                        if (img.ImageName.StartsWith("http"))
+                                        {
+                                            imageSrc = img.ImageName;  // URL trong ImageName
+                                        }
+                                        else
+                                        {
+                                            imageSrc = $"~/media/products/{img.ImageName}";  // Fallback ImageName
+                                        }
+                                    }
+                                }
+                                
+                                @if (!string.IsNullOrEmpty(imageSrc))
+                                {
+                                    <img src="@imageSrc" class="img-thumbnail" style="width: 150px; height: 120px; object-fit: cover;" 
+                                         alt="Product Image" />
+                                }
+                                else
+                                {
+                                    <div class="img-thumbnail d-flex align-items-center justify-content-center" 
+                                         style="width: 150px; height: 120px; background: #f8f9fa; border: 1px solid #dee2e6;">
+                                        <span class="text-muted">Không có ảnh</span>
+                                    </div>
+                                }
+                                
+                                <div class="form-check mt-1">
+                                    <input type="radio" name="DefaultImageType" value="additional_@img.Id" class="form-check-input default-image-radio" @(img.IsDefault ? "checked" : "") />
+                                    <label class="form-check-label">Ảnh mặc định</label>
+                                </div>
+                                <div class="form-check mt-1">
+                                    <input type="checkbox" name="DeleteImages" value="@img.Id" class="form-check-input" />
+                                    <label class="form-check-label">Xóa ảnh</label>
+                                </div>
+                                @* Color selection for images removed as per user request *@
+                            </div>
+                        }
+                    }
+                    
+                    @* Hiển thị thông báo nếu không có ảnh nào *@
+                    @if (Model.ProductImages == null || Model.ProductImages.Count == 0)
+                    {
+                        <div class="alert alert-info">Chưa có ảnh sản phẩm nào</div>
+                    }
+                </div>
+            </div>
+
+            <!-- Upload New Images -->
+            <div class="mb-3">
+                <h6>Tải lên ảnh mới</h6>
+                <input type="file" name="AdditionalImages" multiple class="form-control" id="image-upload" />
+                <small class="form-text text-muted">Có thể chọn nhiều ảnh cùng lúc</small>
+            </div>
+
+            <!-- Preview New Images -->
+            <div class="mt-3" id="new-images-preview">
+                <h6>Xem trước ảnh mới</h6>
+                <div class="d-flex flex-wrap" id="image-previews-container"></div>
+            </div>
+        </div>
+    </div>
+        <div class="form-group">
+            <button class="btn btn-primary">Lưu</button>
+        </div>
+    </form>
+    <a asp-action="Index">Trở lại danh sách</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('Description');
+    </script>
+    <script>
+        $(".typing-price").on("keyup", function(){
+            var currency_input = $(this).val();
+
+            $("#price-convert").html(
+                new Intl.NumberFormat('vn-VN', {style: 'currency', currency: 'VND'})
+                .format(currency_input));
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
+            var brandId = $('#MainBrandId').val();
+            if (brandId) {
+                loadProductCategories(brandId, @Model.CategoryId);
+            }
+
+            // Hàm load phân loại sản phẩm theo thương hiệu
+            function loadProductCategories(brandId, selectedCategoryId) {
+                $.ajax({
+                    type: "GET",
+                    url: "/Admin/Product/GetCategoriesByBrand",
+                    data: { brandId: brandId },
+                    success: function(data) {
+                        var subCategorySelect = $('#SubCategoryId');
+                        subCategorySelect.empty();
+                        subCategorySelect.append('<option>--Chọn phân loại--</option>');
+                        $.each(data, function(i, item) {
+                            var selected = (item.id == selectedCategoryId) ? 'selected' : '';
+                            subCategorySelect.append(`<option value="${item.id}" ${selected}>${item.name}</option>`);
+                        });
+                    },
+                    error: function() {
+                        console.log('Error loading categories for brand');
+                    }
+                });
+            }
+
+            // Xử lý sự kiện thay đổi thương hiệu
+            $('#MainBrandId').change(function() {
+                var brandId = $(this).val();
+                if (brandId) {
+                    loadProductCategories(brandId);
+                } else {
+                    $('#SubCategoryId').empty();
+                    $('#SubCategoryId').append('<option>--Chọn phân loại--</option>');
+                }
+            });
+
+                $('#image-upload').change(function() {
+            var input = this;
+            var previewContainer = $('#image-previews-container');
+            previewContainer.empty(); // Clear previous previews
+
+            if (input.files && input.files.length > 0) {
+                // Show the preview section
+                $('#new-images-preview').show();
+
+                for (var i = 0; i < input.files.length; i++) {
+                    (function(i) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var imageContainer = $('<div class="position-relative m-2 image-container"></div>');
+                            var imageElement = $('<img src="' + e.target.result + '" class="img-thumbnail" style="width: 150px; height: 120px; object-fit: cover;">');
+
+                            // Add radio button for default image
+                            var defaultRadio = $('<div class="form-check mt-1"><input type="radio" name="NewDefaultImageIndex" value="' + i +
+                                               '" class="form-check-input new-default-image-radio"><label class="form-check-label">Đặt làm ảnh mặc định</label></div>');
+
+                            // Note: Color selection removed as per user request
+
+                            imageContainer.append(imageElement);
+                            imageContainer.append(defaultRadio);
+                            previewContainer.append(imageContainer);
+                        };
+                        reader.readAsDataURL(input.files[i]);
+                    })(i);
+                }
+            } else {
+                // Hide the preview section if no files
+                $('#new-images-preview').hide();
+            }
+        });
+
+        // Initialize - hide preview section if no images
+        if (!$('#image-upload').val()) {
+            $('#new-images-preview').hide();
+        }
+
+        // Handle radio button exclusivity between existing and new images
+        $(document).on('change', '.default-image-radio, .new-default-image-radio', function() {
+            if ($(this).hasClass('default-image-radio')) {
+                // If selecting an existing image as default, uncheck all new image radios
+                $('.new-default-image-radio').prop('checked', false);
+            } else {
+                // If selecting a new image as default, uncheck all existing image radios
+                $('.default-image-radio').prop('checked', false);
+            }
+        });
+        });
+    </script>
+}

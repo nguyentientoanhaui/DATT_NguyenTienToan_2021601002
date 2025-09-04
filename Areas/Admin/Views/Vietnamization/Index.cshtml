@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "Việt Hóa Database";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Việt Hóa Database</h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-check"></i> Thành công!</h5>
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            <h5><i class="icon fas fa-ban"></i> Lỗi!</h5>
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info"><i class="fas fa-dollar-sign"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Chuyển Đổi Tiền Tệ</span>
+                                    <span class="info-box-number">USD → VND</span>
+                                    <span class="info-box-number">Tỷ giá: 1 USD = 24,500 VND</span>
+                                    <form asp-action="ConvertCurrency" method="post" style="margin-top: 10px;">
+                                        <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('Bạn có chắc muốn chuyển đổi tiền tệ?')">
+                                            <i class="fas fa-exchange-alt"></i> Chuyển Đổi
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-warning"><i class="fas fa-language"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Việt Hóa Các Trường</span>
+                                    <span class="info-box-number">Gender, Condition, Certificate</span>
+                                    <span class="info-box-number">WarrantyInfo, CaseMaterial, Crystal</span>
+                                    <form asp-action="VietnamizeFields" method="post" style="margin-top: 10px;">
+                                        <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('Bạn có chắc muốn việt hóa các trường?')">
+                                            <i class="fas fa-edit"></i> Việt Hóa Trường
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-success"><i class="fas fa-database"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Việt Hóa Toàn Bộ</span>
+                                    <span class="info-box-number">Tiền tệ + Các trường</span>
+                                    <span class="info-box-number">Mô tả sản phẩm</span>
+                                    <form asp-action="VietnamizeDatabase" method="post" style="margin-top: 10px;">
+                                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Bạn có chắc muốn việt hóa toàn bộ database?')">
+                                            <i class="fas fa-magic"></i> Việt Hóa Tất Cả
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Chi Tiết Việt Hóa</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h5><i class="fas fa-dollar-sign text-info"></i> Chuyển Đổi Tiền Tệ</h5>
+                                            <ul>
+                                                <li>Price: USD → VND (× 24,500)</li>
+                                                <li>CapitalPrice: USD → VND (× 24,500)</li>
+                                                <li>CreditCardPrice: USD → VND (× 24,500)</li>
+                                            </ul>
+
+                                            <h5><i class="fas fa-language text-warning"></i> Các Trường Được Việt Hóa</h5>
+                                            <ul>
+                                                <li><strong>Gender:</strong> Men → Nam, Women → Nữ</li>
+                                                <li><strong>Condition:</strong> Excellent → Xuất sắc, Good → Tốt</li>
+                                                <li><strong>Certificate:</strong> Yes → Có, No → Không</li>
+                                                <li><strong>WarrantyInfo:</strong> 1 Year → 1 Năm</li>
+                                                <li><strong>CaseMaterial:</strong> Stainless Steel → Thép không gỉ</li>
+                                                <li><strong>Crystal:</strong> Sapphire Crystal → Kính Sapphire</li>
+                                                <li><strong>DialColor:</strong> Black → Đen, Blue → Xanh dương</li>
+                                                <li><strong>MovementType:</strong> Automatic → Tự động</li>
+                                                <li><strong>BraceletMaterial:</strong> Leather → Da</li>
+                                                <li><strong>Complication:</strong> Date → Ngày, Chronograph → Bấm giờ</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5><i class="fas fa-file-alt text-success"></i> Mô Tả Sản Phẩm</h5>
+                                            <ul>
+                                                <li>Luxury → Cao cấp</li>
+                                                <li>Authentic → Chính hãng</li>
+                                                <li>Pre-owned → Đã sử dụng</li>
+                                                <li>Swiss Made → Sản xuất tại Thụy Sĩ</li>
+                                                <li>Automatic Movement → Máy tự động</li>
+                                                <li>Water Resistant → Chống nước</li>
+                                                <li>Stainless Steel → Thép không gỉ</li>
+                                                <li>Sapphire Crystal → Kính Sapphire</li>
+                                            </ul>
+
+                                            <div class="alert alert-info">
+                                                <h6><i class="fas fa-info-circle"></i> Lưu Ý:</h6>
+                                                <ul class="mb-0">
+                                                    <li>Quá trình việt hóa sẽ thay đổi dữ liệu vĩnh viễn</li>
+                                                    <li>Nên sao lưu database trước khi thực hiện</li>
+                                                    <li>Có thể mất vài phút để hoàn thành</li>
+                                                    <li>Kiểm tra kỹ kết quả sau khi việt hóa</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

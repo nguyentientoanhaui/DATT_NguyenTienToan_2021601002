@@ -1,0 +1,204 @@
+@model OrderModel
+
+<div class="order-card">
+    <div class="order-header">
+        <div class="order-number">
+            <i class="fas fa-shopping-bag"></i>
+            Đơn hàng #@Model.OrderCode
+        </div>
+        <div class="order-date">
+            <i class="fas fa-calendar"></i>
+            @Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+        </div>
+        <div class="order-status @GetStatusClass(Model.Status)">
+            @GetStatusText(Model.Status)
+        </div>
+    </div>
+    <div class="order-content">
+        <div class="order-info">
+            <div class="info-item">
+                <div class="info-label">📍 Địa chỉ giao hàng</div>
+                <div class="info-value">
+                    @if (!string.IsNullOrEmpty(Model.ShippingAddress))
+                    {
+                        <div>@Model.ShippingAddress</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ShippingWard))
+                    {
+                        <div>Phường/Xã: @Model.ShippingWard</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ShippingDistrict))
+                    {
+                        <div>Quận/Huyện: @Model.ShippingDistrict</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ShippingCity))
+                    {
+                        <div>Tỉnh/Thành: @Model.ShippingCity</div>
+                    }
+                                         @if (string.IsNullOrEmpty(Model.ShippingAddress) && string.IsNullOrEmpty(Model.ShippingWard) && string.IsNullOrEmpty(Model.ShippingDistrict) && string.IsNullOrEmpty(Model.ShippingCity))
+                     {
+                         <div style="color: #95a5a6;">Chưa có thông tin địa chỉ giao hàng</div>
+                         <div style="color: #95a5a6; font-size: 0.8rem;">(Có thể do cookies bị xóa hoặc chưa được set)</div>
+                     }
+                </div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">💳 Thanh toán</div>
+                <div class="info-value">@(Model.PaymentMethod ?? "COD")</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">🚚 Phí vận chuyển</div>
+                <div class="info-value">@Model.ShippingCost.ToString("N0").Replace(",", ".") đ</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">🏷️ Mã giảm giá</div>
+                <div class="info-value">@(Model.CouponCode ?? "Không có")</div>
+            </div>
+        </div>
+        
+        <!-- Debug Info -->
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 10px; margin: 15px 0; font-size: 0.8rem;">
+            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;">Debug Info:</div>
+            <div>OrderCode: @Model.OrderCode</div>
+            <div>PaymentMethod: @(Model.PaymentMethod ?? "NULL")</div>
+            <div>ShippingAddress: @(Model.ShippingAddress ?? "NULL")</div>
+            <div>ShippingWard: @(Model.ShippingWard ?? "NULL")</div>
+            <div>ShippingDistrict: @(Model.ShippingDistrict ?? "NULL")</div>
+            <div>ShippingCity: @(Model.ShippingCity ?? "NULL")</div>
+            <div>ShippingCost: @Model.ShippingCost</div>
+            <div>CouponCode: @(Model.CouponCode ?? "NULL")</div>
+            <div>OrderDetails Count: @(GetOrderDetails(Model.OrderCode)?.Count() ?? 0)</div>
+            <div>CreatedDate: @Model.CreatedDate</div>
+            <div>Status: @Model.Status</div>
+        </div>
+        
+        <!-- Products Section -->
+        <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; margin: 15px 0;">
+            <div style="font-weight: 600; color: #2c3e50; margin-bottom: 12px; font-size: 0.9rem;">
+                <i class="fas fa-box"></i> Sản phẩm đã đặt
+            </div>
+            @{
+                var orderDetails = GetOrderDetails(Model.OrderCode);
+            }
+            @if (orderDetails != null && orderDetails.Any())
+            {
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    @foreach (var detail in orderDetails)
+                    {
+                        <div style="display: flex; align-items: center; padding: 10px; background: white; border-radius: 6px; gap: 12px;">
+                                                         <img src="@GetProductImage(detail.Product)" 
+                                  alt="@(detail.Product?.Name ?? "Sản phẩm")"
+                                  style="width: 80px; height: 80px; border-radius: 8px; object-fit: contain; border: 1px solid #e0e0e0; padding: 5px; background: #f8f9fa;"
+                                  onerror="this.src='~/images/placeholder-product.jpg'">
+                            
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; color: #2c3e50; font-size: 0.9rem;">
+                                    @(detail.Product?.Name ?? "Sản phẩm không xác định")
+                                </div>
+                                <div style="color: #7f8c8d; font-size: 0.8rem;">
+                                    @if (!string.IsNullOrEmpty(detail.ColorName))
+                                    {
+                                        <span>Màu: @detail.ColorName</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(detail.SizeName))
+                                    {
+                                        @if (!string.IsNullOrEmpty(detail.ColorName)) { <span> | </span> }
+                                        <span>Size: @detail.SizeName</span>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: right; color: #2c3e50; font-size: 0.85rem; font-weight: 600;">
+                                <div>SL: @detail.Quantity</div>
+                                <div>@detail.Price.ToString("N0").Replace(",", ".") đ</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div style="color: #95a5a6; text-align: center; padding: 20px;">
+                    Không có thông tin sản phẩm
+                </div>
+            }
+        </div>
+        
+        <div class="order-actions">
+            @if (Model.Status == 1 || Model.Status == 2)
+            {
+                <a onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')" 
+                   class="btn btn-cancel" 
+                   asp-action="CancelOrder" asp-controller="Account" asp-route-ordercode="@Model.OrderCode">
+                    <i class="fas fa-times"></i> Hủy đơn hàng
+                </a>
+            }
+            
+            @if (Model.Status == 4)
+            {
+                <a onclick="return confirm('Xác nhận bạn đã nhận được hàng? Hành động này không thể hoàn tác.')" 
+                   class="btn btn-received" 
+                   asp-action="ConfirmReceived" asp-controller="Account" asp-route-ordercode="@Model.OrderCode"
+                   style="background: #28a745; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; margin-right: 8px;">
+                    <i class="fas fa-check-circle"></i> Đã nhận hàng
+                </a>
+            }
+            
+            @if (Model.Status == 0 && Model.DeliveredDate.HasValue && (DateTime.Now - Model.DeliveredDate.Value).TotalDays <= 7)
+            {
+                <a onclick="return confirm('Bạn có chắc chắn muốn yêu cầu hoàn hàng?')" 
+                   class="btn btn-return" 
+                   asp-action="RequestReturn" asp-controller="Account" asp-route-ordercode="@Model.OrderCode">
+                    <i class="fas fa-undo"></i> Yêu cầu hoàn hàng
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusClass(int status)
+    {
+        return status switch
+        {
+            1 => "status-new",
+            2 => "status-pending", 
+            4 => "status-shipping",
+            0 => "status-delivered",
+            3 => "status-cancelled",
+            _ => "status-new"
+        };
+    }
+
+    private string GetStatusText(int status)
+    {
+        return status switch
+        {
+            1 => "Đơn hàng mới",
+            2 => "Chờ xác nhận",
+            4 => "Đang giao hàng", 
+            0 => "Đã giao hàng",
+            3 => "Đã hủy",
+            _ => "Không xác định"
+        };
+    }
+
+    private IEnumerable<OrderDetails> GetOrderDetails(string orderCode)
+    {
+        var orderDetails = ViewBag.OrderDetails as Dictionary<string, List<OrderDetails>>;
+        if (orderDetails != null && orderDetails.ContainsKey(orderCode))
+        {
+            return orderDetails[orderCode];
+        }
+        return new List<OrderDetails>();
+    }
+
+    private string GetProductImage(ProductModel product)
+    {
+        if (product != null && !string.IsNullOrEmpty(product.Image))
+        {
+            return product.Image;
+        }
+        return "~/images/placeholder-product.jpg";
+    }
+}

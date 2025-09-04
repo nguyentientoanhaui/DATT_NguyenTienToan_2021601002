@@ -1,0 +1,796 @@
+﻿@model CartItemViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var outOfStockProductIds = ViewBag.OutOfStockProductIds;
+}
+
+<link rel="stylesheet" href="~/css/cart.css" />
+
+<div class="cart-page">
+    @if (Model.CartItems.Count > 0)
+    {
+        <div class="container">
+            <div class="cart-header">
+                <h1>Thanh Toán</h1>
+            </div>
+
+            <div class="cart-content">
+                <div class="cart-left">
+                    <!-- Express Checkout -->
+                    <div class="checkout-section">
+                        <h2>Thanh Toán Nhanh</h2>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="checkout-section">
+                        <h2>Thông Tin Liên Hệ</h2>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" value="@(ViewBag.UserEmail ?? "nguyentoantmu@gmail.com")" class="form-control" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Số điện thoại</label>
+                            <input type="tel" id="phone" value="@(ViewBag.UserPhone ?? "0388672928")" class="form-control" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="fullname">Họ và tên</label>
+                            <input type="text" id="fullname" value="@(ViewBag.UserFullName ?? "")" class="form-control" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Delivery -->
+                    <div class="checkout-section">
+                        <h2>Địa Chỉ Giao Hàng</h2>
+                        <div class="address-selection">
+                            <div class="address-option">
+                                <input type="radio" id="default-address" name="shipping-address" value="default" checked>
+                                <label for="default-address">Địa chỉ từ tài khoản</label>
+                            </div>
+                            <div class="address-details" id="default-address-details">
+                                @if (!string.IsNullOrEmpty(ViewBag.UserAddress))
+                                {
+                                    <p>@ViewBag.UserAddress</p>
+                                }
+                                else
+                                {
+                                    <p>phudai</p>
+                                    <p>phudien</p>
+                                    <p>Ha Noi, Ha Noi 41324 VN</p>
+                                }
+                                <p>@(ViewBag.UserPhone ?? "0388672928")</p>
+                            </div>
+                            <a href="/Account/UpdateAccount" class="edit-link">Cập nhật thông tin</a>
+                        </div>
+                        
+                        <div class="address-selection" style="margin-top: 15px;">
+                            <div class="address-option">
+                                <input type="radio" id="different-address" name="shipping-address" value="different">
+                                <label for="different-address">Sử dụng địa chỉ giao hàng khác</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Form địa chỉ giao hàng khác với đề xuất thông minh -->
+                        <div id="different-shipping-form" style="display: none; margin-top: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
+                            <h4 style="margin-bottom: 20px; color: #333; font-weight: 600;">
+                                <i class="fa fa-map-marker-alt" style="color: #007bff; margin-right: 8px;"></i>
+                                Địa chỉ giao hàng mới
+                            </h4>
+                            
+                            <div class="form-group">
+                                <label for="province-select">Tỉnh/Thành phố <span style="color: red;">*</span></label>
+                                <select id="province-select" class="form-control" style="height: 45px; border-radius: 6px;">
+                                    <option value="">Đang tải...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="district-select">Quận/Huyện <span style="color: red;">*</span></label>
+                                <select id="district-select" class="form-control" style="height: 45px; border-radius: 6px;">
+                                    <option value="">Chọn Quận/Huyện</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="ward-select">Phường/Xã <span style="color: red;">*</span></label>
+                                <select id="ward-select" class="form-control" style="height: 45px; border-radius: 6px;">
+                                    <option value="">Chọn Phường/Xã</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="address-input">Địa chỉ chi tiết <span style="color: red;">*</span></label>
+                                <input type="text" id="address-input" class="form-control" 
+                                       placeholder="Ví dụ: Số 123, đường ABC, chung cư XYZ, phòng 456" 
+                                       style="height: 45px; border-radius: 6px;">
+                                <small class="form-text text-muted">
+                                    <i class="fa fa-info-circle"></i> 
+                                    Nhập địa chỉ chi tiết: số nhà, tên đường, tên chung cư, số phòng...
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="new-phone">Số điện thoại</label>
+                                <input type="tel" id="new-phone" class="form-control" 
+                                       placeholder="Nhập số điện thoại liên hệ" 
+                                       style="height: 45px; border-radius: 6px;">
+                            </div>
+                            
+                            <!-- Hiển thị địa chỉ đã chọn -->
+                            <div id="selected-address" style="display: none;"></div>
+                            
+                            <!-- Button test lưu địa chỉ -->
+                            <div class="form-group" style="margin-top: 15px;">
+                                <button type="button" id="save-address-btn" class="btn btn-primary" style="width: 100%;">
+                                    <i class="fa fa-save"></i> Lưu địa chỉ giao hàng
+                                </button>
+                            </div>
+                            
+                            <!-- Thông báo lỗi -->
+                            <div id="address-errors" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Payment -->
+                    <div class="checkout-section">
+                        <h2>Phương Thức Thanh Toán</h2>
+                        <p class="security-text">Tất cả giao dịch đều được bảo mật và mã hóa.</p>
+                        
+                        <!-- Payment Methods -->
+                        <div class="payment-methods">
+                            <div class="payment-method">
+                                <input type="radio" id="bank-transfer" name="payment" checked>
+                                <label for="bank-transfer">
+                                    <div class="payment-info">
+                                        <div class="payment-name">Chuyển Khoản Ngân Hàng</div>
+                                        <div class="payment-description">Chuyển khoản trực tiếp cho giao dịch lớn</div>
+                                        <div class="payment-fee">Không có phí xử lý</div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="payment-method">
+                                <input type="radio" id="credit-card" name="payment">
+                                <label for="credit-card">
+                                    <div class="payment-info">
+                                        <div class="payment-name">Thẻ Tín Dụng</div>
+                                        <div class="payment-description">Visa, Mastercard, JCB - Ưu đãi 0% lãi suất</div>
+                                        <div class="payment-fee">Phí xử lý 2.5%</div>
+                                        <div class="promotion-badge">🎁 Giảm 5% cho thẻ Premium</div>
+                                    </div>
+                                    <div class="card-icons">
+                                        <span class="card-icon">💳</span>
+                                        <span class="card-icon">💳</span>
+                                        <span class="card-icon">💳</span>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="payment-method">
+                                <input type="radio" id="installment" name="payment">
+                                <label for="installment">
+                                    <div class="payment-info">
+                                        <div class="payment-name">Trả Góp 0% Lãi Suất</div>
+                                        <div class="payment-description">Kế hoạch trả góp 6-12 tháng qua ngân hàng</div>
+                                        <div class="payment-fee">0% lãi suất cho khách hàng đủ điều kiện</div>
+                                        <div class="promotion-badge">🏦 Hỗ trợ: Vietcombank, Techcombank, BIDV</div>
+                                    </div>
+                                    <div class="installment-badge">0% LÃI</div>
+                                </label>
+                            </div>
+                            
+                            <div class="payment-method">
+                                <input type="radio" id="cash" name="payment">
+                                <label for="cash">
+                                    <div class="payment-info">
+                                        <div class="payment-name">Tiền Mặt</div>
+                                        <div class="payment-description">Thanh toán trực tiếp tại cửa hàng</div>
+                                        <div class="payment-fee">Giảm giá 3% cho thanh toán tiền mặt</div>
+                                        <div class="promotion-badge">💰 Ưu đãi đặc biệt</div>
+                                    </div>
+                                    <div class="cash-icon">
+                                        <span class="payment-icon">💵</span>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="payment-method">
+                                <input type="radio" id="cod" name="payment">
+                                <label for="cod">
+                                    <div class="payment-info">
+                                        <div class="payment-name">Thanh Toán Khi Nhận Hàng (COD)</div>
+                                        <div class="payment-description">Thanh toán tiền mặt khi nhận hàng</div>
+                                        <div class="payment-fee">Không có phí xử lý</div>
+                                        <div class="promotion-badge">🚚 Giao hàng tận nơi</div>
+                                    </div>
+                                    <div class="cod-icon">
+                                        <span class="payment-icon">📦</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Details -->
+                        <div class="payment-details">
+                            <div class="detail-row">
+                                <span>Phương thức thanh toán:</span>
+                                <span id="selected-payment">Chuyển Khoản Ngân Hàng</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Phí xử lý:</span>
+                                <span id="processing-fee">0₫</span>
+                            </div>
+                            <div class="detail-row" id="discount-row" style="display: none;">
+                                <span>Giảm giá:</span>
+                                <span id="discount-amount">0₫</span>
+                            </div>
+                            <div class="detail-row total">
+                                <span>Tổng tiền:</span>
+                                <span id="total-amount">@((Model.GrandTotal * 1.029m).ToString("N0").Replace(",", "."))₫</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Badges -->
+                        <div class="security-badges">
+                            <div class="security-badge">
+                                <i class="fa fa-shield-alt"></i>
+                                <span>Mã Hóa SSL</span>
+                            </div>
+                            <div class="security-badge">
+                                <i class="fa fa-lock"></i>
+                                <span>Bảo Mật PCI DSS</span>
+                            </div>
+                            <div class="security-badge">
+                                <i class="fa fa-certificate"></i>
+                                <span>Đảm Bảo Chính Hãng</span>
+                            </div>
+                            <div class="security-badge">
+                                <i class="fa fa-gem"></i>
+                                <span>Bảo Hiểm Đồng Hồ</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Checkout Button -->
+                        <div class="checkout-button-section">
+                            <button id="process-payment-btn" class="process-payment-btn">
+                                <i class="fa fa-lock"></i>
+                                Thanh Toán An Toàn
+                            </button>
+                            <p class="payment-note">Bằng cách nhấn "Thanh Toán An Toàn", bạn đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách bảo mật</a>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cart-right">
+                    <div class="order-summary">
+                        <h2>Tóm Tắt Đơn Hàng</h2>
+                        
+                        @foreach (var item in Model.CartItems)
+                        {
+                            bool isOutOfStock = outOfStockProductIds.Contains(item.ProductId);
+                            
+                            <div class="cart-item-card @(isOutOfStock ? "out-of-stock" : "")">
+                                <div class="product-section">
+                                    <div class="item-image">
+                                        @if (!string.IsNullOrEmpty(item.Image))
+                                        {
+                                            <img src="@item.Image" alt="@item.ProductName" onerror="this.src='/images/placeholder-product.jpg'">
+                                        }
+                                        else
+                                        {
+                                            <img src="~/images/placeholder-product.jpg" alt="@item.ProductName">
+                                        }
+                                    </div>
+                                    
+                                    <div class="item-details">
+                                        <h3>@item.ProductName</h3>
+                                        <p class="sku">Mã SP: @item.ProductId</p>
+                                        <p class="price">@item.Price.ToString("N0").Replace(",", ".")₫</p>
+                                        <a class="remove-link" asp-action="Remove" asp-controller="Cart" asp-route-id="@item.ProductId">Xóa</a>
+                                    </div>
+                                </div>
+                                
+                                <div class="divider"></div>
+                                
+                                <div class="authenticity-section">
+                                    <div class="authenticity-badge">
+                                        <div class="badge-icon">⌚</div>
+                                        <div class="badge-text">CHỨNG NHẬN<br>ĐỒNG HỒ VIỆT NAM</div>
+                                    </div>
+                                    
+                                    <div class="authenticity-info">
+                                        <div class="service-name">
+                                            <span>Dịch vụ xác thực đồng hồ</span>
+                                            <i class="fa fa-info-circle"></i>
+                                        </div>
+                                        <p class="service-price">1.500.000₫</p>
+                                    </div>
+                                    
+                                    <div class="add-service-btn">
+                                        <button class="add-btn">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Tạm tính (Giá chuyển khoản):</span>
+                                <span>@Model.GrandTotal.ToString("N0").Replace(",", ".")₫</span>
+                            </div>
+                            
+                            <div class="summary-row">
+                                <span>Phí vận chuyển:</span>
+                                <span class="free-shipping">MIỄN PHÍ</span>
+                            </div>
+                            
+                            <div class="summary-row">
+                                <span>Phí xử lý: 2.9%</span>
+                                <span>@((Model.GrandTotal * 0.029m).ToString("N0").Replace(",", "."))₫</span>
+                            </div>
+                            
+                            <div class="summary-row total">
+                                <span>Tổng cộng:</span>
+                                <span>@((Model.GrandTotal * 1.029m).ToString("N0").Replace(",", "."))₫</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-cart">
+            <div class="container">
+                <h1>Giỏ hàng của bạn đang trống.</h1>
+                <p>Thêm sản phẩm vào giỏ hàng để xem tại đây.</p>
+                <a href="/" class="continue-shopping">Tiếp tục mua sắm</a>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    // Payment method handling
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentMethods = document.querySelectorAll('input[name="payment"]');
+        const selectedPaymentSpan = document.getElementById('selected-payment');
+        const processingFeeSpan = document.getElementById('processing-fee');
+        const totalAmountSpan = document.getElementById('total-amount');
+        const discountRow = document.getElementById('discount-row');
+        const discountAmountSpan = document.getElementById('discount-amount');
+        const processPaymentBtn = document.getElementById('process-payment-btn');
+        
+        // Get base amount from the page
+        const baseAmount = @Model.GrandTotal;
+        
+        function updatePaymentDetails() {
+            const selectedMethod = document.querySelector('input[name="payment"]:checked');
+            
+            if (selectedMethod) {
+                const methodId = selectedMethod.id;
+                let methodName = '';
+                let processingFee = 0;
+                let discount = 0;
+                let feePercentage = 0;
+                
+                switch(methodId) {
+                    case 'bank-transfer':
+                        methodName = 'Chuyển Khoản Ngân Hàng';
+                        processingFee = 0;
+                        discount = 0;
+                        feePercentage = 0;
+                        break;
+                    case 'credit-card':
+                        methodName = 'Thẻ Tín Dụng';
+                        processingFee = baseAmount * 0.025;
+                        discount = baseAmount * 0.05; // 5% discount for premium cards
+                        feePercentage = 2.5;
+                        break;
+                    case 'installment':
+                        methodName = 'Trả Góp 0% Lãi Suất';
+                        processingFee = 0;
+                        discount = 0;
+                        feePercentage = 0;
+                        break;
+                    case 'cash':
+                        methodName = 'Tiền Mặt';
+                        processingFee = 0;
+                        discount = baseAmount * 0.03; // 3% discount for cash
+                        feePercentage = 0;
+                        break;
+                    case 'cod':
+                        methodName = 'Thanh Toán Khi Nhận Hàng (COD)';
+                        processingFee = 0;
+                        discount = 0;
+                        feePercentage = 0;
+                        break;
+                }
+                
+                // Update display
+                selectedPaymentSpan.textContent = methodName;
+                processingFeeSpan.textContent = `${processingFee.toLocaleString('vi-VN')}₫`;
+                
+                // Show/hide discount row
+                if (discount > 0) {
+                    discountRow.style.display = 'flex';
+                    discountAmountSpan.textContent = `-${discount.toLocaleString('vi-VN')}₫`;
+                } else {
+                    discountRow.style.display = 'none';
+                }
+                
+                const totalAmount = baseAmount + processingFee - discount;
+                totalAmountSpan.textContent = `${totalAmount.toLocaleString('vi-VN')}₫`;
+                
+                // Update order summary total
+                const orderSummaryTotal = document.querySelector('.summary-row.total span:last-child');
+                if (orderSummaryTotal) {
+                    orderSummaryTotal.textContent = `${totalAmount.toLocaleString('vi-VN')}₫`;
+                }
+            }
+        }
+        
+        // Process payment function
+        async function processPayment() {
+            const selectedMethod = document.querySelector('input[name="payment"]:checked');
+            if (!selectedMethod) {
+                alert('Vui lòng chọn phương thức thanh toán');
+                return;
+            }
+            
+            const customerEmail = document.getElementById('email').value;
+            if (!customerEmail) {
+                alert('Vui lòng nhập email');
+                return;
+            }
+            
+            // Disable button and show loading
+            processPaymentBtn.disabled = true;
+            processPaymentBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang xử lý...';
+            
+            try {
+                // Lấy thông tin địa chỉ giao hàng với validation
+                let customerPhone = '0388672928';
+                let shippingAddress = 'phudai, phudien, Ha Noi, Ha Noi 41324 VN';
+                
+                // Kiểm tra xem có sử dụng địa chỉ khác không
+                const differentAddressRadio = document.getElementById('different-address');
+                if (differentAddressRadio && differentAddressRadio.checked) {
+                    // Validate địa chỉ mới
+                    if (window.addressSuggestion) {
+                        const validation = window.addressSuggestion.validateAddress();
+                        if (!validation.isValid) {
+                            // Hiển thị lỗi
+                            const errorDiv = document.getElementById('address-errors');
+                            errorDiv.innerHTML = '<strong>Lỗi:</strong><br>' + validation.errors.join('<br>');
+                            errorDiv.style.display = 'block';
+                            return;
+                        } else {
+                            // Ẩn lỗi nếu có
+                            document.getElementById('address-errors').style.display = 'none';
+                        }
+                        
+                        // Lấy địa chỉ đầy đủ
+                        const fullAddress = window.addressSuggestion.getFullAddress();
+                        const newPhone = document.getElementById('new-phone').value;
+                        
+                        shippingAddress = fullAddress.fullAddress;
+                        if (newPhone) {
+                            customerPhone = newPhone;
+                        }
+                    } else {
+                        // Fallback cho trường hợp không có addressSuggestion
+                        const newAddress = document.getElementById('address-input').value;
+                        const newWard = document.getElementById('ward-select').options[document.getElementById('ward-select').selectedIndex]?.text || '';
+                        const newDistrict = document.getElementById('district-select').options[document.getElementById('district-select').selectedIndex]?.text || '';
+                        const newCity = document.getElementById('province-select').options[document.getElementById('province-select').selectedIndex]?.text || '';
+                        const newPhone = document.getElementById('new-phone').value;
+                        
+                        if (!newAddress || !newWard || !newDistrict || !newCity) {
+                            alert('Vui lòng điền đầy đủ thông tin địa chỉ giao hàng mới');
+                            return;
+                        }
+                        
+                        shippingAddress = `${newAddress}, ${newWard}, ${newDistrict}, ${newCity}`;
+                        if (newPhone) {
+                            customerPhone = newPhone;
+                        }
+                    }
+                } else {
+                    // Sử dụng thông tin từ tài khoản
+                    const userPhone = document.getElementById('phone').value;
+                    const userAddress = '@(ViewBag.UserAddress ?? "")';
+                    if (userPhone) {
+                        customerPhone = userPhone;
+                    }
+                    if (userAddress) {
+                        shippingAddress = userAddress;
+                    }
+                }
+                
+                const paymentData = {
+                    paymentMethod: selectedMethod.id,
+                    amount: baseAmount,
+                    customerEmail: customerEmail,
+                    customerPhone: customerPhone,
+                    shippingAddress: shippingAddress
+                };
+                
+                const response = await fetch('/Payment/ProcessPayment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Handle different payment methods
+                    switch (result.paymentMethod) {
+                        case 'bank-transfer':
+                            showBankTransferInfo(result);
+                            break;
+                        case 'credit-card':
+                            window.location.href = result.redirectUrl;
+                            break;
+                        case 'installment':
+                            showInstallmentInfo(result);
+                            break;
+                        case 'cash':
+                            showCashPaymentInfo(result);
+                            break;
+                        case 'cod':
+                            // COD - Chuyển hướng đến Checkout để tạo đơn hàng
+                            window.location.href = '/Checkout/Checkout';
+                            break;
+                    }
+                } else {
+                    alert('Lỗi: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.');
+            } finally {
+                // Re-enable button
+                processPaymentBtn.disabled = false;
+                processPaymentBtn.innerHTML = '<i class="fa fa-lock"></i> Thanh Toán An Toàn';
+            }
+        }
+        
+        function showBankTransferInfo(result) {
+            const modal = document.createElement('div');
+            modal.className = 'payment-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-university"></i> Thông Tin Chuyển Khoản VPBank</h3>
+                        <span class="close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="bank-info">
+                            <h4><i class="fas fa-info-circle"></i> Thông Tin Tài Khoản</h4>
+                            <p><strong>Ngân hàng:</strong> ${result.bankInfo.bankName}</p>
+                            <p><strong>Số tài khoản:</strong> ${result.bankInfo.accountNumber}</p>
+                            <p><strong>Tên tài khoản:</strong> ${result.bankInfo.accountName}</p>
+                            <p><strong>Chi nhánh:</strong> ${result.bankInfo.branch}</p>
+                            <p><strong>Swift Code:</strong> ${result.bankInfo.swiftCode}</p>
+                            <hr>
+                            <p><strong>Số tiền:</strong> <span style="color: #e74c3c; font-size: 18px; font-weight: bold;">${result.amount.toLocaleString('vi-VN')}₫</span></p>
+                            <p><strong>Nội dung:</strong> <span style="background: #f8f9fa; padding: 5px; border-radius: 3px;">${result.orderId}</span></p>
+                            <p><strong>Mã đơn hàng:</strong> <span style="background: #e3f2fd; padding: 5px; border-radius: 3px;">${result.orderId}</span></p>
+                        </div>
+                        
+                        <div class="qr-code-section" style="text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                            <h4><i class="fas fa-qrcode"></i> Mã QR Thanh Toán VPBank</h4>
+                            <div class="qr-code-container">
+                                <div id="qrcode" style="display: inline-block; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></div>
+                                <p style="margin-top: 10px; color: #666; font-style: italic;">${result.bankInfo.qrCode.instructions}</p>
+                                <p style="margin-top: 5px; font-size: 12px; color: #999;">Mã QR hỗ trợ VietQR - Có thể quét bằng mọi ứng dụng ngân hàng</p>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-instructions">
+                            <h4><i class="fas fa-list-ol"></i> Hướng dẫn thanh toán:</h4>
+                            <ol>
+                                ${result.bankInfo.transferInstructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                            </ol>
+                            
+                            <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                                <h5><i class="fas fa-mobile-alt"></i> Ứng Dụng Hỗ Trợ</h5>
+                                <p><strong>VPBank Mobile:</strong> Quét QR, thanh toán nhanh chóng</p>
+                                <p><strong>VPBank Online:</strong> Chuyển khoản trực tuyến</p>
+                                <p><strong>VPBank QR:</strong> Thanh toán bằng QR code</p>
+                            </div>
+                            
+                            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                                <p><strong>⚠️ Lưu ý quan trọng:</strong></p>
+                                <ul>
+                                    <li>Vui lòng chuyển khoản chính xác số tiền và nội dung</li>
+                                    <li>Sau khi chuyển khoản, gửi biên lai qua email: support@donghocaocap.com</li>
+                                    <li>Đơn hàng sẽ được xử lý trong vòng 24 giờ</li>
+                                    <li>Liên hệ hotline: 0388672928 nếu cần hỗ trợ</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Tạo QR code
+            const qrCodeContainer = modal.querySelector('#qrcode');
+            if (qrCodeContainer && result.bankInfo.qrCode) {
+                // Tạo QR code sử dụng thư viện qrcode-generator
+                const qrContent = result.bankInfo.qrCode.qrContent;
+                const qrCode = createQRCode(qrContent);
+                qrCodeContainer.innerHTML = qrCode;
+            }
+            
+            // Close modal
+            modal.querySelector('.close').onclick = () => modal.remove();
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+        }
+        
+        // Hàm tạo QR code đơn giản
+        function createQRCode(text) {
+            // Sử dụng API QR Server để tạo QR code
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
+            return `<img src="${qrUrl}" alt="VPBank QR Code" style="max-width: 200px; border: 2px solid #007bff; border-radius: 8px;">`;
+        }
+        
+        function showInstallmentInfo(result) {
+            const modal = document.createElement('div');
+            modal.className = 'payment-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Thông Tin Trả Góp 0% Lãi Suất</h3>
+                        <span class="close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="installment-info">
+                            <h4>Thông Tin Đơn Hàng</h4>
+                            <p><strong>Mã đơn hàng:</strong> <span style="background: #e3f2fd; padding: 5px; border-radius: 3px;">${result.orderId}</span></p>
+                            <p><strong>Số tiền:</strong> <span style="color: #e74c3c; font-size: 18px; font-weight: bold;">${result.amount.toLocaleString('vi-VN')}₫</span></p>
+                            <hr>
+                            <h4>Ngân Hàng Hỗ Trợ Trả Góp</h4>
+                            ${result.installmentInfo.banks.map(bank => `
+                                <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                    <h5 style="color: #2c3e50; margin-bottom: 10px;">🏦 ${bank.name}</h5>
+                                    <p><strong>Mã ngân hàng:</strong> ${bank.code}</p>
+                                    <p><strong>Lãi suất:</strong> <span style="color: #27ae60; font-weight: bold;">${bank.interestRate}</span></p>
+                                    <p><strong>Kỳ hạn:</strong> ${bank.tenure}</p>
+                                    <p><strong>Hạn mức:</strong> ${bank.minAmount.toLocaleString('vi-VN')}₫ - ${bank.maxAmount.toLocaleString('vi-VN')}₫</p>
+                                    <p><strong>Giấy tờ cần thiết:</strong></p>
+                                    <ul style="margin-left: 20px;">
+                                        ${bank.requirements.map(req => `<li>${req}</li>`).join('')}
+                                    </ul>
+                                    <a href="${bank.applicationUrl}" target="_blank" style="background: #3498db; color: white; padding: 8px 15px; text-decoration: none; border-radius: 3px; display: inline-block; margin-top: 10px;">Đăng Ký Trả Góp</a>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="payment-instructions">
+                            <h4>Hướng dẫn trả góp:</h4>
+                            <ol>
+                                ${result.installmentInfo.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                            </ol>
+                            <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                                <h5>📞 Hỗ Trợ Trả Góp</h5>
+                                <p><strong>Hotline:</strong> ${result.installmentInfo.supportInfo.phone}</p>
+                                <p><strong>Email:</strong> ${result.installmentInfo.supportInfo.email}</p>
+                                <p><strong>Giờ làm việc:</strong> ${result.installmentInfo.supportInfo.workingHours}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            modal.querySelector('.close').onclick = () => modal.remove();
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+        }
+        
+        function showCashPaymentInfo(result) {
+            const modal = document.createElement('div');
+            modal.className = 'payment-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Thông Tin Thanh Toán Tiền Mặt</h3>
+                        <span class="close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="cash-info">
+                            <h4>Thông Tin Cửa Hàng</h4>
+                            <p><strong>Tên cửa hàng:</strong> ${result.cashInfo.storeName}</p>
+                            <p><strong>Địa chỉ:</strong> ${result.cashInfo.storeAddress}</p>
+                            <p><strong>Số điện thoại:</strong> ${result.cashInfo.phone}</p>
+                            <p><strong>Giờ làm việc:</strong> ${result.cashInfo.workingHours}</p>
+                            <hr>
+                            <p><strong>Mã đơn hàng:</strong> <span style="background: #e3f2fd; padding: 5px; border-radius: 3px;">${result.orderId}</span></p>
+                            <p><strong>Số tiền:</strong> <span style="color: #e74c3c; font-size: 18px; font-weight: bold;">${result.amount.toLocaleString('vi-VN')}₫</span></p>
+                        </div>
+                        <div class="payment-instructions">
+                            <h4>Hướng dẫn thanh toán:</h4>
+                            <ol>
+                                ${result.cashInfo.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                            </ol>
+                            <div style="background: #f0f8ff; border: 1px solid #87ceeb; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                                <h5>🏪 Dịch Vụ Tại Cửa Hàng</h5>
+                                <p><strong>Bãi đỗ xe:</strong> ${result.cashInfo.additionalInfo.parking}</p>
+                                <p><strong>Phương thức thanh toán:</strong> ${result.cashInfo.additionalInfo.paymentMethods.join(', ')}</p>
+                                <p><strong>Dịch vụ:</strong></p>
+                                <ul style="margin-left: 20px;">
+                                    ${result.cashInfo.additionalInfo.services.map(service => `<li>${service}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                                <p><strong>⚠️ Lưu ý:</strong></p>
+                                <ul>
+                                    <li>Vui lòng mang theo CMND/CCCD khi đến cửa hàng</li>
+                                    <li>Có thể thanh toán bằng tiền mặt hoặc thẻ ATM nội địa</li>
+                                    <li>Kiểm tra sản phẩm kỹ trước khi thanh toán</li>
+                                    <li>Nhận hóa đơn và bảo hành chính hãng</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            modal.querySelector('.close').onclick = () => modal.remove();
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+        }
+        
+        // Add event listeners
+        paymentMethods.forEach(method => {
+            method.addEventListener('change', updatePaymentDetails);
+        });
+        
+        processPaymentBtn.addEventListener('click', processPayment);
+        
+        // Xử lý radio button địa chỉ giao hàng
+        const defaultAddressRadio = document.getElementById('default-address');
+        const differentAddressRadio = document.getElementById('different-address');
+        const differentShippingForm = document.getElementById('different-shipping-form');
+        
+        if (defaultAddressRadio && differentAddressRadio && differentShippingForm) {
+            // Xử lý khi chọn địa chỉ mặc định
+            defaultAddressRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    differentShippingForm.style.display = 'none';
+                    console.log('DEBUG: Chọn địa chỉ mặc định');
+                    // Xóa cookies địa chỉ khác nếu có
+                    fetch('/Cart/RemoveShippingCookie', { method: 'POST' });
+                }
+            });
+            
+            // Xử lý khi chọn địa chỉ khác
+            differentAddressRadio.addEventListener('change', function() {
+                if (this.checked) {
+                    differentShippingForm.style.display = 'block';
+                    console.log('DEBUG: Chọn địa chỉ giao hàng khác');
+                }
+            });
+        }
+        
+        // Initialize
+        updatePaymentDetails();
+    });
+</script>
+
+<!-- Include Address Suggestion Script -->
+<script src="~/js/address-suggestion.js"></script>

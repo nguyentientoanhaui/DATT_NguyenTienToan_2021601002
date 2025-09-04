@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Check User Roles";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Check User Roles and Permissions</h1>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            <strong>Error:</strong> @ViewBag.Error
+        </div>
+    }
+
+    @if (ViewBag.Results != null)
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">User Role Analysis</h6>
+            </div>
+            <div class="card-body">
+                @foreach (var result in ViewBag.Results)
+                {
+                    <p class="mb-1">@result</p>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Actions</h6>
+        </div>
+        <div class="card-body">
+            <p>Based on the results above, you can:</p>
+            <ul>
+                <li>If user has no roles: Use the Fix User Roles tool</li>
+                <li>If user has Customer role only: Need to assign admin role</li>
+                <li>If user has Admin role: Should be able to access admin panel</li>
+            </ul>
+            
+            <div class="mt-3">
+                <a href="/Admin/User/FixUserRoles" class="btn btn-warning">Fix User Roles</a>
+                <a href="/Account/Login" class="btn btn-primary">Go to Login</a>
+                <a href="/Admin/Dashboard" class="btn btn-success">Try Admin Panel</a>
+            </div>
+        </div>
+    </div>
+</div>

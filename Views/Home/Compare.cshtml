@@ -1,0 +1,1186 @@
+﻿@{
+    ViewData["title"] = "So sánh sản phẩm";
+}
+
+<div class="compare-container">
+    <div class="compare-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="compare-title">
+                        <i class="fas fa-balance-scale me-3"></i>
+                        So sánh sản phẩm
+                    </h1>
+                    <p class="compare-subtitle">Đánh giá chi tiết và khách quan các sản phẩm đồng hồ</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="compare-actions">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-dark btn-sm me-2">
+                            <i class="fas fa-home me-1"></i>Trang chủ
+                        </a>
+                        <a href="@Url.Action("Index", "Product")" class="btn btn-dark btn-sm me-2">
+                            <i class="fas fa-shopping-bag me-1"></i>Mua sắm
+                        </a>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearAllCompare()">
+                            <i class="fas fa-trash me-1"></i>Xóa tất cả
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                @if (Model != null && Model.Count > 0)
+                {
+                    <div class="compare-table-wrapper">
+                        <div class="table-responsive">
+                            <table class="compare-table" id="compareTable">
+
+                                <tbody>
+                                    <!-- Hình ảnh -->
+                                    <tr class="image-row">
+                                        <td class="feature-label">
+                                            <i class="fas fa-image me-2"></i>
+                                            <span>Hình ảnh</span>
+                                        </td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                <div class="product-image-large">
+                                                    <img src="/Home/GetProductImage?productId=@compare_product.Product.Id" 
+                                                         alt="@compare_product.Product.Name" 
+                                                         class="large-image">
+                                                                                                        <button type="button"
+                                                            class="btn-remove-compare"
+                                                            data-product-id="@compare_product.Compares.Id"
+                                                            data-product-name="@compare_product.Product.Name">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                                <h6 class="product-name">@compare_product.Product.Name</h6>
+                                                <div class="product-brand">@(compare_product.Product.Brand?.Name ?? "N/A")</div>
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <!-- CHI TIẾT ĐỒNG HỒ -->
+                                    <tr class="section-header">
+                                        <td colspan="@(Model.Count + 1)" class="section-title">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            CHI TIẾT ĐỒNG HỒ
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Giá bán</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                <div class="price-main">@compare_product.Product.Price.ToString("N0") VNĐ</div>
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Giá thẻ tín dụng</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                @try
+                                                {
+                                                    var creditPrice = compare_product.Product.CreditCardPrice;
+                                                    if (creditPrice > 0)
+                                                    {
+                                                        <div class="price-credit">@creditPrice.ToString("N0") VNĐ</div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">N/A</span>
+                                                    }
+                                                }
+                                                catch
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Số Model</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.Model ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Năm sản xuất</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.Year?.ToString() ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Tình trạng</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                <span class="status-badge @(compare_product.Product.Condition?.ToLower() == "excellent" ? "status-excellent" : "status-other")">
+                                                    @(compare_product.Product.Condition ?? "N/A")
+                                                </span>
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Giới tính</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.Gender ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Hộp & Giấy tờ</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                @if (compare_product.Product.BoxAndPapers == true)
+                                                {
+                                                    <span class="status-badge status-yes">Có</span>
+                                                }
+                                                else if (compare_product.Product.BoxAndPapers == false)
+                                                {
+                                                    <span class="status-badge status-no">Không</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Danh mục</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.Category?.Name ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Số lượng tồn kho</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                @if (compare_product.Product.Quantity > 0)
+                                                {
+                                                    <span class="stock-badge stock-available">@compare_product.Product.Quantity</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="stock-badge stock-out">Hết hàng</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Đã bán</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@compare_product.Product.Sold</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Giá vốn</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                @if (compare_product.Product.CapitalPrice > 0)
+                                                {
+                                                    <span class="price-cost">@compare_product.Product.CapitalPrice.ToString("N0") VNĐ</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">N/A</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <!-- VỎ ĐỒNG HỒ -->
+                                    <tr class="section-header">
+                                        <td colspan="@(Model.Count + 1)" class="section-title">
+                                            <i class="fas fa-cog me-2"></i>
+                                            VỎ ĐỒNG HỒ
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Chất liệu</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.CaseMaterial ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Kính</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.Crystal ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Kích thước</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.CaseSize ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Vành</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.BezelMaterial ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Số Serial</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.SerialNumber ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Mặt số</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.DialColor ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Vạch số giờ</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.HourMarkers ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <!-- BỘ MÁY -->
+                                    <tr class="section-header">
+                                        <td colspan="@(Model.Count + 1)" class="section-title">
+                                            <i class="fas fa-cogs me-2"></i>
+                                            BỘ MÁY
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Calibre</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.Calibre ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Loại</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.MovementType ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Tính năng</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.Complication ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <!-- DÂY ĐỒNG HỒ -->
+                                    <tr class="section-header">
+                                        <td colspan="@(Model.Count + 1)" class="section-title">
+                                            <i class="fas fa-link me-2"></i>
+                                            DÂY ĐỒNG HỒ
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Chất liệu</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.BraceletMaterial ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Loại</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.BraceletType ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Khóa</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.ClaspType ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <!-- BẢO HÀNH & CHỨNG NHẬN -->
+                                    <tr class="section-header">
+                                        <td colspan="@(Model.Count + 1)" class="section-title">
+                                            <i class="fas fa-shield-alt me-2"></i>
+                                            BẢO HÀNH & CHỨNG NHẬN
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Chứng nhận</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.Certificate ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Bảo hành</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">@(compare_product.Product.WarrantyInfo ?? "N/A")</td>
+                                        }
+                                    </tr>
+                                    
+                                    <!-- MÔ TẢ -->
+                                    <tr class="feature-row description-row">
+                                        <td class="feature-label">Mô tả chi tiết</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                @if (!string.IsNullOrEmpty(compare_product.Product.Description))
+                                                {
+                                                    <div class="product-description">
+                                                        @Html.Raw(compare_product.Product.Description.Length > 200 
+                                                            ? compare_product.Product.Description.Substring(0, 200) + "..." 
+                                                            : compare_product.Product.Description)
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Không có mô tả</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <!-- ĐÁNH GIÁ -->
+                                    <tr class="feature-row rating-row">
+                                        <td class="feature-label">Đánh giá trung bình</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                @try
+                                                {
+                                                    var reviews = compare_product.Product.ProductReviews;
+                                                    if (reviews != null && reviews.Count > 0)
+                                                    {
+                                                        double totalRating = 0;
+                                                        int reviewCount = 0;
+                                                        
+                                                        foreach (var review in reviews)
+                                                        {
+                                                            try
+                                                            {
+                                                                var rating = review.Rating;
+                                                                if (rating > 0)
+                                                                {
+                                                                    totalRating += rating;
+                                                                    reviewCount++;
+                                                                }
+                                                            }
+                                                            catch { }
+                                                        }
+                                                        
+                                                        if (reviewCount > 0)
+                                                        {
+                                                            var avgRating = totalRating / reviewCount;
+                                                            var rating = Math.Round(avgRating, 1);
+                                                            
+                                                            <div class="rating-display">
+                                                                <div class="stars">
+                                                                    @for (int star = 1; star <= 5; star++)
+                                                                    {
+                                                                        if (star <= rating)
+                                                                        {
+                                                                            <i class="fas fa-star star-filled"></i>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <i class="far fa-star star-empty"></i>
+                                                                        }
+                                                                    }
+                                                                </div>
+                                                                <div class="rating-text">@rating/5</div>
+                                                                <div class="review-count">@reviewCount đánh giá</div>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Chưa có đánh giá</span>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Chưa có đánh giá</span>
+                                                    }
+                                                }
+                                                catch
+                                                {
+                                                    <span class="text-muted">Chưa có đánh giá</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                    
+                                    <!-- TRẠNG THÁI -->
+                                    <tr class="feature-row">
+                                        <td class="feature-label">Trạng thái</td>
+                                        @foreach (var compare_product in Model)
+                                        {
+                                            <td class="product-cell">
+                                                @if (compare_product.Product.IsActive)
+                                                {
+                                                    <span class="status-badge status-active">Đang bán</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="status-badge status-inactive">Ngừng bán</span>
+                                                }
+                                            </td>
+                                        }
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-compare">
+                        <div class="empty-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <h3>Danh sách so sánh trống</h3>
+                        <p>Bạn chưa có sản phẩm nào trong danh sách so sánh.</p>
+                        <a href="@Url.Action("Index", "Product")" class="btn btn-dark btn-lg">
+                            <i class="fas fa-plus me-2"></i>Thêm sản phẩm để so sánh
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Reset và base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fafafa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Container chính */
+.compare-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+}
+
+/* Header */
+.compare-header {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.compare-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+.compare-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.compare-actions .btn {
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.compare-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Table wrapper */
+.compare-table-wrapper {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin-bottom: 3rem;
+}
+
+/* Table styles */
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.compare-table th,
+.compare-table td {
+    padding: 1.2rem 1rem;
+    border: none;
+    vertical-align: top;
+}
+
+/* Header styles */
+.table-header {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    color: white;
+}
+
+.feature-column {
+    width: 200px;
+    background: #34495e;
+}
+
+.feature-header {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.product-column {
+    width: 280px;
+    background: #34495e;
+    text-align: center;
+}
+
+.product-header {
+    position: relative;
+}
+
+.product-image-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.product-image:hover {
+    transform: scale(1.05);
+}
+
+.btn-remove-compare {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(231, 76, 60, 0.9);
+    border: none;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+.btn-remove-compare:hover {
+    background: rgba(192, 57, 43, 1);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.btn-remove-compare:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.product-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.product-brand {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    color: #ecf0f1;
+}
+
+/* Feature rows */
+.feature-row {
+    border-bottom: 1px solid #ecf0f1;
+    transition: background-color 0.3s ease;
+}
+
+.feature-row:hover {
+    background-color: #f8f9fa;
+}
+
+.feature-label {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+    border-right: 2px solid #ecf0f1;
+    position: relative;
+}
+
+.feature-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.product-cell {
+    text-align: center;
+    background: white;
+    transition: background-color 0.3s ease;
+}
+
+.product-cell:hover {
+    background-color: #f8f9fa;
+}
+
+/* Section headers */
+.section-header {
+    background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+}
+
+.section-title {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 1.5rem 1rem;
+    letter-spacing: 1px;
+}
+
+/* Image row */
+.image-row {
+    background: #f8f9fa;
+}
+
+.product-image-large {
+    position: relative;
+    text-align: center;
+}
+
+.large-image {
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.large-image:hover {
+    transform: scale(1.05);
+}
+
+/* Price styles */
+.price-main {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #e74c3c;
+}
+
+.price-credit {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #3498db;
+}
+
+.price-cost {
+    font-size: 1rem;
+    color: #7f8c8d;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-excellent {
+    background: #d5f4e6;
+    color: #27ae60;
+}
+
+.status-other {
+    background: #fef9e7;
+    color: #f39c12;
+}
+
+.status-yes {
+    background: #d5f4e6;
+    color: #27ae60;
+}
+
+.status-no {
+    background: #fadbd8;
+    color: #e74c3c;
+}
+
+.status-active {
+    background: #d5f4e6;
+    color: #27ae60;
+}
+
+.status-inactive {
+    background: #d6eaf8;
+    color: #7f8c8d;
+}
+
+/* Stock badges */
+.stock-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.stock-available {
+    background: #d5f4e6;
+    color: #27ae60;
+}
+
+.stock-out {
+    background: #fadbd8;
+    color: #e74c3c;
+}
+
+/* Description row */
+.description-row .product-cell {
+    text-align: left;
+}
+
+.product-description {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #555;
+}
+
+/* Rating row */
+.rating-row .product-cell {
+    text-align: center;
+}
+
+.rating-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stars {
+    display: flex;
+    gap: 0.2rem;
+}
+
+.star-filled {
+    color: #f39c12;
+    font-size: 1.1rem;
+}
+
+.star-empty {
+    color: #bdc3c7;
+    font-size: 1.1rem;
+}
+
+.rating-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.review-count {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+/* Empty state */
+.empty-compare {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #bdc3c7;
+    margin-bottom: 2rem;
+}
+
+.empty-compare h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-weight: 400;
+}
+
+.empty-compare p {
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.empty-compare .btn {
+    border-radius: 25px;
+    padding: 1rem 2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.empty-compare .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+
+
+/* Responsive */
+@@media (max-width: 1200px) {
+    .feature-column {
+        width: 180px;
+    }
+    
+    .product-column {
+        width: 250px;
+    }
+}
+
+@@media (max-width: 768px) {
+    .compare-title {
+        font-size: 2rem;
+    }
+    
+    .compare-subtitle {
+        font-size: 1rem;
+    }
+    
+    .compare-actions {
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .compare-table-wrapper {
+        border-radius: 10px;
+        margin: 0 1rem 2rem;
+    }
+    
+    .compare-table th,
+    .compare-table td {
+        padding: 0.8rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .feature-column {
+        width: 120px;
+    }
+    
+    .product-column {
+        width: 200px;
+    }
+    
+    .product-image {
+        height: 80px;
+    }
+    
+    .large-image {
+        max-width: 120px;
+        max-height: 120px;
+    }
+    
+    .section-title {
+        font-size: 1rem;
+        padding: 1rem 0.5rem;
+    }
+}
+
+@@media (max-width: 576px) {
+    .compare-header {
+        padding: 2rem 0 1.5rem;
+    }
+    
+    .compare-title {
+        font-size: 1.8rem;
+    }
+    
+    .compare-table-wrapper {
+        margin: 0 0.5rem 1.5rem;
+    }
+    
+    .compare-table th,
+    .compare-table td {
+        padding: 0.6rem 0.3rem;
+        font-size: 0.8rem;
+    }
+    
+    .feature-column {
+        width: 100px;
+    }
+    
+    .product-column {
+        width: 150px;
+    }
+    
+    .product-image {
+        height: 60px;
+    }
+    
+    .large-image {
+        max-width: 80px;
+        max-height: 80px;
+    }
+}
+</style>
+
+<script>
+    // Wait for jQuery to be available
+    function waitForJQuery(callback) {
+        if (typeof $ !== 'undefined') {
+            callback();
+        } else {
+            setTimeout(function() {
+                waitForJQuery(callback);
+            }, 100);
+        }
+    }
+
+    waitForJQuery(function() {
+        $(document).ready(function() {
+            // Responsive table
+            if ($(window).width() < 768) {
+                $('#compareTable').addClass('table-responsive');
+            }
+            
+            // Handle remove button clicks
+            $(document).on('click', '.btn-remove-compare', function() {
+                const compareId = $(this).data('product-id');
+                const productName = $(this).data('product-name');
+                console.log('Remove button clicked:', compareId, productName);
+                removeFromCompare(compareId, productName);
+            });
+        });
+    });
+
+    // Function to remove product from comparison using AJAX
+    function removeFromCompare(compareId, productName) {
+        if (confirm(`Bạn có chắc muốn xóa sản phẩm "${productName}" khỏi danh sách so sánh?`)) {
+            performDelete(compareId, productName);
+        }
+    }
+
+    // Function to perform the actual deletion
+    function performDelete(compareId, productName) {
+        console.log('performDelete called with:', compareId, productName);
+        
+        // Show loading state
+        const button = $(`button[data-product-id="${compareId}"]`);
+        console.log('Button found:', button.length);
+        
+        if (button.length === 0) {
+            console.error('Button not found!');
+            showNotification('Không tìm thấy nút xóa!', 'error');
+            return;
+        }
+        
+        const originalContent = button.html();
+        button.html('<i class="fas fa-spinner fa-spin"></i>');
+        button.prop('disabled', true);
+
+        console.log('Sending AJAX request...');
+        $.ajax({
+            url: '@Url.Action("DeleteCompare", "Home")',
+            type: 'POST',
+            data: { Id: compareId },
+            success: function(response) {
+                console.log('AJAX success, response:', response);
+                if (response.success) {
+                    console.log('Delete successful, removing from DOM...');
+                    
+                    // Show success message
+                    showNotification('Sản phẩm đã được xóa khỏi danh sách so sánh thành công!', 'success');
+                    
+                    // Find the product cell and remove it
+                    const productCell = button.closest('td');
+                    const columnIndex = productCell.index();
+                    console.log('Column index to remove:', columnIndex);
+                    
+                    // Remove this cell from all rows
+                    $('tbody tr').each(function() {
+                        const cell = $(this).find('td').eq(columnIndex);
+                        console.log('Removing cell:', cell.length);
+                        cell.remove();
+                    });
+                    
+                    console.log('Cells removed, checking remaining...');
+                    // Check if no products left
+                    const remainingCells = $('tbody tr:first td').length;
+                    console.log('Remaining cells:', remainingCells);
+                    
+                    if (remainingCells <= 1) {
+                        console.log('No products left, redirecting...');
+                        setTimeout(function() {
+                            window.location.href = '@Url.Action("Index", "Home")';
+                        }, 1500);
+                    }
+                } else {
+                    console.log('Delete failed:', response.message);
+                    showNotification(response.message || 'Có lỗi xảy ra khi xóa sản phẩm!', 'error');
+                    // Restore button
+                    button.html(originalContent);
+                    button.prop('disabled', false);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
+                console.error('Response text:', xhr.responseText);
+                showNotification('Có lỗi xảy ra khi xóa sản phẩm!', 'error');
+                // Restore button
+                button.html(originalContent);
+                button.prop('disabled', false);
+            }
+        });
+    }
+
+    // Function to clear all compare products
+    function clearAllCompare() {
+        if (confirm('Bạn có chắc muốn xóa tất cả sản phẩm khỏi danh sách so sánh?')) {
+            performClearAll();
+        }
+    }
+
+    // Function to perform clear all
+    function performClearAll() {
+        $.ajax({
+            url: '@Url.Action("ClearAllCompare", "Home")',
+            type: 'POST',
+            success: function(response) {
+                if (response.success) {
+                    showNotification('Đã xóa tất cả sản phẩm khỏi danh sách so sánh!', 'success');
+                    setTimeout(function() {
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    }, 1500);
+                } else {
+                    showNotification(response.message || 'Có lỗi xảy ra khi xóa danh sách so sánh!', 'error');
+                }
+            },
+            error: function() {
+                showNotification('Có lỗi xảy ra khi xóa danh sách so sánh!', 'error');
+            }
+        });
+    }
+
+
+
+    // Function to show notifications
+    function showNotification(message, type) {
+        // Sử dụng SweetAlert nếu có, nếu không thì dùng alert đơn giản
+        if (typeof Swal !== 'undefined') {
+            let icon = 'info';
+            let title = 'Thông báo';
+            
+            if (type === 'success') {
+                icon = 'success';
+                title = 'Thành công';
+            } else if (type === 'error') {
+                icon = 'error';
+                title = 'Lỗi';
+            } else if (type === 'warning') {
+                icon = 'warning';
+                title = 'Cảnh báo';
+            }
+            
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: icon,
+                timer: type === 'success' ? 2000 : 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        } else {
+            // Fallback: sử dụng alert đơn giản
+            alert(message);
+        }
+    }
+</script>

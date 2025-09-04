@@ -1,0 +1,254 @@
+@model int
+
+<div class="compare-button-container">
+    <button class="btn btn-outline-primary btn-sm compare-btn" 
+            onclick="addToCompare(@Model)" 
+            data-product-id="@Model"
+            title="Thêm vào so sánh">
+        <i class="fas fa-balance-scale me-1"></i>
+        <span class="compare-text">So sánh</span>
+        <span class="compare-count" id="compare-count-@Model" style="display: none;"></span>
+    </button>
+</div>
+
+<style>
+    .compare-button-container {
+        display: inline-block;
+    }
+
+    .compare-btn {
+        transition: all 0.3s ease;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .compare-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .compare-btn.added {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+
+    .compare-btn.added:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+
+    .compare-btn.loading {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .compare-btn .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.25rem;
+    }
+
+    .compare-count {
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-left: 5px;
+    }
+
+    .compare-btn.full .compare-count {
+        background: #ffc107;
+        color: #000;
+    }
+</style>
+
+<script>
+    function addToCompare(productId) {
+        console.log('addToCompare called with productId:', productId);
+        const btn = event.target.closest('.compare-btn');
+        console.log('Button found:', btn);
+        
+        // Kiểm tra số lượng sản phẩm trong danh sách so sánh trước
+        checkCompareCount().then(countData => {
+            console.log('Compare count check result:', countData);
+            if (countData.isFull) {
+                // Nếu đã đầy, hiển thị thông báo và không cho thêm
+                console.log('Compare list is full, showing warning');
+                showNotification(countData.message, 'warning');
+                return;
+            }
+            
+            // Nếu chưa đầy, tiếp tục thêm sản phẩm
+            console.log('Compare list not full, proceeding to add');
+            performAddToCompare(productId, btn);
+        }).catch(error => {
+            console.error('Error checking compare count:', error);
+            // Nếu có lỗi khi kiểm tra, vẫn cho phép thêm
+            performAddToCompare(productId, btn);
+        });
+    }
+
+    function checkCompareCount() {
+        console.log('checkCompareCount called');
+        return fetch('/Home/GetCompareCount')
+            .then(response => {
+                console.log('GetCompareCount response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('GetCompareCount response data:', data);
+                if (data.success) {
+                    return data;
+                } else {
+                    throw new Error(data.message);
+                }
+            });
+    }
+
+    function performAddToCompare(productId, btn) {
+        const originalText = btn.innerHTML;
+        
+        // Thêm loading state
+        btn.classList.add('loading');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Đang thêm...';
+        
+        // Get anti-forgery token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('Id', productId);
+        if (token) {
+            formData.append('__RequestVerificationToken', token);
+        }
+        
+        fetch('/Home/AddCompare', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Thay đổi trạng thái nút
+                btn.classList.add('added');
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Đã thêm';
+                btn.title = 'Đã thêm vào so sánh';
+                
+                // Hiển thị thông báo
+                showNotification(data.message, 'success');
+                
+                // Cập nhật số lượng hiển thị trên tất cả các nút
+                checkCompareCount().then(countData => {
+                    updateCompareCountDisplay(countData);
+                });
+                
+                // Disable nút
+                btn.disabled = true;
+                btn.style.pointerEvents = 'none';
+            } else {
+                showNotification(data.message, 'error');
+                // Khôi phục nút
+                btn.classList.remove('loading');
+                btn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Có lỗi xảy ra khi thêm vào so sánh!', 'error');
+            // Khôi phục nút
+            btn.classList.remove('loading');
+            btn.innerHTML = originalText;
+        });
+    }
+
+    function showNotification(message, type) {
+        // Sử dụng SweetAlert nếu có, nếu không thì dùng alert đơn giản
+        if (typeof Swal !== 'undefined') {
+            let icon = 'success';
+            let title = 'Thành công';
+            
+            if (type === 'error') {
+                icon = 'error';
+                title = 'Lỗi';
+            } else if (type === 'warning') {
+                icon = 'warning';
+                title = 'Cảnh báo';
+            }
+            
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: icon,
+                timer: 3000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        } else {
+            // Fallback: sử dụng alert đơn giản
+            alert(message);
+        }
+    }
+
+
+
+    // Function để cập nhật số lượng hiển thị trên tất cả các nút so sánh
+    function updateCompareCountDisplay(countData) {
+        const compareButtons = document.querySelectorAll('.compare-btn');
+        compareButtons.forEach(btn => {
+            const countSpan = btn.querySelector('.compare-count');
+            if (countSpan) {
+                if (countData.isFull) {
+                    countSpan.textContent = '4/4';
+                    countSpan.style.display = 'inline-flex';
+                    btn.classList.add('full');
+                    btn.title = 'Danh sách so sánh đã đầy';
+                } else if (countData.count > 0) {
+                    countSpan.textContent = `${countData.count}/4`;
+                    countSpan.style.display = 'inline-flex';
+                    btn.classList.remove('full');
+                    btn.title = `Đã có ${countData.count}/4 sản phẩm trong danh sách so sánh`;
+                } else {
+                    countSpan.style.display = 'none';
+                    btn.classList.remove('full');
+                    btn.title = 'Thêm vào so sánh';
+                }
+            }
+        });
+    }
+
+    // Cập nhật số lượng khi trang được load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Compare button script loaded');
+        checkCompareCount().then(countData => {
+            console.log('Compare count data:', countData);
+            updateCompareCountDisplay(countData);
+        }).catch(error => {
+            console.error('Error loading compare count:', error);
+        });
+    });
+
+    // Fallback: Cập nhật sau 1 giây nếu DOMContentLoaded không hoạt động
+    setTimeout(function() {
+        console.log('Fallback: Checking compare count after 1 second');
+        checkCompareCount().then(countData => {
+            console.log('Fallback compare count data:', countData);
+            updateCompareCountDisplay(countData);
+        }).catch(error => {
+            console.error('Fallback error loading compare count:', error);
+        });
+    }, 1000);
+</script>

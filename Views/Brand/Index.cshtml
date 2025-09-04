@@ -1,0 +1,69 @@
+﻿@model IEnumerable<ProductModel>
+
+<div class="col-sm-3">
+    <div id="sticky-sidebar">
+        <partial name="_SideBarPartial" />
+    </div>
+</div>
+
+<div class="col-sm-9 padding-right">
+    <div class="features_items">
+        <h2 class="title text-center">@ViewBag.Brand.Name</h2>
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="product-link">
+                                <img src="~/media/products/@item.Image" alt="@item.Image" class="product-img" />
+                            </a>
+                            <button class="wishlist-btn" data-product-id="@item.Id">
+                                <i class="fa fa-heart"></i>
+                            </button>
+                            @if (item.Quantity <= 0)
+                            {
+                                <div class="out-of-stock-badge">Hết hàng</div>
+                            }
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title">
+                                <a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">@item.Name</a>
+                            </div>
+                            <div class="product-specs">
+                                <p>Danh mục: @item.Category.Name</p>
+                                <p>Thương hiệu: @item.Brand.Name</p>
+                            </div>
+                            <div class="price">@item.Price.ToString("N0").Replace(",", ".") VNĐ</div>
+                            <div class="product-actions">
+                                @if (item.Quantity > 0)
+                                {
+                                    <a href="#" class="buy-btn">MUA NGAY</a>
+                                    <div class="sell-container">
+                                        <a href="javascript:void(0)" onclick="getQuote(@item.Id)" class="sell-btn">THU MUA</a>
+                                        <div class="quote-text" onclick="getQuote(@item.Id)">Báo Giá</div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <button class="buy-btn disabled" disabled>Hết hàng</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="~/js/simple-wishlist.js"></script>
+    <script>
+        function getQuote(productId) {
+            window.location.href = '/Sell/Create?productId=' + productId;
+        }
+    </script>
+}

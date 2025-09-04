@@ -1,0 +1,1011 @@
+@model ProductDetailsViewModel
+@{
+    ViewData["Title"] = Model.ProductDetail.Name;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-details.css" />
+    <style>
+        .wishlist-btn i {
+            color: #000000 !important;
+            font-size: 16px;
+        }
+        .wishlist-btn:hover i {
+            color: #e74c3c !important;
+        }
+        .wishlist-btn[data-wishlisted="true"] i {
+            color: #e74c3c !important;
+        }
+        .wishlist-btn[data-wishlisted="true"]:hover i {
+            color: #c0392b !important;
+        }
+        .wishlist-btn {
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        .wishlist-btn:hover {
+            background-color: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        /* Force specification alignment */
+        .spec-item {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+        
+        .spec-label {
+            text-align: left !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .spec-value {
+            text-align: right !important;
+            flex: 1 !important;
+            margin-left: 20px !important;
+        }
+        
+        /* Alert messages */
+        .alert {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+    </style>
+}
+
+<!-- Product Details Section -->
+<section class="product-details-section">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/">Trang chủ</a>
+            <span>/</span>
+            <a href="@Url.Action("Brand", "Product", new { brandId = Model.ProductDetail.BrandId })">@Model.ProductDetail.Brand?.Name</a>
+            <span>/</span>
+            <a href="@Url.Action("Index", "Product")">@Model.ProductDetail.Category?.Name</a>
+            <span>/</span>
+            <span>@Model.ProductDetail.Name</span>
+        </div>
+
+        <div class="product-details-grid">
+                         <!-- Product Images -->
+             <div class="product-images">
+                 <div class="main-image-container">
+                     <div class="image-slider">
+                         <div class="slider-container" id="slider-container">
+                             @{
+                                 var productImages = Model.ProductDetail.ProductImages ?? new List<ProductImageModel>();
+                                 var uniqueImages = productImages.GroupBy(img => img.ImageUrl).Select(g => g.First()).ToList();
+                                 
+                                 if (uniqueImages.Any())
+                                 {
+                                     foreach (var image in uniqueImages)
+                                     {
+                                         var index = uniqueImages.IndexOf(image);
+                                         <div class="slide @(index == 0 ? "active" : "")" data-index="@index">
+                                             <img src="@image.ImageUrl" alt="@Model.ProductDetail.Name" style="width: 100%; height: 500px; object-fit: contain; padding: 20px; background: #f8f9fa; border-radius: 8px;" />
+                                             <div class="image-badge">Ảnh Thực Tế</div>
+                                         </div>
+                                     }
+                                 }
+                                 else
+                                 {
+                                     <div class="slide active" data-index="0">
+                                         <img src="~/images/placeholder-product.jpg" alt="@Model.ProductDetail.Name" style="width: 100%; height: 500px; object-fit: contain; padding: 20px; background: #f8f9fa; border-radius: 8px;" />
+                                         <div class="image-badge">Ảnh Thực Tế</div>
+                                     </div>
+                                 }
+                             }
+                         </div>
+                         
+                         @{
+                            var sliderImages = Model.ProductDetail.ProductImages ?? new List<ProductImageModel>();
+                            var uniqueSliderImages = sliderImages.GroupBy(img => img.ImageUrl).Select(g => g.First()).ToList();
+                            var hasMultipleImages = uniqueSliderImages.Count > 1;
+                            
+                            if (hasMultipleImages)
+                            {
+                                <button type="button" class="slider-nav prev" onclick="changeSlide(-1)">
+                                    <i class="fa fa-chevron-left"></i>
+                                </button>
+                                <button type="button" class="slider-nav next" onclick="changeSlide(1)">
+                                    <i class="fa fa-chevron-right"></i>
+                                </button>
+                                
+                                <div class="slide-indicators">
+                                    @for (int i = 0; i < uniqueSliderImages.Count; i++)
+                                    {
+                                        <span class="indicator @(i == 0 ? "active" : "")" data-slide-to="@i" onclick="goToSlide(@i)"></span>
+                                    }
+                                </div>
+                            }
+                        }
+                     </div>
+                 </div>
+                 
+                 <!-- Thumbnail gallery -->
+                <div class="thumbnail-gallery">
+                    <div class="thumbnail-container" id="thumbnail-container">
+                        @{
+                            var thumbnailImages = Model.ProductDetail.ProductImages ?? new List<ProductImageModel>();
+                            var uniqueThumbnailImages = thumbnailImages.GroupBy(img => img.ImageUrl).Select(g => g.First()).ToList();
+                            if (uniqueThumbnailImages.Any())
+                            {
+                                foreach (var image in uniqueThumbnailImages)
+                                {
+                                    var index = uniqueThumbnailImages.IndexOf(image);
+                                    <div class="thumbnail @(index == 0 ? "active" : "")" data-slide-to="@index">
+                                        <img src="@image.ImageUrl" alt="@Model.ProductDetail.Name" class="img-thumbnail" onclick="goToSlide(@index)" />
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="thumbnail active" onclick="goToSlide(0)">
+                                    <img src="~/images/placeholder-product.jpg" alt="@Model.ProductDetail.Name" class="img-thumbnail" />
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+             </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <div class="product-header">
+                    <h1 class="product-title">@Model.ProductDetail.Name</h1>
+                    <div class="product-reference">Ref @Model.ProductDetail.Id</div>
+                </div>
+
+                <div class="product-price-section">
+                    <div class="price-display">
+                        <span class="price-amount">@Model.ProductDetail.Price.ToString("N0").Replace(",", ".") VNĐ</span>
+                    </div>
+                    <div class="price-note">giá tiền mặt</div>
+                </div>
+
+                <div class="product-actions">
+                    <button class="buy-now-btn" onclick="addToCart(@Model.ProductDetail.Id)">
+                        <i class="fa fa-shopping-cart"></i>
+                        Mua Ngay
+                    </button>
+                    
+                    <div class="sell-section">
+                        <span class="sell-text">Muốn bán đồng hồ?</span>
+                        <button class="sell-btn" onclick="getQuote(@Model.ProductDetail.Id)">
+                            Thu Mua @Model.ProductDetail.Brand?.Name
+                        </button>
+                    </div>
+
+                    <button class="btn btn-default wishlist-btn" data-product-id="@Model.ProductDetail.Id">
+                        <i class="fa fa-heart"></i>
+                    </button>
+                    
+                    @await Html.PartialAsync("_CompareButton", Model.ProductDetail.Id)
+                    
+                    <button class="btn btn-secondary" onclick="testWishlistEndpoint()" style="margin-top: 10px;">
+                        Kiểm Tra
+                    </button>
+                </div>
+
+                <!-- Certification Badge -->
+                <div class="certification-badge">
+                    <div class="certification-header">
+                        <i class="fa fa-certificate"></i>
+                        <span>Chứng nhận bởi Watch CSA</span>
+                    </div>
+                    <div class="certification-text">
+                        Nhà cung cấp hàng đầu về<br>
+                        Xác thực đồng hồ độc lập
+                    </div>
+                </div>
+
+                <!-- Why We Love This Watch -->
+                <div class="why-we-love">
+                    <h3>Tại Sao Chúng Tôi Yêu Thích Đồng Hồ Này</h3>
+                    <p>@Model.ProductDetail.Description</p>
+                </div>
+
+                <!-- Watch Specifications -->
+                <div class="watch-specifications">
+                    <h3>Thông Số Kỹ Thuật Đồng Hồ</h3>
+                    
+                    <!-- WATCH DETAILS -->
+                    <div class="spec-section">
+                        <h4>CHI TIẾT ĐỒNG HỒ</h4>
+                        <div class="spec-grid">
+                            @if (!string.IsNullOrEmpty(Model.ProductDetail.CreditCardPrice?.ToString()))
+                            {
+                                <div class="spec-item">
+                                    <span class="spec-label">GIÁ THẺ TÍN DỤNG:</span>
+                                    <span class="spec-value">@Model.ProductDetail.CreditCardPrice?.ToString("N0").Replace(",", ".") VNĐ</span>
+                                </div>
+                            }
+                            <div class="spec-item">
+                                <span class="spec-label">THƯƠNG HIỆU:</span>
+                                <span class="spec-value">@Model.ProductDetail.Brand?.Name</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">TÊN MODEL:</span>
+                                <span class="spec-value">@Model.ProductDetail.Name</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.ProductDetail.ModelNumber))
+                            {
+                                <div class="spec-item">
+                                    <span class="spec-label">SỐ MODEL:</span>
+                                    <span class="spec-value">@Model.ProductDetail.ModelNumber</span>
+                                </div>
+                            }
+                            @if (Model.ProductDetail.Year.HasValue)
+                            {
+                                <div class="spec-item">
+                                    <span class="spec-label">NĂM:</span>
+                                    <span class="spec-value">@Model.ProductDetail.Year</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ProductDetail.ItemNumber))
+                            {
+                                <div class="spec-item">
+                                    <span class="spec-label">MÃ SẢN PHẨM:</span>
+                                    <span class="spec-value">@Model.ProductDetail.ItemNumber</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ProductDetail.Condition))
+                            {
+                                <div class="spec-item">
+                                    <span class="spec-label">TÌNH TRẠNG:</span>
+                                    <span class="spec-value">@Model.ProductDetail.Condition</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ProductDetail.Gender))
+                            {
+                                <div class="spec-item">
+                                    <span class="spec-label">GIỚI TÍNH:</span>
+                                    <span class="spec-value">@Model.ProductDetail.Gender</span>
+                                </div>
+                            }
+                            @if (Model.ProductDetail.BoxAndPapers.HasValue)
+                            {
+                                <div class="spec-item">
+                                    <span class="spec-label">HỘP & GIẤY TỜ:</span>
+                                    <span class="spec-value">@(Model.ProductDetail.BoxAndPapers.Value ? "Có" : "Không")</span>
+                                </div>
+                            }
+                            <div class="spec-item">
+                                <span class="spec-label">DANH MỤC:</span>
+                                <span class="spec-value">@Model.ProductDetail.Category?.Name</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">SỐ LƯỢNG:</span>
+                                <span class="spec-value">@Model.ProductDetail.Quantity</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">ĐÃ BÁN:</span>
+                                <span class="spec-value">@Model.ProductDetail.Sold</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">GIÁ VỐN:</span>
+                                <span class="spec-value">@Model.ProductDetail.CapitalPrice.ToString("N0").Replace(",", ".") VNĐ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CASE -->
+                    @if (!string.IsNullOrEmpty(Model.ProductDetail.CaseMaterial) || !string.IsNullOrEmpty(Model.ProductDetail.CaseSize) || !string.IsNullOrEmpty(Model.ProductDetail.Crystal))
+                    {
+                        <div class="spec-section">
+                            <h4>VỎ ĐỒNG HỒ</h4>
+                            <div class="spec-grid">
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.CaseMaterial))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">CHẤT LIỆU:</span>
+                                        <span class="spec-value">@Model.ProductDetail.CaseMaterial</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.Crystal))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">KÍNH:</span>
+                                        <span class="spec-value">@Model.ProductDetail.Crystal</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.CaseSize))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">KÍCH THƯỚC:</span>
+                                        <span class="spec-value">@Model.ProductDetail.CaseSize</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.BezelMaterial))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">VÀNH:</span>
+                                        <span class="spec-value">@Model.ProductDetail.BezelMaterial</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.SerialNumber))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">SỐ SERIAL:</span>
+                                        <span class="spec-value">@Model.ProductDetail.SerialNumber</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.DialColor))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">MẶT SỐ:</span>
+                                        <span class="spec-value">@Model.ProductDetail.DialColor</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.HourMarkers))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">VẠCH SỐ GIỜ:</span>
+                                        <span class="spec-value">@Model.ProductDetail.HourMarkers</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- MOVEMENT -->
+                    @if (!string.IsNullOrEmpty(Model.ProductDetail.Calibre) || !string.IsNullOrEmpty(Model.ProductDetail.MovementType) || !string.IsNullOrEmpty(Model.ProductDetail.Complication))
+                    {
+                        <div class="spec-section">
+                            <h4>BỘ MÁY</h4>
+                            <div class="spec-grid">
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.Calibre))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">CALIBRE:</span>
+                                        <span class="spec-value">@Model.ProductDetail.Calibre</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.MovementType))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">LOẠI:</span>
+                                        <span class="spec-value">@Model.ProductDetail.MovementType</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.Complication))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">TÍNH NĂNG:</span>
+                                        <span class="spec-value">@Model.ProductDetail.Complication</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- BRACELET -->
+                    @if (!string.IsNullOrEmpty(Model.ProductDetail.BraceletMaterial) || !string.IsNullOrEmpty(Model.ProductDetail.BraceletType) || !string.IsNullOrEmpty(Model.ProductDetail.ClaspType))
+                    {
+                        <div class="spec-section">
+                            <h4>DÂY ĐỒNG HỒ</h4>
+                            <div class="spec-grid">
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.BraceletMaterial))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">CHẤT LIỆU:</span>
+                                        <span class="spec-value">@Model.ProductDetail.BraceletMaterial</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.BraceletType))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">LOẠI:</span>
+                                        <span class="spec-value">@Model.ProductDetail.BraceletType</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.ClaspType))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">KHÓA:</span>
+                                        <span class="spec-value">@Model.ProductDetail.ClaspType</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- WARRANTY & CERTIFICATE -->
+                    @if (!string.IsNullOrEmpty(Model.ProductDetail.Certificate) || !string.IsNullOrEmpty(Model.ProductDetail.WarrantyInfo))
+                    {
+                        <div class="spec-section">
+                            <h4>BẢO HÀNH & CHỨNG NHẬN</h4>
+                            <div class="spec-grid">
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.Certificate))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">CHỨNG NHẬN:</span>
+                                        <span class="spec-value">@Model.ProductDetail.Certificate</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ProductDetail.WarrantyInfo))
+                                {
+                                    <div class="spec-item">
+                                        <span class="spec-label">BẢO HÀNH:</span>
+                                        <span class="spec-value">@Model.ProductDetail.WarrantyInfo</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Warranty Info -->
+                <div class="warranty-info">
+                    <div class="warranty-badge">
+                        <i class="fa fa-shield-alt"></i>
+                        <span>Đảm Bảo Chính Hãng</span>
+                        </div>
+                    <p>Đồng hồ @Model.ProductDetail.Brand?.Name này đi kèm với bảo hành toàn diện và đảm bảo chính hãng của chúng tôi.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Description -->
+        <div class="product-description-section">
+            <div class="description-content">
+                <h2>Mô Tả Sản Phẩm</h2>
+                <p>@Model.ProductDetail.Description</p>
+                
+                <div class="description-features">
+                    <h3>Đặc Điểm Nổi Bật:</h3>
+                    <ul>
+                        <li>Đồng hồ @Model.ProductDetail.Brand?.Name chính hãng</li>
+                        <li>Chất liệu cao cấp và tay nghề thủ công tinh xảo</li>
+                        <li>Bảo hành toàn diện</li>
+                        <li>Xác thực và kiểm định chuyên nghiệp</li>
+                </ul>
+            </div>
+            </div>
+        </div>
+
+        <!-- Customer Reviews -->
+        <div class="reviews-section">
+            <div class="reviews-header">
+                <h2>Đánh Giá Khách Hàng</h2>
+                            <div class="average-rating">
+                    <div class="rating-score">
+                        <span class="score">@Model.AverageRating.ToString("F1")</span>
+                        <div class="stars">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                if (i <= Model.AverageRating)
+                                            {
+                                                <i class="fa fa-star"></i>
+                                            }
+                                else if (i - Model.AverageRating < 1)
+                                            {
+                                                <i class="fa fa-star-half-o"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-star-o"></i>
+                                            }
+                                        }
+                        </div>
+                                    </div>
+                                    <div class="rating-count">
+                        Dựa trên @Model.ProductReviews.Count đánh giá
+                                </div>
+                            </div>
+                        </div>
+
+            @if (Model.ProductReviews.Any())
+            {
+                        <div class="reviews-list">
+                    @foreach (var review in Model.ProductReviews.Take(3))
+                            {
+                                <div class="review-item">
+                                    <div class="review-header">
+                                        <div class="reviewer-info">
+                                    <h4>@review.UserName</h4>
+                                    <div class="review-date">@review.CreatedDate.ToString("MM/dd/yyyy")</div>
+                                        </div>
+                                        <div class="reviewer-rating">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                        if (i <= review.Rating)
+                                                {
+                                                    <i class="fa fa-star"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fa fa-star-o"></i>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="review-content">
+                                <p>@review.Comment</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+            }
+            else
+            {
+                <div class="no-reviews">
+                    <p>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p>
+                </div>
+            }
+
+            <!-- Review Form -->
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="review-form">
+                    <h3>Viết Đánh Giá</h3>
+                    
+                    <!-- Display success/error messages -->
+                    @if (TempData["success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["success"]
+                        </div>
+                    }
+                    @if (TempData["error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["error"]
+                        </div>
+                    }
+                    
+                    <form asp-action="CommentProduct" method="post" id="reviewForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ProductId" value="@Model.ProductDetail.Id" />
+                        <input type="hidden" name="OrderCode" value="REVIEW_@(Model.ProductDetail.Id)_@(DateTime.Now.Ticks)" />
+
+                                    <div class="form-group">
+                            <label>Tên *</label>
+                            <input name="UserName" class="form-control" value="@Model.Name" required />
+                                    </div>
+
+                                    <div class="form-group">
+                            <label>Đánh Giá * <small class="text-muted">(Click vào ngôi sao để chọn)</small></label>
+                            <div class="star-rating-selector">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" name="Rating" value="@i" id="star@(i)" required />
+                                    <label for="star@(i)" title="@i sao"><i class="fa fa-star-o"></i></label>
+                                }
+                            </div>
+                                    </div>
+
+                                    <div class="form-group">
+                            <label>Bình Luận *</label>
+                            <textarea name="Comment" class="form-control" rows="4" required></textarea>
+                                    </div>
+
+                        <button type="submit" class="submit-review-btn">Gửi Đánh Giá</button>
+                                </form>
+                            </div>
+            }
+            else
+            {
+                <div class="review-form">
+                    <h3>Viết Đánh Giá</h3>
+                    <div class="login-required">
+                        <p>Bạn cần <a href="@Url.Action("Login", "Account")">đăng nhập</a> để có thể viết đánh giá.</p>
+                    </div>
+                </div>
+            }
+                    </div>
+
+        <!-- Related Products -->
+        @if (ViewBag.RelatedProducts != null && ((List<ProductModel>)ViewBag.RelatedProducts).Any())
+        {
+            <div class="related-products">
+                <h2>Sản Phẩm Tương Tự</h2>
+                <div class="related-products-grid">
+                    @foreach (var product in (List<ProductModel>)ViewBag.RelatedProducts)
+                    {
+                        <div class="related-product-item">
+                            <div class="related-product-image">
+                                <a href="@Url.Action("Details", "Product", new { id = product.Id })">
+                                    <img src="@Url.Action("GetProductImage", "Home", new { productId = product.Id })" alt="@product.Name" />
+                                            </a>
+                                        </div>
+                            <div class="related-product-info">
+                                <h4>@product.Name</h4>
+                                <div class="related-product-price">@product.Price.ToString("N0").Replace(",", ".") VNĐ</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+        }
+            </div>
+</section>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="~/js/simple-wishlist.js"></script>
+    <script>
+        let currentSlide = 0;
+        let totalSlides = 0;
+        let isDragging = false;
+        let startPos = 0;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+
+        // Initialize slider
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSlider();
+            initializeDragAndDrop();
+            initializeStarRating();
+        });
+
+        function initializeSlider() {
+            const slides = document.querySelectorAll('.slide');
+            totalSlides = slides.length;
+            
+            if (totalSlides === 0) return;
+            
+            // Show first slide
+            showSlide(0);
+        }
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            const indicators = document.querySelectorAll('.indicator');
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            
+            // Hide all slides
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            // Remove active from all indicators and thumbnails
+            indicators.forEach(indicator => indicator.classList.remove('active'));
+            thumbnails.forEach(thumbnail => thumbnail.classList.remove('active'));
+            
+            // Show current slide
+            if (slides[index]) {
+                slides[index].classList.add('active');
+            }
+            
+            // Activate current indicator
+            if (indicators[index]) {
+                indicators[index].classList.add('active');
+            }
+            
+            // Activate current thumbnail
+            if (thumbnails[index]) {
+                thumbnails[index].classList.add('active');
+            }
+            
+            currentSlide = index;
+        }
+
+        function changeSlide(direction) {
+            let newIndex = currentSlide + direction;
+            
+            if (newIndex < 0) {
+                newIndex = totalSlides - 1;
+            } else if (newIndex >= totalSlides) {
+                newIndex = 0;
+            }
+            
+            showSlide(newIndex);
+        }
+
+        function goToSlide(index) {
+            if (index >= 0 && index < totalSlides) {
+                showSlide(index);
+            }
+        }
+
+        // Drag and Drop functionality
+        function initializeDragAndDrop() {
+            const sliderContainer = document.getElementById('slider-container');
+            if (!sliderContainer) return;
+
+            sliderContainer.addEventListener('mousedown', startDragging);
+            sliderContainer.addEventListener('touchstart', startDragging);
+            sliderContainer.addEventListener('mouseup', stopDragging);
+            sliderContainer.addEventListener('touchend', stopDragging);
+            sliderContainer.addEventListener('mouseleave', stopDragging);
+            sliderContainer.addEventListener('mousemove', drag);
+            sliderContainer.addEventListener('touchmove', drag);
+            
+            // Prevent context menu on right click
+            sliderContainer.addEventListener('contextmenu', e => e.preventDefault());
+        }
+
+        function startDragging(event) {
+            isDragging = true;
+            startPos = getPositionX(event);
+            sliderContainer.style.cursor = 'grabbing';
+        }
+
+        function stopDragging() {
+            isDragging = false;
+            const movedBy = currentTranslate - prevTranslate;
+            
+            // If moved enough, change slide
+            if (Math.abs(movedBy) > 100) {
+                if (movedBy < 0) {
+                    changeSlide(1); // Swipe left = next slide
+                } else {
+                    changeSlide(-1); // Swipe right = previous slide
+                }
+            }
+            
+            currentTranslate = 0;
+            prevTranslate = 0;
+            sliderContainer.style.cursor = 'grab';
+        }
+
+        function drag(event) {
+            if (!isDragging) return;
+            
+            const currentPosition = getPositionX(event);
+            currentTranslate = currentPosition - startPos;
+            
+            // Add visual feedback
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => {
+                slide.style.transform = `translateX(${currentTranslate}px)`;
+            });
+        }
+
+        function getPositionX(event) {
+            return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowLeft') {
+                changeSlide(-1);
+            } else if (event.key === 'ArrowRight') {
+                changeSlide(1);
+            }
+        });
+
+        // Mouse wheel navigation
+        document.getElementById('slider-container').addEventListener('wheel', function(event) {
+            event.preventDefault();
+            if (event.deltaY > 0) {
+                changeSlide(1);
+            } else {
+                changeSlide(-1);
+            }
+        });
+
+        // Auto-play removed - manual navigation only
+
+        function addToCart(productId) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            fetch('/Home/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: `productId=${productId}&__RequestVerificationToken=${token}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Success', data.message, 'success');
+                    if (typeof updateCartCount === 'function') {
+                        updateCartCount();
+                    }
+                } else {
+                    showNotification('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Could not add to cart', 'error');
+            });
+        }
+
+        function addToWishlist(productId) {
+            fetch('/Home/AddWishList', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `Id=${productId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Success', data.message, 'success');
+                } else {
+                    showNotification('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Could not add to wishlist', 'error');
+            });
+        }
+
+        function getQuote(productId) {
+            window.location.href = '/Sell/Create?productId=' + productId;
+        }
+
+        function showNotification(title, message, type) {
+            // Sử dụng SweetAlert nếu có, nếu không thì dùng alert đơn giản
+            if (typeof Swal !== 'undefined') {
+                let icon = 'info';
+                let swalTitle = title;
+                
+                if (type === 'success') {
+                    icon = 'success';
+                    swalTitle = 'Thành công';
+                } else if (type === 'error') {
+                    icon = 'error';
+                    swalTitle = 'Lỗi';
+                } else if (type === 'warning') {
+                    icon = 'warning';
+                    swalTitle = 'Cảnh báo';
+                }
+                
+                Swal.fire({
+                    title: swalTitle,
+                    text: message,
+                    icon: icon,
+                    timer: type === 'success' ? 2000 : 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            } else {
+                // Fallback: sử dụng alert đơn giản
+                alert(`${title}: ${message}`);
+            }
+        }
+
+        function initializeStarRating() {
+            console.log('=== INITIALIZING STAR RATING ===');
+            
+            const starInputs = document.querySelectorAll('.star-rating-selector input');
+            const starLabels = document.querySelectorAll('.star-rating-selector label');
+
+            console.log('Found star inputs:', starInputs.length);
+            console.log('Found star labels:', starLabels.length);
+
+            if (starInputs.length === 0) {
+                console.error('No star inputs found!');
+                return;
+            }
+
+            starInputs.forEach((input, index) => {
+                console.log(`Setting up star input ${index + 1}, value: ${input.value}`);
+                
+                input.addEventListener('change', function() {
+                    const rating = parseInt(this.value);
+                    console.log('Star rating changed to:', rating);
+                    
+                    // Update visual stars (reverse order because of CSS)
+                    starLabels.forEach((label, labelIndex) => {
+                        const icon = label.querySelector('i');
+                        const starValue = parseInt(starInputs[labelIndex].value);
+                        
+                        console.log(`Updating star ${labelIndex + 1}, value: ${starValue}, selected: ${starValue <= rating}`);
+                        
+                        if (starValue <= rating) {
+                            icon.className = 'fa fa-star';
+                            icon.style.color = '#ffc107';
+                        } else {
+                            icon.className = 'fa fa-star-o';
+                            icon.style.color = '#ddd';
+                        }
+                    });
+                });
+
+                // Add click handler to labels for better UX
+                const label = document.querySelector(`label[for="${input.id}"]`);
+                if (label) {
+                    label.addEventListener('click', function() {
+                        console.log('Star label clicked:', input.value);
+                        input.checked = true;
+                        input.dispatchEvent(new Event('change'));
+                    });
+                }
+            });
+
+            // Add hover effects
+            starLabels.forEach((label, index) => {
+                label.addEventListener('mouseenter', function() {
+                    const hoverRating = parseInt(starInputs[index].value);
+                    console.log('Hovering over star:', hoverRating);
+                    
+                    starLabels.forEach((l, i) => {
+                        const icon = l.querySelector('i');
+                        const starValue = parseInt(starInputs[i].value);
+                        
+                        if (starValue <= hoverRating) {
+                            icon.style.color = '#ffc107';
+                        } else {
+                            icon.style.color = '#ddd';
+                        }
+                    });
+                });
+
+                label.addEventListener('mouseleave', function() {
+                    // Reset to current selection
+                    const selectedInput = document.querySelector('.star-rating-selector input:checked');
+                    const selectedRating = selectedInput ? parseInt(selectedInput.value) : 0;
+                    
+                    starLabels.forEach((l, i) => {
+                        const icon = l.querySelector('i');
+                        const starValue = parseInt(starInputs[i].value);
+                        
+                        if (starValue <= selectedRating) {
+                            icon.className = 'fa fa-star';
+                            icon.style.color = '#ffc107';
+                        } else {
+                            icon.className = 'fa fa-star-o';
+                            icon.style.color = '#ddd';
+                        }
+                    });
+                });
+            });
+
+            console.log('=== STAR RATING INITIALIZED ===');
+        }
+
+        // Form validation
+        const reviewForm = document.getElementById('reviewForm');
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', function(e) {
+                console.log('=== Form Submit Debug ===');
+                
+                // Debug form data
+                const formData = new FormData(reviewForm);
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+                
+                const ratingInputs = document.querySelectorAll('.star-rating-selector input[name="Rating"]');
+                const isRatingSelected = Array.from(ratingInputs).some(input => input.checked);
+                
+                console.log(`Rating selected: ${isRatingSelected}`);
+                
+                if (!isRatingSelected) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn số sao đánh giá!');
+                    return false;
+                }
+                
+                const comment = document.querySelector('textarea[name="Comment"]').value.trim();
+                console.log(`Comment length: ${comment.length}`);
+                
+                if (comment.length < 10) {
+                    e.preventDefault();
+                    alert('Bình luận phải có ít nhất 10 ký tự!');
+                    return false;
+                }
+                
+                console.log('Form validation passed, submitting...');
+                return true;
+            });
+        }
+    </script>
+}

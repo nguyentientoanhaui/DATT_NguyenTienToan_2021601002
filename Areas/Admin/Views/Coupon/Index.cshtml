@@ -1,0 +1,203 @@
+﻿@model CouponModel
+@{
+    ViewData["Title"] = "Tạo Mã Giảm Giá";
+}
+<h3>Tạo Mã Giảm Giá</h3>
+
+<div class="col-md-9">
+    <form autocomplete="off" asp-controller="Coupon" asp-action="Create" enctype="multipart/form-data">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label>Tên</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Mô tả</label>
+            <textarea asp-for="Description" class="form-control"> </textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Loại giảm giá</label>
+            <select asp-for="DiscountType" class="form-control">
+                <option value="0">Giảm theo phần trăm (%)</option>
+                <option value="1">Giảm theo số tiền cố định (VNĐ)</option>
+            </select>
+            <span asp-validation-for="DiscountType" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Giá trị giảm giá</label>
+            <input asp-for="DiscountValue" class="form-control" />
+            <span asp-validation-for="DiscountValue" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Ngày bắt đầu</label>
+            <input asp-for="DateStart" class="form-control" />
+            <span asp-validation-for="DateStart" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Ngày hết hạn</label>
+            <input asp-for="DateExpired" class="form-control" />
+            <span asp-validation-for="DateExpired" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Số lượng</label>
+            <input asp-for="Quantity" min="1" value="1" class="form-control" />
+            <span asp-validation-for="Quantity" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Trạng thái</label>
+            <select asp-for="Status" class="form-control">
+                <option value="1">Kích hoạt</option>
+                <option value="0">Ẩn</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <button class="btn btn-primary">Tạo mới</button>
+        </div>
+
+    </form>
+    <table class="table table-striped" id="myTable">
+        <thead>
+            <tr>
+                <th>Tên</th>
+                <th>Mô tả</th>
+                <th>Loại giảm giá</th>
+                <th>Giá trị giảm giá</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày hết hạn</th>
+                <th>Số lượng</th>
+                <th>Trạng thái</th>
+                <th>Thời gian còn lại</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var coupon in ViewBag.Coupons)
+            {
+                <tr>
+                    <td>@coupon.Name</td>
+                    <td>@coupon.Description</td>
+                    <td>
+                        @if (coupon.DiscountType == DiscountType.Percentage)
+                        {
+                            <span>Theo %</span>
+                        }
+                        else
+                        {
+                            <span>Theo VNĐ</span>
+                        }
+                    </td>
+                    <td>
+                        @if (coupon.DiscountType == DiscountType.Percentage)
+                        {
+                            <span>@coupon.DiscountValue%</span>
+                        }
+                        else
+                        {
+                            <span>@coupon.DiscountValue.ToString("N0") VNĐ</span>
+                        }
+                    </td>
+                    <td>@coupon.DateStart.ToString("dd-MM-yyyy")</td>
+                    <td>@coupon.DateExpired.ToString("dd-MM-yyyy")</td>
+                    <td>@coupon.Quantity</td>
+                    <td>
+                        @if (@coupon.Status == 1)
+                        {
+                            <select name="Status" class="coupon-status" data-id="@coupon.Id">
+                                <option selected value="1">Kích hoạt</option>
+                                <option value="0">Ẩn</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <select name="Status" class="coupon-status" data-id="@coupon.Id">
+                                <option value="1">Kích hoạt</option>
+                                <option selected value="0">Ẩn</option>
+                            </select>
+                        }
+                    </td>
+                    <td>
+                        @if (coupon.DateExpired < DateTime.Now)
+                        {
+                            <span class="text text-danger">Hết hạn</span>
+                        }
+                        else
+                        {
+                            TimeSpan remainingTime = coupon.DateExpired - DateTime.Now;
+                            int daysRemaining = remainingTime.Days;
+                            @if (daysRemaining == 0)
+                            {
+                                <span class="text text-danger">Hôm nay</span>
+                            }
+                            else
+                            {
+                                <span class="text text-success">@daysRemaining ngày còn lại</span>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script src="~/js/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Thêm sự kiện thay đổi trạng thái
+        $(document).ready(function() {
+            $('.coupon-status').change(function() {
+                var couponId = $(this).data('id');
+                var newStatus = $(this).val();
+
+                // Gọi API để cập nhật trạng thái
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("UpdateStatus", "Coupon", new { area = "Admin" })",
+                    data: { id: couponId, status: newStatus },
+                    success: function(response) {
+                        if (response.success) {
+                            // Hiển thị thông báo thành công
+                            Swal.fire({
+                                title: 'Thành công!',
+                                text: response.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            });
+                        } else {
+                            // Hiển thị thông báo lỗi
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: response.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Lỗi khi cập nhật trạng thái:', error);
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: 'Có lỗi xảy ra khi cập nhật trạng thái',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

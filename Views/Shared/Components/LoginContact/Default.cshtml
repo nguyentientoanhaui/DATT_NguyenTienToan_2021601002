@@ -1,0 +1,11 @@
+﻿@model Shopping_Demo.Models.ContactModel
+
+@if (Model != null)
+{
+    <div style="display:flex; align-items:end">
+        <img src="~/media/logo/@Model.LogoImage" width="60" height="60" style="border-radius: 50%;" />
+        <p class="sidebar-brand-text" style="font-weight: bold; color: #ee4d2d; font-size:24px;">
+            @Model.Name
+        </p>
+    </div>
+}

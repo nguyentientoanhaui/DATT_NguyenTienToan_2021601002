@@ -1,0 +1,108 @@
+﻿@model IEnumerable<CategoryModel>
+
+<style>
+    .category-container {
+        width: 250px;
+    }
+
+    .category-item {
+        margin-bottom: 8px;
+    }
+
+    .panel-heading {
+        background-color: #f8f9fa;
+        padding: 10px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .panel-heading:hover {
+            background-color: #eee;
+        }
+
+    .panel-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0;
+    }
+
+    .category-link {
+        font-weight: bold;
+        color: #333;
+        text-decoration: none;
+    }
+
+    .arrow {
+        color: #888;
+        transition: transform 0.3s;
+    }
+
+    .toggle-checkbox:checked + .panel-heading .arrow {
+        transform: rotate(180deg);
+    }
+
+    .subcategory-list {
+        max-height: 0;
+        overflow: hidden;
+        padding-left: 20px;
+        transition: max-height 0.3s ease;
+        margin: 0;
+        list-style: none;
+    }
+
+    .toggle-checkbox:checked ~ .subcategory-list {
+        max-height: 500px;
+    }
+
+    .subcategory-list li {
+        padding: 6px 0;
+    }
+
+        .subcategory-list li a {
+            text-decoration: none;
+            color: #2196f3;
+            font-size: 14px;
+        }
+
+            .subcategory-list li a:hover {
+                text-decoration: underline;
+            }
+
+</style>
+
+<div class="category-container">
+    @foreach (var mainCat in Model.Where(c => c.Level == 1 && c.Status == 1))
+    {
+        var id = $"toggle-{mainCat.Id}";
+        var subCats = Model.Where(c => c.ParentId == mainCat.Id && c.Status == 1).ToList();
+
+        <div class="category-item panel-default">
+            <input type="checkbox" id="@id" class="toggle-checkbox" hidden />
+
+            <label for="@id" class="panel-heading" style="width: 250px;">
+                <div class="panel-title d-flex align-items-center justify-content-between">
+                    <a class="category-link" asp-controller="Category" asp-action="Index" asp-route-Slug="@mainCat.Slug">
+                        @mainCat.Name
+                    </a>
+                    <i class="fa-solid fa-chevron-down arrow"></i>
+                </div>
+            </label>
+
+            @if (subCats.Any())
+            {
+                <ul class="subcategory-list panel-heading">
+                    @foreach (var sub in subCats)
+                    {
+                        <li class="panel-title">
+                            <a asp-controller="Category" asp-action="Index" asp-route-Slug="@sub.Slug">
+                                @sub.Name
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    }
+</div>

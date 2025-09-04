@@ -1,0 +1,324 @@
+﻿@{
+    var rolesAllowed = new[] { "Admin", "Manager", "Staff", "Sale", "Shipper" };
+    bool showAdminMenu = rolesAllowed.Any(role => User.IsInRole(role));
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Trang Chủ | Cửa Hàng Đồng Hồ Cao Cấp</title>
+
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css" />
+    <link href="~/css/prettyPhoto.css" rel="stylesheet">
+    <link href="~/css/price-range.css" rel="stylesheet">
+    <link href="~/css/animate.css" rel="stylesheet">
+    <link href="~/css/responsive.css" rel="stylesheet">
+    <link href="~/css/jquery-ui.css" rel="stylesheet">
+    <link href="~/css/datatables.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.min.css">
+    <link rel="stylesheet" href="~/css/buttons.dataTables.min.css">
+    <link href="~/css/main.css" rel="stylesheet">
+    <link href="~/css/product-listing.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/aurum-style.css">
+    @await RenderSectionAsync("Styles", required: false)
+    <!--[if lt IE 9]>
+    <script src="~/js/html5shiv.js"></script>
+    <script src="~/js/respond.min.js"></script>
+    <![endif]-->
+    <link rel="shortcut icon" href="images/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+    <!-- Font Awesome for luxury icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Body padding for fixed header */
+        body {
+            padding-top: 60px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Additional padding for home page */
+        body.home-page {
+            padding-top: 120px;
+            min-height: auto; /* Override min-height for home page */
+        }
+        
+        /* Ensure main content takes available space */
+        main {
+            flex: 1;
+            min-height: 0; /* Allow main to shrink */
+        }
+        
+        /* Special handling for home page */
+        body.home-page main {
+            flex: none; /* Don't use flex for home page */
+        }
+        
+        /* Force footer to be visible */
+        .site-footer {
+            background: #111 !important;
+            color: #e9ecef !important;
+            padding: 50px 0 20px 0 !important;
+            margin-top: 60px !important;
+            border-top: none !important;
+            display: block !important;
+            visibility: visible !important;
+            position: relative !important;
+            z-index: 1000 !important;
+            clear: both !important;
+            width: 100% !important;
+            min-height: 200px !important;
+        }
+        
+        /* Ensure footer appears after hero section on home page */
+        body.home-page .site-footer {
+            margin-top: 80px !important;
+            position: relative !important;
+            z-index: 9999 !important;
+            clear: both !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+        
+        /* Show layout footer on home page with proper styling */
+        body.home-page footer.site-footer,
+        body.home-page .site-footer {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            overflow: visible !important;
+            position: relative !important;
+            margin-top: 80px !important;
+            z-index: 1000 !important;
+        }
+        
+        .cart-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .cart-icon {
+            font-size: 24px;
+            color: #ee4d2d; /* Màu cam đặc trưng của Shopee */
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background-color: white;
+            color: #ee4d2d;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        .cart-text {
+            font-size: 13px;
+            color: #ee4d2d;
+            margin-top: 2px;
+            text-align: center;
+        }
+
+        .cart-container:hover .cart-icon,
+        .cart-container:hover .cart-text {
+            opacity: 0.8;
+        }
+
+        .search_box {
+            background: #ffffff; /* White background */
+            border: 1px solid #d1d1d1; /* Light border to match the image */
+            color: #333; /* Darker text color for better readability */
+            font-family: 'Roboto', sans-serif; /* Keep the font */
+            font-size: 14px; /* Slightly larger font size */
+            font-weight: 400; /* Normal weight for better readability */
+            height: 35px; /* Slightly taller input */
+            outline: none; /* Remove outline */
+            padding-left: 15px; /* More padding on the left */
+            padding-right: 40px; /* Space for the magnifying glass icon */
+            width: 300px; /* Wider input to match the image */
+            border-radius: 5px; /* Rounded corners */
+            background-image: url('../images/home/searchicon.png'); /* Ensure you have the correct path to your magnifying glass icon */
+            background-repeat: no-repeat;
+            background-position: calc(100% - 10px) center; /* Position the icon on the right */
+            background-size: 20px; /* Adjust icon size */
+        }
+    </style>
+</head><!--/head-->
+
+<body class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "home-page" : "other-pages")" data-user-authenticated="@User.Identity.IsAuthenticated.ToString().ToLower()">
+    <!-- Header for all pages -->
+    <partial name="_HeaderPartial" />
+    
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Luxury Footer -->
+    <footer class="site-footer" style="display: block !important; visibility: visible !important; position: relative !important; z-index: 1000 !important;">
+        <div class="container footer-container">
+            <div class="footer-grid">
+                <!-- Brand Section -->
+                <div class="footer-brand">
+                    <div class="footer-brand-logo">Aurum</div>
+                    <div class="footer-brand-tagline">"Nơi thời gian kể lại câu chuyện của những kiệt tác đồng hồ cao cấp"</div>
+                    <address class="footer-address">
+                        01-05, tầng 1 Tràng Tiền Plaza<br />
+                        24 Hai Bà Trưng, Phường Cửa Nam,<br />
+                        Quận Hoàn Kiếm, Thành phố Hà Nội 000084<br />
+                        Việt Nam
+                    </address>
+                    <div class="footer-contact">
+                        <div class="footer-contact-item">
+                            <i class="fa fa-phone"></i>
+                            <a href="tel:0388672928">0388 672 928</a>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fa fa-envelope"></i>
+                            <a href="mailto:AurumWatches@gmail.com">AurumWatches@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Hours -->
+                <div class="footer-hours">
+                    <h4 class="footer-title">Giờ mở cửa <span class="footer-open">Đang mở cửa</span></h4>
+                    <ul class="hours-list">
+                        <li><span>Thứ Hai</span><span>9:30 - 21:30</span></li>
+                        <li><span>Thứ Ba</span><span>9:30 - 21:30</span></li>
+                        <li><span>Thứ Tư</span><span>9:30 - 21:30</span></li>
+                        <li><span>Thứ Năm</span><span>9:30 - 21:30</span></li>
+                        <li><span>Thứ Sáu</span><span>9:30 - 22:00</span></li>
+                        <li><span>Thứ Bảy</span><span>9:30 - 22:00</span></li>
+                        <li><span>Chủ Nhật</span><span>9:30 - 22:00</span></li>
+                    </ul>
+                </div>
+
+                <!-- Social Links -->
+                <div class="footer-social">
+                    <h4 class="footer-title">Kết nối</h4>
+                    <div class="social-links">
+                        <a class="social-link" href="https://www.tiktok.com" target="_blank" aria-label="TikTok">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                        <a class="social-link" href="https://www.instagram.com" target="_blank" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a class="social-link" href="https://www.youtube.com" target="_blank" aria-label="YouTube">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                        <a class="social-link" href="https://www.facebook.com" target="_blank" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a class="social-link" href="mailto:AurumWatches@gmail.com" aria-label="Email">
+                            <i class="far fa-envelope"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>© @DateTime.Now.Year Aurum Watches. Tất cả quyền được bảo lưu. | Thiết kế cao cấp dành cho những người sành điệu.</div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v22.0"></script>
+    <script src="~/js/jquery.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/jquery.scrollUp.min.js"></script>
+    <script src="~/js/price-range.js"></script>
+    <script src="~/js/jquery.prettyPhoto.js"></script>
+    <script src="~/js/main.js"></script>
+    <script src="~/js/sweetalert2.min.js"></script>
+    <script src="~/js/jquery-3.7.1.js"></script>
+    <script src="~/js/jquery-ui.js"></script>
+    <script src="~/js/jquery.scrollUp.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/dataTables.buttons.js"></script>
+    <script src="~/js/buttons.dataTables.js"></script>
+    <script src="~/js/jszip.min.js"></script>
+    <script src="~/js/pdfmake.min.js"></script>
+    <script src="~/js/vfs_fonts.js"></script>
+    <script src="~/js/buttons.html5.min.js"></script>
+    <script src="~/js/buttons.print.min.js"></script>  
+    <script src="~/js/cart.js"></script>
+    <script src="~/js/header.js"></script>
+    <script src="~/js/order-notifications.js"></script>
+    <script>
+        // Ensure scripts run after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Layout DOM ready');
+            
+            // Test dropdown functionality
+            const userIcon = document.getElementById('user-icon');
+            const userDropdown = document.getElementById('user-dropdown-menu');
+            const userIconMain = document.getElementById('user-icon-main');
+            const userDropdownMain = document.getElementById('user-dropdown-menu-main');
+            
+            console.log('Dropdown elements found:', {
+                userIcon: !!userIcon,
+                userDropdown: !!userDropdown,
+                userIconMain: !!userIconMain,
+                userDropdownMain: !!userDropdownMain
+            });
+            
+            // Add click handlers
+            if (userIcon && userDropdown) {
+                userIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Top bar user icon clicked');
+                    userDropdown.classList.toggle('show');
+                    console.log('Top bar dropdown show:', userDropdown.classList.contains('show'));
+                });
+            }
+            
+            if (userIconMain && userDropdownMain) {
+                userIconMain.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Main header user icon clicked');
+                    userDropdownMain.classList.toggle('show');
+                    console.log('Main header dropdown show:', userDropdownMain.classList.contains('show'));
+                });
+            }
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-dropdown') && !e.target.closest('.user-dropdown-main')) {
+                    if (userDropdown) userDropdown.classList.remove('show');
+                    if (userDropdownMain) userDropdownMain.classList.remove('show');
+                }
+            });
+        });
+    </script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

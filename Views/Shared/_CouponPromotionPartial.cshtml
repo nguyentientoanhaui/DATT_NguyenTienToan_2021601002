@@ -1,0 +1,54 @@
+﻿<div class="coupon-promotion">
+    <div class="coupon-banner">
+        <div class="banner-content">
+            <h3>Khuyến Mãi Đặc Biệt</h3>
+            <p>Sử dụng mã <strong>WELCOME15</strong> để nhận giảm giá 15% cho đơn hàng đầu tiên!</p>
+            <a asp-controller="Coupon" asp-action="Index" class="btn btn-primary">Xem Tất Cả Mã Giảm Giá</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .coupon-promotion {
+        margin: 30px 0;
+    }
+
+    .coupon-banner {
+        background: linear-gradient(135deg, #ff7337, #ee4d2d);
+        border-radius: 8px;
+        padding: 20px;
+        color: white;
+        text-align: center;
+    }
+
+    .banner-content h3 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .banner-content p {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+
+    .banner-content strong {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+
+    .banner-content .btn {
+        background: white;
+        color: #ee4d2d;
+        border: none;
+        padding: 8px 20px;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+        .banner-content .btn:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+</style>

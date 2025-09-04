@@ -1,0 +1,274 @@
+@model Shopping_Demo.Models.ViewModels.ProductReviewViewModel
+
+@{
+    ViewData["Title"] = "Đánh giá sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Viết Đánh Giá</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Product Info -->
+                    <div class="product-info mb-4 p-3 bg-light rounded">
+                        <div class="row align-items-center">
+                            @if (!string.IsNullOrEmpty(Model.ProductImage))
+                            {
+                                <div class="col-auto">
+                                    <img src="~/media/products/@Model.ProductImage" alt="@Model.ProductName" 
+                                         class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;">
+                                </div>
+                            }
+                            <div class="col">
+                                <h5 class="mb-1">@Model.ProductName</h5>
+                                <small class="text-muted">Mã đơn hàng: @Model.OrderCode</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review Form -->
+                    <form asp-action="SubmitReview" asp-controller="Account" method="post">
+                        <input type="hidden" asp-for="OrderCode" />
+                        <input type="hidden" asp-for="ProductId" />
+                        <input type="hidden" asp-for="ProductName" />
+                        <input type="hidden" asp-for="ProductImage" />
+
+                        <!-- Star Rating -->
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-bold">Đánh Giá *</label>
+                            <div class="rating-stars">
+                                <span class="star" onclick="alert('Star 1 clicked!'); setRating(1)" data-rating="1">★</span>
+                                <span class="star" onclick="alert('Star 2 clicked!'); setRating(2)" data-rating="2">★</span>
+                                <span class="star" onclick="alert('Star 3 clicked!'); setRating(3)" data-rating="3">★</span>
+                                <span class="star" onclick="alert('Star 4 clicked!'); setRating(4)" data-rating="4">★</span>
+                                <span class="star" onclick="alert('Star 5 clicked!'); setRating(5)" data-rating="5">★</span>
+                                <span id="rating-text" class="ms-3">Chọn số sao để đánh giá</span>
+                            </div>
+                            <input type="hidden" asp-for="Rating" id="rating-value" />
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                            
+                            <!-- Debug info -->
+                            <div class="mt-2">
+                                <small class="text-muted">Debug: Rating value = <span id="debug-rating">0</span></small>
+                                <br>
+                                <button type="button" onclick="testStarRating()" class="btn btn-sm btn-info">Test Star Rating</button>
+                            </div>
+                        </div>
+
+                        <!-- Comment -->
+                        <div class="form-group mb-4">
+                            <label asp-for="Comment" class="form-label fw-bold">Bình Luận *</label>
+                            <textarea asp-for="Comment" class="form-control" rows="5" 
+                                      placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary me-2">
+                                Gửi Đánh Giá
+                            </button>
+                            <a asp-action="ViewOrderClient" asp-controller="Account" 
+                               asp-route-orderCode="@Model.OrderCode" class="btn btn-secondary">
+                                Quay Lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .rating-stars {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+    }
+    
+    .star {
+        font-size: 30px;
+        color: #ddd;
+        cursor: pointer;
+        margin-right: 5px;
+        transition: color 0.2s;
+        user-select: none;
+    }
+    
+    .star:hover,
+    .star.active {
+        color: #ffc107;
+    }
+    
+    #rating-text {
+        font-size: 14px;
+        color: #666;
+    }
+</style>
+
+<script>
+    console.log('=== REVIEW PAGE SCRIPT LOADED ===');
+        
+        function setRating(rating) {
+            console.log('=== setRating function called ===');
+            console.log('Rating parameter:', rating);
+            console.log('Type of rating:', typeof rating);
+            
+            try {
+                // Check if elements exist
+                const ratingInput = document.getElementById('rating-value');
+                const ratingText = document.getElementById('rating-text');
+                const stars = document.querySelectorAll('.star');
+                
+                console.log('Elements found:');
+                console.log('- ratingInput:', ratingInput);
+                console.log('- ratingText:', ratingText);
+                console.log('- stars count:', stars.length);
+                
+                if (!ratingInput) {
+                    console.error('ERROR: rating-value input not found!');
+                    return;
+                }
+                
+                if (!ratingText) {
+                    console.error('ERROR: rating-text span not found!');
+                    return;
+                }
+                
+                if (stars.length === 0) {
+                    console.error('ERROR: No stars found!');
+                    return;
+                }
+                
+                // Update hidden input
+                console.log('Setting hidden input value to:', rating);
+                ratingInput.value = rating;
+                console.log('Hidden input value after set:', ratingInput.value);
+                
+                // Update debug display
+                const debugRating = document.getElementById('debug-rating');
+                if (debugRating) {
+                    debugRating.textContent = rating;
+                }
+                
+                // Update stars display
+                console.log('Updating stars display...');
+                stars.forEach((star, index) => {
+                    console.log(`Star ${index + 1}: ${index < rating ? 'ACTIVE' : 'INACTIVE'}`);
+                    if (index < rating) {
+                        star.classList.add('active');
+                        star.style.color = '#ffc107';
+                    } else {
+                        star.classList.remove('active');
+                        star.style.color = '#ddd';
+                    }
+                });
+                
+                // Update text
+                const ratingTexts = {
+                    1: 'Rất không hài lòng ★',
+                    2: 'Không hài lòng ★★',
+                    3: 'Bình thường ★★★',
+                    4: 'Hài lòng ★★★★',
+                    5: 'Rất hài lòng ★★★★★'
+                };
+                
+                const newText = ratingTexts[rating];
+                console.log('Setting text to:', newText);
+                ratingText.textContent = newText;
+                console.log('Text after set:', ratingText.textContent);
+                
+                console.log('=== setRating completed successfully ===');
+                
+            } catch (error) {
+                console.error('ERROR in setRating function:', error);
+                console.error('Error stack:', error.stack);
+            }
+        }
+        
+        // Add hover effects and debug DOM loading
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== DOM CONTENT LOADED ===');
+            
+            try {
+                const stars = document.querySelectorAll('.star');
+                const ratingInput = document.getElementById('rating-value');
+                const ratingText = document.getElementById('rating-text');
+                
+                console.log('DOM Elements check:');
+                console.log('- Stars found:', stars.length);
+                console.log('- Rating input found:', !!ratingInput);
+                console.log('- Rating text found:', !!ratingText);
+                
+                if (stars.length === 0) {
+                    console.error('ERROR: No stars found in DOM!');
+                    console.log('Available elements with class "star":', document.querySelectorAll('.star'));
+                    console.log('All elements in rating-stars div:', document.querySelector('.rating-stars'));
+                    return;
+                }
+                
+                let currentRating = 0;
+                
+                stars.forEach((star, index) => {
+                    console.log(`Setting up hover for star ${index + 1}`);
+                    
+                    star.addEventListener('mouseenter', function() {
+                        console.log(`Mouse enter star ${index + 1}`);
+                        const hoverRating = index + 1;
+                        stars.forEach((s, i) => {
+                            if (i < hoverRating) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ddd';
+                            }
+                        });
+                    });
+                    
+                    star.addEventListener('mouseleave', function() {
+                        console.log(`Mouse leave star ${index + 1}`);
+                        stars.forEach((s, i) => {
+                            if (i < currentRating) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ddd';
+                            }
+                        });
+                    });
+                    
+                    // Also add click listener as backup
+                    star.addEventListener('click', function() {
+                        console.log(`Star ${index + 1} clicked via event listener`);
+                        setRating(index + 1);
+                        currentRating = index + 1;
+                    });
+                });
+                
+                console.log('=== Hover effects setup completed ===');
+                
+            } catch (error) {
+                console.error('ERROR in DOMContentLoaded:', error);
+                console.error('Error stack:', error.stack);
+            }
+        });
+        
+        // Test function to verify script loading
+        window.testStarRating = function() {
+            console.log('=== TESTING STAR RATING ===');
+            setRating(3);
+        };
+        
+        console.log('=== SCRIPT SETUP COMPLETED ===');
+</script>
+
+@section Scripts {
+    <script>
+        // This will definitely run in Scripts section
+        alert('REVIEW SCRIPT LOADED - CHECK IF YOU SEE THIS ALERT');
+        console.log('SCRIPTS SECTION - REVIEW PAGE LOADED');
+    </script>
+}

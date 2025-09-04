@@ -1,0 +1,48 @@
+﻿@model IEnumerable<SliderModel>
+
+@{
+    ViewData["title"] = "Danh sách slider";
+}
+
+<h3>Danh sách slider</h3>
+<a asp-action="Create" asp-controller="Slider" class="btn btn-primary mb-3">Thêm slider</a>
+
+<table class="table table-bordered" id="myTable">
+    <thead class="thead-light">
+        <tr>
+            <th>#</th>
+            <th>Tên slider</th>
+            <th>Mô tả slider</th>
+            <th>Hình ảnh</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>@Html.Raw(item.Description)</td>
+                <td>
+                    <img src="~/media/sliders/@item.Image" width="400" height="150" alt="Ảnh slider" />
+                </td>
+                <td>
+                    @if (item.Status == 1)
+                    {
+                        <span class="text-success">Hiển thị</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger">Ẩn</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-controller="Slider" asp-route-Id="@item.Id" class="btn btn-warning btn-sm">Sửa</a>
+                    <a asp-action="Delete" asp-controller="Slider" asp-route-Id="@item.Id" class="btn btn-danger btn-sm confirmDeletion">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

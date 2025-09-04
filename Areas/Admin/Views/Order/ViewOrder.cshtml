@@ -1,0 +1,269 @@
+﻿@model IEnumerable<OrderDetails>
+@{
+    ViewData["Title"] = "Chi Tiết Đơn Hàng";
+}
+
+<div class="container">
+    <h2>Chi Tiết Đơn Hàng</h2>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Thông Tin Giao Hàng</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Địa chỉ:</strong> @ViewBag.ShippingAddress, @ViewBag.ShippingWard, @ViewBag.ShippingDistrict, @ViewBag.ShippingCity</p>
+            <p><strong>Phí vận chuyển:</strong> @ViewBag.ShippingCost.ToString("#,##0 VNĐ")</p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ViewBag.CouponCode))
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Thông Tin Giảm Giá</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Mã giảm giá:</strong> @ViewBag.CouponCode</p>
+                <p><strong>Số tiền giảm:</strong> @ViewBag.DiscountAmount.ToString("#,##0 VNĐ")</p>
+            </div>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Trạng Thái Đơn Hàng</h4>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label>Trạng thái hiện tại:</label>
+                @if (ViewBag.Status == 1)
+                {
+                    <span class="badge" style="background-color: #007bff; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Đơn hàng mới</span>
+                }
+                else if (ViewBag.Status == 2)
+                {
+                    <span class="badge" style="background-color: #ffc107; color: black; border-radius: 5px; padding: 0.25em 0.6em;">Chờ xác nhận</span>
+                }
+                else if (ViewBag.Status == 4)
+                {
+                    <span class="badge" style="background-color: #17a2b8; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Đang giao hàng</span>
+                }
+                else if (ViewBag.Status == 0)
+                {
+                    <span class="badge" style="background-color: #28a745; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Đã giao hàng</span>
+                }
+                else if (ViewBag.Status == 3)
+                {
+                    <span class="badge" style="background-color: #dc3545; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Đã hủy</span>
+                }
+                else if (ViewBag.Status == 5)
+                {
+                    <span class="badge" style="background-color: #ff9800; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Yêu cầu hoàn hàng</span>
+                }
+                else if (ViewBag.Status == 6)
+                {
+                    <span class="badge" style="background-color: #673ab7; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Hoàn hàng thành công</span>
+                }
+                else
+                {
+                    <span class="badge" style="background-color: #6c757d; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Không xác định</span>
+                }
+            </div>
+            <div class="row">
+                <div class="form-group col-md-8 align-items-center">
+                    <label>Cập nhật trạng thái:</label>
+                    <select id="orderStatus" class="form-control" @(ViewBag.Status == 0 || ViewBag.Status == 6 ? "disabled" : "")>
+                        <option value="1" selected="@(ViewBag.Status == 1)">Đơn hàng mới</option>
+                        <option value="2" selected="@(ViewBag.Status == 2)">Chờ xác nhận</option>
+                        <option value="4" selected="@(ViewBag.Status == 4)">Đang giao hàng</option>
+                        <option value="0" selected="@(ViewBag.Status == 0)">Đã giao hàng</option>
+                        <option value="3" selected="@(ViewBag.Status == 3)">Đã hủy</option>
+                        <option value="5" selected="@(ViewBag.Status == 5)">Yêu cầu hoàn hàng</option>
+                        <option value="6" selected="@(ViewBag.Status == 6)">Hoàn hàng thành công</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label style="color: white;">Hành động</label>
+                    <button id="updateStatus" class="btn btn-warning form-control" @(ViewBag.Status == 0 || ViewBag.Status == 6 ? "disabled" : "")>
+                        Cập nhật
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Sản phẩm</h4>
+        </div>
+        <div class="card-body">
+            @{
+                decimal subtotal = 0;
+            }
+            @foreach (var item in Model)
+            {
+                decimal itemTotal = item.Quantity * item.Price;
+                subtotal += itemTotal;
+                <div class="row mb-4 border-bottom pb-3">
+                    <div class="col-md-3">
+                        @if (!string.IsNullOrEmpty(item.Product?.Image))
+                        {
+                            <img src="@item.Product.Image" 
+                                 alt="@item.Product.Name" 
+                                 style="width: 100%; max-width: 200px; height: auto; border-radius: 8px;" 
+                                 class="img-fluid"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div style="width: 200px; height: 200px; background-color: #f8f9fa; border-radius: 8px; display: none; align-items: center; justify-content: center; color: #6c757d;">
+                                <i class="fas fa-image fa-3x"></i>
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="width: 200px; height: 200px; background-color: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                                <i class="fas fa-image fa-3x"></i>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-md-9">
+                        <h5 class="mb-3">@item.Product?.Name</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Thông tin cơ bản</h6>
+                                <table class="table table-sm">
+                                    <tr><td><strong>Model:</strong></td><td>@(item.Product?.Model ?? "N/A")</td></tr>
+                                    <tr><td><strong>Model Number:</strong></td><td>@(item.Product?.ModelNumber ?? "N/A")</td></tr>
+                                    <tr><td><strong>Năm sản xuất:</strong></td><td>@(item.Product?.Year?.ToString() ?? "N/A")</td></tr>
+                                    <tr><td><strong>Giới tính:</strong></td><td>@(item.Product?.Gender ?? "N/A")</td></tr>
+                                    <tr><td><strong>Tình trạng:</strong></td><td>@(item.Product?.Condition ?? "N/A")</td></tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Thông tin kỹ thuật</h6>
+                                <table class="table table-sm">
+                                    <tr><td><strong>Vỏ máy:</strong></td><td>@(item.Product?.CaseMaterial ?? "N/A")</td></tr>
+                                    <tr><td><strong>Kích thước vỏ:</strong></td><td>@(item.Product?.CaseSize ?? "N/A")</td></tr>
+                                    <tr><td><strong>Mặt kính:</strong></td><td>@(item.Product?.Crystal ?? "N/A")</td></tr>
+                                    <tr><td><strong>Vành bezel:</strong></td><td>@(item.Product?.BezelMaterial ?? "N/A")</td></tr>
+                                    <tr><td><strong>Số serial:</strong></td><td>@(item.Product?.SerialNumber ?? "N/A")</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Mặt số</h6>
+                                <table class="table table-sm">
+                                    <tr><td><strong>Màu mặt số:</strong></td><td>@(item.Product?.DialColor ?? "N/A")</td></tr>
+                                    <tr><td><strong>Vạch giờ:</strong></td><td>@(item.Product?.HourMarkers ?? "N/A")</td></tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Bộ máy</h6>
+                                <table class="table table-sm">
+                                    <tr><td><strong>Calibre:</strong></td><td>@(item.Product?.Calibre ?? "N/A")</td></tr>
+                                    <tr><td><strong>Loại máy:</strong></td><td>@(item.Product?.MovementType ?? "N/A")</td></tr>
+                                    <tr><td><strong>Chức năng:</strong></td><td>@(item.Product?.Complication ?? "N/A")</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Dây đeo</h6>
+                                <table class="table table-sm">
+                                    <tr><td><strong>Chất liệu:</strong></td><td>@(item.Product?.BraceletMaterial ?? "N/A")</td></tr>
+                                    <tr><td><strong>Loại dây:</strong></td><td>@(item.Product?.BraceletType ?? "N/A")</td></tr>
+                                    <tr><td><strong>Khóa:</strong></td><td>@(item.Product?.ClaspType ?? "N/A")</td></tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Phụ kiện</h6>
+                                <table class="table table-sm">
+                                    <tr><td><strong>Hộp & giấy tờ:</strong></td><td>@(item.Product?.BoxAndPapers == true ? "Có" : item.Product?.BoxAndPapers == false ? "Không" : "N/A")</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="text-muted">Số lượng: @item.Quantity</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-muted">Đơn giá: @item.Price.ToString("#,##0 VNĐ")</span>
+                                    </div>
+                                    <div>
+                                        <strong class="text-primary">Thành tiền: @itemTotal.ToString("#,##0 VNĐ")</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Tổng thanh toán</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 offset-md-6">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Tạm tính:</strong></td>
+                            <td class="text-right">@subtotal.ToString("#,##0 VNĐ")</td>
+                        </tr>
+                        @if (ViewBag.DiscountAmount > 0)
+                        {
+                            <tr>
+                                <td><strong>Giảm giá:</strong></td>
+                                <td class="text-right text-danger">-@ViewBag.DiscountAmount.ToString("#,##0 VNĐ")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td><strong>Phí vận chuyển:</strong></td>
+                            <td class="text-right">@ViewBag.ShippingCost.ToString("#,##0 VNĐ")</td>
+                        </tr>
+                        <tr class="border-top">
+                            <td><strong class="h5">Tổng cộng:</strong></td>
+                            <td class="text-right"><strong class="h5 text-primary">@(Math.Max(0, subtotal - ViewBag.DiscountAmount + ViewBag.ShippingCost).ToString("#,##0 VNĐ"))</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a asp-action="Index" asp-controller="Order">Trở lại danh sách</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#updateStatus").click(function () {
+                var status = $("#orderStatus").val();
+                var orderCode = "@Model.FirstOrDefault()?.OrderCode";
+
+                $.ajax({
+                    url: '@Url.Action("UpdateOrder", "Order")',
+                    type: 'POST',
+                    data: { ordercode: orderCode, status: status },
+                    success: function (result) {
+                        if (result.success) {
+                            alert("Cập nhật trạng thái đơn hàng thành công");
+                            location.reload();
+                        }
+                    },
+                    error: function () {
+                        alert("Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng");
+                    }
+                });
+            });
+        });
+    </script>
+}

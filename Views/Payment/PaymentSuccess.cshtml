@@ -1,0 +1,38 @@
+@model Shopping_Demo.Models.PaymentModel
+@{
+    ViewData["Title"] = "Thanh Toán Thành Công";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="alert alert-success">
+                <h1><i class="fa fa-check-circle text-success"></i></h1>
+                <h2>Thanh Toán Thành Công!</h2>
+                <p>Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đã được xử lý thành công.</p>
+                
+                @if (Model != null)
+                {
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5>Thông Tin Đơn Hàng</h5>
+                            <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
+                            <p><strong>Phương thức thanh toán:</strong> @Model.PaymentMethod</p>
+                            <p><strong>Số tiền:</strong> @Model.TotalAmount.ToString("N0").Replace(",", ".")₫</p>
+                            <p><strong>Trạng thái:</strong> <span class="text-success">Hoàn thành</span></p>
+                            <p><strong>Thời gian:</strong> @Model.CompletedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    </div>
+                }
+                
+                <div class="mt-4">
+                    <a href="/" class="btn btn-primary">Tiếp Tục Mua Sắm</a>
+                    <a href="/Account/History" class="btn btn-secondary">Xem Lịch Sử Đơn Hàng</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

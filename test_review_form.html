@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Review Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 300px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .star-rating { margin: 10px 0; }
+        .star-rating input { width: auto; margin-right: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Test Review Form</h2>
+    <form action="http://localhost:53813/Product/CommentProduct" method="post">
+        <div class="form-group">
+            <label>Product ID:</label>
+            <input type="number" name="ProductId" value="377" required />
+        </div>
+        
+        <div class="form-group">
+            <label>Order Code:</label>
+            <input type="text" name="OrderCode" value="REVIEW_377_TEST" required />
+        </div>
+        
+        <div class="form-group">
+            <label>User Name:</label>
+            <input type="text" name="UserName" value="Test User" required />
+        </div>
+        
+        <div class="form-group">
+            <label>Rating (1-5):</label>
+            <div class="star-rating">
+                <input type="radio" name="Rating" value="5" id="star5" required />
+                <label for="star5">5 Stars</label>
+                <input type="radio" name="Rating" value="4" id="star4" />
+                <label for="star4">4 Stars</label>
+                <input type="radio" name="Rating" value="3" id="star3" />
+                <label for="star3">3 Stars</label>
+                <input type="radio" name="Rating" value="2" id="star2" />
+                <label for="star2">2 Stars</label>
+                <input type="radio" name="Rating" value="1" id="star1" />
+                <label for="star1">1 Star</label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Comment:</label>
+            <textarea name="Comment" rows="4" required>This is a test review comment with more than 10 characters.</textarea>
+        </div>
+        
+        <button type="submit">Submit Review</button>
+    </form>
+    
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('Form submitted');
+            const formData = new FormData(this);
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+        });
+    </script>
+</body>
+</html>

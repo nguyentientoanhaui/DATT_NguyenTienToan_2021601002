@@ -1,0 +1,604 @@
+@model ProductModel
+@{
+    ViewData["title"] = "Chi tiết đồng hồ - " + Model.Name;
+}
+
+<style>
+    .details-container {
+        background: #fafafa;
+        min-height: 100vh;
+        padding: 2rem;
+    }
+
+    .details-header {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 2rem;
+        border: none;
+    }
+
+    .details-title {
+        color: var(--primary-black);
+        font-weight: 700;
+        font-size: 2rem;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -0.5px;
+    }
+
+    .details-card {
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border: none;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: var(--light-gray);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--primary-black);
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .info-label {
+        color: var(--medium-gray);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        color: var(--primary-black);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .price-display {
+        font-size: 1.5rem;
+        color: #e74c3c;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .gallery-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        aspect-ratio: 1;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .gallery-item:hover {
+        transform: scale(1.05);
+    }
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border: 1px solid var(--border-color);
+        background: var(--light-gray);
+    }
+
+    .no-images-message {
+        text-align: center;
+        padding: 2rem;
+        color: var(--medium-gray);
+        font-style: italic;
+    }
+
+    .no-images-message i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .default-badge {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: #007bff;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .color-swatch {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .color-name {
+        vertical-align: middle;
+        margin-right: 12px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-black);
+        color: var(--white);
+    }
+
+    .btn-primary:hover {
+        background: var(--secondary-black);
+        color: var(--white);
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: var(--light-gray);
+        color: var(--primary-black);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: var(--accent-gray);
+        color: var(--primary-black);
+    }
+
+    .description-content {
+        line-height: 1.6;
+        color: var(--dark-gray);
+    }
+</style>
+
+<div class="details-container">
+    <!-- Header -->
+    <div class="details-header">
+        <h1 class="details-title">@Model.Name</h1>
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <div>
+                <span class="status-badge @(Model.IsActive ? "status-active" : "status-inactive")">
+                    @(Model.IsActive ? "Đang hiển thị" : "Đã ẩn")
+                </span>
+            </div>
+            <div class="action-buttons">
+                <a href="@Url.Action("Edit", "Product", new { Id = Model.Id })" class="btn-primary">
+                    <i class="fas fa-edit"></i>
+                    Chỉnh sửa
+                </a>
+                <a href="@Url.Action("Index", "Product")" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Quay lại danh sách
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="details-card">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-2"></i>
+            Thông tin cơ bản
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Tên sản phẩm</span>
+                    <span class="info-value">@Model.Name</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Slug</span>
+                    <span class="info-value">@Model.Slug</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Giá bán</span>
+                    <span class="info-value price-display">@Model.Price.ToString("N0") VNĐ</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Giá vốn</span>
+                    <span class="info-value">@Model.CapitalPrice.ToString("N0") VNĐ</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Thương hiệu</span>
+                    <span class="info-value">@Model.Brand?.Name</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Danh mục</span>
+                    <span class="info-value">@Model.Category?.Name</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Số lượng</span>
+                    <span class="info-value">@Model.Quantity</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Đã bán</span>
+                    <span class="info-value">@Model.Sold</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watch Specifications -->
+    <div class="details-card">
+        <div class="card-header">
+            <i class="fas fa-cog me-2"></i>
+            Thông số kỹ thuật đồng hồ
+        </div>
+        <div class="card-body">
+            <div class="info-grid">
+                @if (!string.IsNullOrEmpty(Model.Model))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Model</span>
+                        <span class="info-value">@Model.Model</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.ModelNumber))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Model Number</span>
+                        <span class="info-value">@Model.ModelNumber</span>
+                    </div>
+                }
+                @if (Model.Year.HasValue)
+                {
+                    <div class="info-item">
+                        <span class="info-label">Năm sản xuất</span>
+                        <span class="info-value">@Model.Year</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Gender))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Giới tính</span>
+                        <span class="info-value">@Model.Gender</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Condition))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Tình trạng</span>
+                        <span class="info-value">@Model.Condition</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.CaseMaterial))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Chất liệu vỏ</span>
+                        <span class="info-value">@Model.CaseMaterial</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.CaseSize))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Kích thước vỏ</span>
+                        <span class="info-value">@Model.CaseSize</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Crystal))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Mặt kính</span>
+                        <span class="info-value">@Model.Crystal</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.BezelMaterial))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Chất liệu bezel</span>
+                        <span class="info-value">@Model.BezelMaterial</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.SerialNumber))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Số serial</span>
+                        <span class="info-value">@Model.SerialNumber</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.DialColor))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Màu mặt số</span>
+                        <span class="info-value">@Model.DialColor</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.HourMarkers))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Vạch giờ</span>
+                        <span class="info-value">@Model.HourMarkers</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Calibre))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Calibre</span>
+                        <span class="info-value">@Model.Calibre</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.MovementType))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Loại máy</span>
+                        <span class="info-value">@Model.MovementType</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Complication))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Chức năng phức tạp</span>
+                        <span class="info-value">@Model.Complication</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.BraceletMaterial))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Chất liệu dây</span>
+                        <span class="info-value">@Model.BraceletMaterial</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.BraceletType))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Loại dây</span>
+                        <span class="info-value">@Model.BraceletType</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.ClaspType))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Loại khóa</span>
+                        <span class="info-value">@Model.ClaspType</span>
+                    </div>
+                }
+                @if (Model.BoxAndPapers.HasValue)
+                {
+                    <div class="info-item">
+                        <span class="info-label">Hộp & giấy tờ</span>
+                        <span class="info-value">@(Model.BoxAndPapers.Value ? "Có" : "Không")</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Certificate))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Chứng chỉ</span>
+                        <span class="info-value">@Model.Certificate</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.WarrantyInfo))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Thông tin bảo hành</span>
+                        <span class="info-value">@Model.WarrantyInfo</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.ItemNumber))
+                {
+                    <div class="info-item">
+                        <span class="info-label">Mã sản phẩm</span>
+                        <span class="info-value">@Model.ItemNumber</span>
+                    </div>
+                }
+                @if (Model.CreditCardPrice.HasValue)
+                {
+                    <div class="info-item">
+                        <span class="info-label">Giá thanh toán thẻ</span>
+                        <span class="info-value">@Model.CreditCardPrice.Value.ToString("N0") VNĐ</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Description -->
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <div class="details-card">
+            <div class="card-header">
+                <i class="fas fa-align-left me-2"></i>
+                Mô tả sản phẩm
+            </div>
+            <div class="card-body">
+                <div class="description-content">
+                    @Html.Raw(Model.Description)
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Colors and Sizes -->
+    @if ((Model.ProductColors != null && Model.ProductColors.Any()) || (Model.ProductSizes != null && Model.ProductSizes.Any()))
+    {
+        <div class="details-card">
+            <div class="card-header">
+                <i class="fas fa-palette me-2"></i>
+                Màu sắc & Kích cỡ
+            </div>
+            <div class="card-body">
+                <div class="info-grid">
+                    @if (Model.ProductColors != null && Model.ProductColors.Any())
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Màu sắc có sẵn</span>
+                            <div class="info-value">
+                                @foreach (var productColor in Model.ProductColors)
+                                {
+                                    <span class="color-swatch" style="background-color: @productColor.Color.Code;"></span>
+                                    <span class="color-name">@productColor.Color.Name</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                    @if (Model.ProductSizes != null && Model.ProductSizes.Any())
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Kích cỡ có sẵn</span>
+                            <div class="info-value">
+                                @string.Join(", ", Model.ProductSizes.Select(ps => ps.Size.Name))
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Product Images -->
+    <div class="details-card">
+        <div class="card-header">
+            <i class="fas fa-images me-2"></i>
+            Hình ảnh sản phẩm 
+            @if (Model.ProductImages != null && Model.ProductImages.Any())
+            {
+                <span>(@Model.ProductImages.Count ảnh)</span>
+            }
+        </div>
+        <div class="card-body">
+            @if (Model.ProductImages != null && Model.ProductImages.Any())
+            {
+                <div class="image-gallery">
+                    @foreach (var image in Model.ProductImages.OrderByDescending(i => i.IsDefault))
+                    {
+                        <div class="gallery-item">
+                            @if (image.IsDefault)
+                            {
+                                <div class="default-badge">Ảnh chính</div>
+                            }
+                            @{
+                                string imageSource = "";
+                                if (!string.IsNullOrEmpty(image.ImageUrl))
+                                {
+                                    if (image.ImageUrl.StartsWith("http"))
+                                    {
+                                        imageSource = image.ImageUrl;  // URL trực tiếp
+                                    }
+                                    else
+                                    {
+                                        imageSource = $"~/media/products/{image.ImageUrl}";  // Local path với ~
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(image.ImageName))
+                                {
+                                    if (image.ImageName.StartsWith("http"))
+                                    {
+                                        imageSource = image.ImageName;  // URL trong ImageName
+                                    }
+                                    else
+                                    {
+                                        imageSource = $"~/media/products/{image.ImageName}";  // Local ImageName với ~
+                                    }
+                                }
+                            }
+                            <img src="@imageSource" 
+                                 alt="@Model.Name" 
+                                 onclick="openImageModal(this)"
+                                 onerror="this.src='~/images/placeholder-product.jpg'; this.onerror=null;" />
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="no-images-message">
+                    <div>
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <p>Chưa có hình ảnh nào cho sản phẩm này</p>
+                    <a href="@Url.Action("Edit", "Product", new { Id = Model.Id })" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Thêm hình ảnh
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xem ảnh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openImageModal(img) {
+        document.getElementById('modalImage').src = img.src;
+        new bootstrap.Modal(document.getElementById('imageModal')).show();
+    }
+</script>

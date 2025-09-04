@@ -1,0 +1,70 @@
+﻿@model ColorModel
+@{
+    ViewData["title"] = "Chỉnh sửa màu sắc";
+}
+
+<h3>Chỉnh sửa màu sắc</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label">Tên màu sắc</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Code" class="control-label">Mã màu (ví dụ: #FF5733)</label>
+                <div class="input-group">
+                    <input asp-for="Code" class="form-control" id="colorCode" />
+                    <input type="color" class="form-control form-control-color" id="colorPicker" title="Chọn màu sắc">
+                </div>
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Xem trước</label>
+                <div id="colorPreview" style="width: 100%; height: 50px; border: 1px solid #ccc;"></div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+        <a asp-action="Index">Quay lại danh sách</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Update color preview when code changes
+            $('#colorCode').on('input', function() {
+                updateColorPreview();
+            });
+
+            // Update color code when color picker changes
+            $('#colorPicker').on('input', function() {
+                $('#colorCode').val($(this).val());
+                updateColorPreview();
+            });
+
+            // Initial preview
+            updateColorPreview();
+
+            function updateColorPreview() {
+                var colorCode = $('#colorCode').val();
+                $('#colorPreview').css('background-color', colorCode);
+                $('#colorPicker').val(colorCode);
+            }
+        });
+    </script>
+}

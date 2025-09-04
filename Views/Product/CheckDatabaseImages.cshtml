@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Database Images";
+}
+
+<div class="container mt-4">
+    <h2>Database Images Check</h2>
+    
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-success">@TempData["success"]</div>
+    }
+    
+    @if (TempData["info"] != null)
+    {
+        <div class="alert alert-info">@TempData["info"]</div>
+    }
+
+    <div class="row mb-3">
+        <div class="col">
+            <form asp-action="UpdateProductImages" method="post">
+                <button type="submit" class="btn btn-primary">Update Products with Available Images</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h4>Products in Database</h4>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Image</th>
+                        <th>Image Preview</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in ViewBag.Products)
+                    {
+                        <tr>
+                            <td>@product.Id</td>
+                            <td>@product.Name</td>
+                            <td>@product.Image</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(product.Image) && product.Image != "noimage.jpg")
+                                {
+                                    <img src="~/media/products/@product.Image" alt="@product.Name" style="width: 100px; height: 80px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No image</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+

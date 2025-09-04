@@ -1,0 +1,27 @@
+﻿@model SizeModel
+@{
+    ViewData["title"] = "Chỉnh sửa kích cỡ";
+}
+
+
+<h3>Chỉnh sửa kích cỡ</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label">Tên kích cỡ</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+<a asp-action="Index" >Quay lại danh sách</a>

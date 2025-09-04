@@ -1,0 +1,14 @@
+<svg width="300" height="250" viewBox="0 0 300 250" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="250" fill="#f8f9fa"/>
+  <rect x="10" y="10" width="280" height="230" fill="#e9ecef" stroke="#dee2e6" stroke-width="1"/>
+  
+  <!-- Icon đồng hồ -->
+  <circle cx="150" cy="125" r="40" fill="none" stroke="#6c757d" stroke-width="2"/>
+  <circle cx="150" cy="125" r="2" fill="#6c757d"/>
+  <line x1="150" y1="125" x2="150" y2="95" stroke="#6c757d" stroke-width="2" stroke-linecap="round"/>
+  <line x1="150" y1="125" x2="170" y2="125" stroke="#6c757d" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Text -->
+  <text x="150" y="190" text-anchor="middle" fill="#6c757d" font-family="Arial, sans-serif" font-size="14">No Image Available</text>
+  <text x="150" y="210" text-anchor="middle" fill="#adb5bd" font-family="Arial, sans-serif" font-size="12">Product Image</text>
+</svg>

@@ -1,0 +1,606 @@
+﻿@model StatisticalModel
+@{
+    ViewData["Title"] = "Thống kê bán hàng - Aurum";
+}
+
+<style>
+    .stats-container {
+        padding: 2rem;
+        background: #fafafa;
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 2rem;
+        border: none;
+    }
+
+    .page-title {
+        color: var(--primary-black);
+        font-weight: 700;
+        font-size: 2rem;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -0.5px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .stats-card {
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        padding: 1.5rem;
+        border: none;
+    }
+
+    .stats-card h5 {
+        color: var(--primary-black);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .chart-container {
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: none;
+    }
+
+    .chart-title {
+        color: var(--primary-black);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .filter-section {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 2rem;
+        border: none;
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 1rem;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        color: var(--primary-black);
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .filter-control {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--white);
+        color: var(--primary-black);
+        transition: all 0.3s ease;
+    }
+
+    .filter-control:focus {
+        outline: none;
+        border-color: var(--primary-black);
+        box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+    }
+
+    .btn-filter {
+        background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .btn-filter:hover {
+        background: linear-gradient(135deg, #4338CA 0%, #6D28D9 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+    }
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-black);
+        margin-bottom: 0.25rem;
+    }
+
+    .metric-label {
+        font-size: 0.875rem;
+        color: var(--medium-gray);
+        font-weight: 500;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        height: 400px;
+        margin-bottom: 1rem;
+    }
+
+    .back-button {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: var(--white);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        text-decoration: none;
+    }
+
+    @@media (max-width: 768px) {
+        .stats-container {
+            padding: 1rem;
+        }
+        
+        .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="stats-container">
+    <div class="page-header">
+        <h1 class="page-title">Thống kê bán hàng - Aurum</h1>
+        <p style="color: var(--medium-gray); margin: 0.5rem 0 0 0;">Phân tích hiệu suất kinh doanh đồng hồ cao cấp</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>Lọc theo thời gian:</label>
+                <select class="filter-control" id="timeFilter">
+                    <option value="7">7 ngày qua</option>
+                    <option value="30" selected>30 ngày qua</option>
+                    <option value="90">3 tháng qua</option>
+                    <option value="365">1 năm qua</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Từ ngày:</label>
+                <input type="date" class="filter-control" id="dateFrom" />
+            </div>
+            <div class="filter-group">
+                <label>Đến ngày:</label>
+                <input type="date" class="filter-control" id="dateTo" />
+            </div>
+            <div class="filter-group">
+                <button class="btn-filter" id="applyFilter">Áp dụng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-value" id="totalRevenue">0</div>
+            <div class="metric-label">Tổng doanh thu (VNĐ)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="totalOrders">0</div>
+            <div class="metric-label">Tổng đơn hàng</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="totalWatches">0</div>
+            <div class="metric-label">Đồng hồ đã bán</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="avgOrderValue">0</div>
+            <div class="metric-label">Giá trị đơn hàng TB</div>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="stats-grid">
+        <!-- Sales Trend Chart -->
+        <div class="chart-container">
+            <h5 class="chart-title">Xu hướng bán hàng</h5>
+            <div class="chart-wrapper">
+                <canvas id="salesTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Brand Performance Chart -->
+        <div class="chart-container">
+            <h5 class="chart-title">Hiệu suất theo thương hiệu</h5>
+            <div class="chart-wrapper">
+                <canvas id="brandPerformanceChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Category Distribution Chart -->
+        <div class="chart-container">
+            <h5 class="chart-title">Phân bố theo danh mục</h5>
+            <div class="chart-wrapper">
+                <canvas id="categoryDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Price Range Analysis Chart -->
+        <div class="chart-container">
+            <h5 class="chart-title">Phân tích khoảng giá</h5>
+            <div class="chart-wrapper">
+                <canvas id="priceRangeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div style="text-align: center; margin-top: 2rem;">
+        <a asp-action="Index" asp-controller="Dashboard" class="back-button">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại Dashboard
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            let salesTrendChart, brandPerformanceChart, categoryDistributionChart, priceRangeChart;
+
+            // Initialize charts
+            function initializeCharts() {
+                // Sales Trend Chart
+                const salesCtx = document.getElementById('salesTrendChart').getContext('2d');
+                salesTrendChart = new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                        datasets: [{
+                            label: 'Doanh thu (triệu VNĐ)',
+                            data: [12, 19, 15, 25, 22, 30, 28],
+                            borderColor: '#4F46E5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#4F46E5',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Doanh thu: ' + context.parsed.y.toLocaleString('vi-VN') + ' triệu VNĐ';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value.toLocaleString('vi-VN') + 'M';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Brand Performance Chart
+                const brandCtx = document.getElementById('brandPerformanceChart').getContext('2d');
+                brandPerformanceChart = new Chart(brandCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Rolex', 'Omega', 'Cartier', 'Patek Philippe', 'Audemars Piguet'],
+                        datasets: [{
+                            data: [35, 25, 20, 15, 5],
+                            backgroundColor: [
+                                '#EF4444', // Red for Rolex
+                                '#3B82F6', // Blue for Omega
+                                '#10B981', // Green for Cartier
+                                '#F59E0B', // Amber for Patek Philippe
+                                '#8B5CF6'  // Purple for Audemars Piguet
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+
+                // Category Distribution Chart
+                const categoryCtx = document.getElementById('categoryDistributionChart').getContext('2d');
+                categoryDistributionChart = new Chart(categoryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Automatic', 'Chronograph', 'Dress', 'Sport', 'Luxury'],
+                        datasets: [{
+                            label: 'Số lượng bán',
+                            data: [45, 30, 20, 35, 25],
+                            backgroundColor: [
+                                '#06B6D4', // Cyan for Automatic
+                                '#F97316', // Orange for Chronograph
+                                '#EC4899', // Pink for Dress
+                                '#84CC16', // Lime for Sport
+                                '#6366F1'  // Indigo for Luxury
+                            ],
+                            borderRadius: 8,
+                            borderWidth: 0,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Price Range Analysis Chart
+                const priceCtx = document.getElementById('priceRangeChart').getContext('2d');
+                priceRangeChart = new Chart(priceCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['< 50M', '50M-100M', '100M-200M', '200M-500M', '> 500M'],
+                        datasets: [{
+                            label: 'Số đơn hàng',
+                            data: [15, 25, 30, 20, 10],
+                            backgroundColor: [
+                                '#22C55E', // Green for budget
+                                '#3B82F6', // Blue for mid-range
+                                '#F59E0B', // Amber for high-end
+                                '#EF4444', // Red for premium
+                                '#8B5CF6'  // Purple for ultra-luxury
+                            ],
+                            borderRadius: 8,
+                            borderWidth: 0,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Update metrics with real data
+            function updateMetrics() {
+                $.ajax({
+                    url: '@Url.Action("GetLuxuryWatchSalesStats", "ProductStats")',
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            $('#totalRevenue').text(response.metrics.totalRevenue.toLocaleString('vi-VN'));
+                            $('#totalOrders').text(response.metrics.totalOrders.toLocaleString('vi-VN'));
+                            $('#totalWatches').text(response.metrics.totalWatchesSold.toLocaleString('vi-VN'));
+                            $('#avgOrderValue').text(response.metrics.avgOrderValue.toLocaleString('vi-VN'));
+                            
+                            // Update charts with real data
+                            updateChartsWithRealData(response);
+                        }
+                    },
+                    error: function() {
+                        console.error('Failed to load sales statistics');
+                    }
+                });
+            }
+
+            // Update charts with real data
+            function updateChartsWithRealData(data) {
+                // Update brand performance chart
+                if (data.brandPerformance && data.brandPerformance.length > 0) {
+                    const brandLabels = data.brandPerformance.map(b => b.name);
+                    const brandData = data.brandPerformance.map(b => b.sales);
+                    
+                    brandPerformanceChart.data.labels = brandLabels;
+                    brandPerformanceChart.data.datasets[0].data = brandData;
+                    brandPerformanceChart.update();
+                }
+
+                // Update category distribution chart
+                if (data.categoryDistribution && data.categoryDistribution.length > 0) {
+                    const categoryLabels = data.categoryDistribution.map(c => c.name);
+                    const categoryData = data.categoryDistribution.map(c => c.sales);
+                    
+                    categoryDistributionChart.data.labels = categoryLabels;
+                    categoryDistributionChart.data.datasets[0].data = categoryData;
+                    categoryDistributionChart.update();
+                }
+
+                // Update price range chart
+                if (data.priceRangeData && data.priceRangeData.length > 0) {
+                    const priceLabels = data.priceRangeData.map(p => p.range);
+                    const priceData = data.priceRangeData.map(p => p.count);
+                    
+                    priceRangeChart.data.labels = priceLabels;
+                    priceRangeChart.data.datasets[0].data = priceData;
+                    priceRangeChart.update();
+                }
+            }
+
+            // Initialize everything
+            initializeCharts();
+            updateMetrics();
+
+            // Filter functionality
+            $('#timeFilter').on('change', function() {
+                const days = $(this).val();
+                if (days) {
+                    const endDate = new Date();
+                    const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
+                    
+                    $('#dateFrom').val(startDate.toISOString().split('T')[0]);
+                    $('#dateTo').val(endDate.toISOString().split('T')[0]);
+                }
+            });
+
+            $('#applyFilter').on('click', function() {
+                const fromDate = $('#dateFrom').val();
+                const toDate = $('#dateTo').val();
+                
+                if (!fromDate || !toDate) {
+                    alert('Vui lòng chọn khoảng thời gian');
+                    return;
+                }
+
+                $(this).text('Đang tải...');
+                
+                // Get sales trend data for the selected date range
+                $.ajax({
+                    url: '@Url.Action("GetSalesTrendData", "ProductStats")',
+                    type: 'POST',
+                    data: {
+                        startDate: fromDate,
+                        endDate: toDate
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Update sales trend chart
+                            salesTrendChart.data.labels = response.dates;
+                            salesTrendChart.data.datasets[0].data = response.revenues.map(r => r / 1000000); // Convert to millions
+                            salesTrendChart.update();
+                        }
+                        $('#applyFilter').text('Áp dụng');
+                    },
+                    error: function() {
+                        console.error('Failed to load trend data');
+                        $('#applyFilter').text('Áp dụng');
+                    }
+                });
+            });
+
+            // Set default date range (30 days)
+            const endDate = new Date();
+            const startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+            $('#dateFrom').val(startDate.toISOString().split('T')[0]);
+            $('#dateTo').val(endDate.toISOString().split('T')[0]);
+            $('#applyFilter').click();
+        });
+    </script>
+}

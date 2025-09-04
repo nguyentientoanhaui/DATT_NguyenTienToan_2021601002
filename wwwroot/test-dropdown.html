@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dropdown</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .user-dropdown {
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+            border: 1px solid red;
+            padding: 10px;
+        }
+        
+        .user-dropdown i {
+            font-size: 1.2rem;
+            color: #333;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 9999;
+            margin-top: 10px;
+            display: block;
+        }
+        
+        .dropdown-menu.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+            display: block !important;
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dropdown-item:hover {
+            background: #f8f9fa;
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .dropdown-item i {
+            width: 16px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .debug-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Test Dropdown Menu</h1>
+        
+        <div class="user-dropdown">
+            <i class="fas fa-user" id="user-icon"></i>
+            <div class="dropdown-menu" id="user-dropdown-menu">
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-user-circle"></i>
+                    Tài khoản
+                </a>
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-history"></i>
+                    Lịch sử đơn hàng
+                </a>
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-heart"></i>
+                    Yêu thích
+                </a>
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Đăng xuất
+                </a>
+            </div>
+        </div>
+        
+        <div class="debug-info">
+            <h3>Debug Info:</h3>
+            <div id="debug-output"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test dropdown script loaded');
+            
+            const userIcon = document.getElementById('user-icon');
+            const userDropdown = document.getElementById('user-dropdown-menu');
+            const debugOutput = document.getElementById('debug-output');
+            
+            console.log('Elements:', { userIcon, userDropdown });
+            
+            if (userIcon && userDropdown) {
+                userIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('User icon clicked');
+                    userDropdown.classList.toggle('show');
+                    console.log('Dropdown show:', userDropdown.classList.contains('show'));
+                    
+                    // Update debug info
+                    debugOutput.innerHTML = `
+                        <p>Icon clicked: ${new Date().toLocaleTimeString()}</p>
+                        <p>Dropdown show class: ${userDropdown.classList.contains('show')}</p>
+                        <p>Dropdown opacity: ${getComputedStyle(userDropdown).opacity}</p>
+                        <p>Dropdown visibility: ${getComputedStyle(userDropdown).visibility}</p>
+                        <p>Dropdown display: ${getComputedStyle(userDropdown).display}</p>
+                    `;
+                });
+            } else {
+                console.log('Elements not found:', { userIcon, userDropdown });
+                debugOutput.innerHTML = '<p>Error: Elements not found</p>';
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.user-dropdown')) {
+                    if (userDropdown) {
+                        userDropdown.classList.remove('show');
+                        console.log('Dropdown closed');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

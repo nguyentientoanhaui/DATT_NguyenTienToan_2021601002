@@ -1,0 +1,1005 @@
+@model X.PagedList.IPagedList<Shopping_Demo.Models.ProductModel>
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+    ViewData["Title"] = $"Đồng Hồ {ViewBag.Brand?.Name}";
+    var brand = ViewBag.Brand as Shopping_Demo.Models.BrandModel;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/aurum-style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .clear-all-btn:hover {
+            color: #000;
+        }
+
+
+
+        .filter-section {
+            margin-bottom: 24px;
+        }
+
+        .filter-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .filter-options {
+            display: block;
+        }
+
+        .filter-options.show {
+            display: block;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .filter-option input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .filter-option label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .filter-count {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 1px solid #dee2e6 !important;
+            padding: 2px 8px !important;
+            border-radius: 12px !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            min-width: 20px !important;
+            text-align: center !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+        }
+
+        /* Products Content */
+        .products-content {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 30px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .products-count {
+            font-weight: 600;
+            color: #000;
+        }
+
+        .products-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .per-page-selector, .sort-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .per-page-selector label, .sort-selector label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .per-page-selector select, .sort-selector select {
+            padding: 8px 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: #fff;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 30px;
+        }
+        
+        /* Override any conflicting styles */
+        .products-content .product-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+        
+        /* Fix layout issues */
+        .product-listing-layout {
+            display: grid !important;
+            grid-template-columns: 280px 1fr !important;
+            gap: 40px !important;
+        }
+        
+        .products-content {
+            background: #fff !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+            overflow: hidden !important;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            border-color: #000;
+        }
+
+        /* AI Icon - Hidden */
+        .ai-icon {
+            display: none;
+        }
+
+        /* Product Image */
+        .product-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+            background: #f8f9fa;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        /* Compare Button Position */
+        .product-image .compare-button-container {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+
+        .product-image .compare-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #dee2e6;
+            color: #495057;
+            padding: 6px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .product-image .compare-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            border-color: #007bff;
+            color: #007bff;
+            transform: translateY(-1px);
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-image a {
+            display: block;
+            height: 100%;
+        }
+
+        /* Product Info */
+        .product-info {
+            padding: 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .product-title {
+            margin-bottom: 8px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-title a {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #000;
+            text-decoration: none;
+            line-height: 1.3;
+            transition: color 0.2s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-title a:hover {
+            color: #333;
+        }
+
+        .product-reference {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .product-specs {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        /* Product Actions */
+        .product-actions {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+            flex-shrink: 0;
+            padding: 16px;
+            margin: -40px -16px -16px -16px;
+        }
+
+        .buy-btn {
+            flex: 1;
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            min-width: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .buy-btn:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+
+        .sell-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .sell-btn {
+            background: #fff;
+            color: #000;
+            border: 1px solid #000;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            width: 100%;
+            min-width: 0;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sell-btn:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        .quote-text {
+            font-size: 0.75rem;
+            color: #6c757d;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .quote-text:hover {
+            color: #000;
+        }
+
+        /* No Products */
+        .no-products {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-products i {
+            margin-bottom: 16px;
+            color: #dee2e6;
+        }
+
+        /* Pagination */
+        .pagination-wrapper {
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 1024px) {
+            .product-listing-layout {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .filter-sidebar {
+                position: static;
+                order: 2;
+            }
+
+            .products-content {
+                order: 1;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+                padding: 20px;
+            }
+
+            .products-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .products-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+}
+
+<!-- Brand Header Section -->
+    <section class="brand-header">
+        <div class="container">
+            <h1 class="brand-title">Đồng Hồ @brand?.Name</h1>
+            <p class="brand-description">
+                Đồng hồ @brand?.Name được tôn vinh vì độ chính xác, độ bền và vẻ đẹp vượt thời gian. 
+                Mỗi chiếc đồng hồ đều được chế tác tỉ mỉ với những vật liệu cao cấp nhất, bao gồm vàng và kim cương. 
+                Đồng hồ @brand?.Name là biểu tượng của quyền lực và đẳng cấp, được đeo bởi những cá nhân có ảnh hưởng nhất trên thế giới.
+            </p>
+            <div class="brand-stats">
+                <div class="stat-item">
+                    <span class="stat-number">@ViewBag.TotalCount</span>
+                    <span class="stat-label">Sản Phẩm Có Sẵn</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="product-listing-layout">
+                <!-- Filter Sidebar -->
+                <div class="filter-sidebar">
+                    <div class="filter-header">
+                        <h3>Lọc Theo</h3>
+                        <button class="clear-all-btn" onclick="clearAllFilters()">Xóa Tất Cả</button>
+                    </div>
+                    
+                    <form id="filter-form" method="get">
+                        <!-- Model Filter -->
+                        @if (ViewBag.ModelData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Mẫu</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var modelItem in ViewBag.ModelData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="model-@modelItem.Name.ToLower().Replace(" ", "-")" name="models" value="@modelItem.Name" onchange="applyFilters()">
+                                            <label for="model-@modelItem.Name.ToLower().Replace(" ", "-")">
+                                                <span>@modelItem.Name</span>
+                                                <span class="filter-count">@modelItem.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        
+                        <!-- Price Filter -->
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Giá</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options">
+                                <div class="price-range-inputs">
+                                    <input type="number" name="minPrice" placeholder="Min" onchange="applyFilters()">
+                                    <span>-</span>
+                                    <input type="number" name="maxPrice" placeholder="Max" onchange="applyFilters()">
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price-under-2000" name="priceRanges" value="Under $2,000" onchange="applyFilters()">
+                                    <label for="price-under-2000">
+                                        <span>Under $2,000</span>
+                                        <span class="filter-count">0</span>
+                                    </label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price-2000-5000" name="priceRanges" value="$2,000 to $5,000" onchange="applyFilters()">
+                                    <label for="price-2000-5000">
+                                        <span>$2,000 to $5,000</span>
+                                        <span class="filter-count">0</span>
+                                    </label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price-5000-10000" name="priceRanges" value="$5,000 to $10,000" onchange="applyFilters()">
+                                    <label for="price-5000-10000">
+                                        <span>$5,000 - $10,000</span>
+                                        <span class="filter-count">0</span>
+                                    </label>
+                                </div>
+                                <div class="filter-option">
+                                    <input type="checkbox" id="price-over-10000" name="priceRanges" value="Over $10,000" onchange="applyFilters()">
+                                    <label for="price-over-10000">
+                                        <span>Trên $10,000</span>
+                                        <span class="filter-count">0</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Size Filter -->
+                        @if (ViewBag.SizeData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Kích Thước</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var size in ViewBag.SizeData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="size-@size.Name.ToLower().Replace(" ", "-")" name="sizes" value="@size.Name" onchange="applyFilters()">
+                                            <label for="size-@size.Name.ToLower().Replace(" ", "-")">
+                                                <span>@size.Name</span>
+                                                <span class="filter-count">@size.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Case Material Filter -->
+                        @if (ViewBag.CaseMaterialData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Chất Liệu Vỏ</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var material in ViewBag.CaseMaterialData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="material-@material.Name.ToLower().Replace(" ", "-")" name="materials" value="@material.Name" onchange="applyFilters()">
+                                            <label for="material-@material.Name.ToLower().Replace(" ", "-")">
+                                                <span>@material.Name</span>
+                                                <span class="filter-count">@material.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Gender Filter -->
+                        @if (ViewBag.GenderData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Giới Tính</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var gender in ViewBag.GenderData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="gender-@gender.Name.ToLower().Replace(" ", "-")" name="genders" value="@gender.Name" onchange="applyFilters()">
+                                            <label for="gender-@gender.Name.ToLower().Replace(" ", "-")">
+                                                <span>@gender.Name</span>
+                                                <span class="filter-count">@gender.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Condition Filter -->
+                        @if (ViewBag.ConditionData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Tình Trạng</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var condition in ViewBag.ConditionData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="condition-@condition.Name.ToLower().Replace(" ", "-")" name="conditions" value="@condition.Name" onchange="applyFilters()">
+                                            <label for="condition-@condition.Name.ToLower().Replace(" ", "-")">
+                                                <span>@condition.Name</span>
+                                                <span class="filter-count">@condition.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Dial Color Filter -->
+                        @if (ViewBag.DialColorData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Màu Mặt Số</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var color in ViewBag.DialColorData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="color-@color.Name.ToLower().Replace(" ", "-")" name="colors" value="@color.Name" onchange="applyFilters()">
+                                            <label for="color-@color.Name.ToLower().Replace(" ", "-")">
+                                                <span>@color.Name</span>
+                                                <span class="filter-count">@color.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Hour Markers Filter -->
+                        @if (ViewBag.HourMarkersData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Vạch Số Giờ</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var marker in ViewBag.HourMarkersData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="marker-@marker.Name.ToLower().Replace(" ", "-")" name="markers" value="@marker.Name" onchange="applyFilters()">
+                                            <label for="marker-@marker.Name.ToLower().Replace(" ", "-")">
+                                                <span>@marker.Name</span>
+                                                <span class="filter-count">@marker.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Movement Type Filter -->
+                        @if (ViewBag.MovementTypeData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Loại Máy</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var movement in ViewBag.MovementTypeData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="movement-@movement.Name.ToLower().Replace(" ", "-")" name="movements" value="@movement.Name" onchange="applyFilters()">
+                                            <label for="movement-@movement.Name.ToLower().Replace(" ", "-")">
+                                                <span>@movement.Name</span>
+                                                <span class="filter-count">@movement.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Bracelet Material Filter -->
+                        @if (ViewBag.BraceletMaterialData != null)
+                        {
+                            <div class="filter-section">
+                                <div class="filter-title" onclick="toggleFilter(this)">
+                                    <span>Chất Liệu Dây</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-options">
+                                    @foreach (var bracelet in ViewBag.BraceletMaterialData)
+                                    {
+                                        <div class="filter-option">
+                                            <input type="checkbox" id="bracelet-@bracelet.Name.ToLower().Replace(" ", "-")" name="bracelets" value="@bracelet.Name" onchange="applyFilters()">
+                                            <label for="bracelet-@bracelet.Name.ToLower().Replace(" ", "-")">
+                                                <span>@bracelet.Name</span>
+                                                <span class="filter-count">@bracelet.Count</span>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        
+                        <!-- Hidden inputs for current state -->
+                        <input type="hidden" name="page" value="1">
+                        <input type="hidden" name="pageSize" value="@ViewBag.PageSize">
+                        <input type="hidden" name="sortBy" value="@ViewBag.SortBy">
+                    </form>
+                </div>
+                
+                <!-- Products Content -->
+                <div class="products-content">
+                    <!-- Products Header -->
+                    <div class="products-header">
+                        <div class="products-count">
+                            <span>@Model.TotalItemCount Sản phẩm</span>
+                        </div>
+                        <div class="products-controls">
+                            <div class="per-page-selector">
+                                <label>Mỗi trang:</label>
+                                <select onchange="changePerPage(this.value)">
+                                    @if (ViewBag.PageSize == 12)
+                                    {
+                                        <option value="12" selected>12</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="12">12</option>
+                                    }
+                                    @if (ViewBag.PageSize == 24)
+                                    {
+                                        <option value="24" selected>24</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="24">24</option>
+                                    }
+                                    @if (ViewBag.PageSize == 48)
+                                    {
+                                        <option value="48" selected>48</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="48">48</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="sort-selector">
+                                <label>Sắp xếp:</label>
+                                <select onchange="changeSortBy(this.value)">
+                                    @if (ViewBag.SortBy == "featured")
+                                    {
+                                        <option value="featured" selected>Nổi bật</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="featured">Nổi bật</option>
+                                    }
+                                    @if (ViewBag.SortBy == "name")
+                                    {
+                                        <option value="name" selected>Tên</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="name">Tên</option>
+                                    }
+                                    @if (ViewBag.SortBy == "price-low")
+                                    {
+                                        <option value="price-low" selected>Giá tăng dần</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="price-low">Giá tăng dần</option>
+                                    }
+                                    @if (ViewBag.SortBy == "price-high")
+                                    {
+                                        <option value="price-high" selected>Giá giảm dần</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="price-high">Giá giảm dần</option>
+                                    }
+                                    @if (ViewBag.SortBy == "newest")
+                                    {
+                                        <option value="newest" selected>Mới nhất</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="newest">Mới nhất</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div class="product-grid">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var product in Model)
+                            {
+                                <div class="product-card">
+                                    <!-- Product Image -->
+                                    <div class="product-image">
+                                        <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="product-link">
+                                            <img src="@Url.Action("GetProductImage", "Home", new { productId = product.Id })" alt="@product.Name" class="product-img" />
+                                        </a>
+                                        <button class="wishlist-btn" data-product-id="@product.Id">
+                                            <i class="fa fa-heart"></i>
+                                        </button>
+                                        @await Html.PartialAsync("_CompareButton", product.Id)
+                                        @if (product.Quantity <= 0)
+                                        {
+                                            <div class="out-of-stock-badge">Hết hàng</div>
+                                        }
+                                    </div>
+
+                                    <!-- Product Info -->
+                                    <div class="product-info">
+                                        <div class="product-title">
+                                            <a href="@Url.Action("Details", "Product", new { id = product.Id })">@product.Name</a>
+                                        </div>
+                                        <div class="product-specs">
+                                            <p>Danh mục: @product.Category?.Name</p>
+                                            <p>Thương hiệu: @product.Brand?.Name</p>
+                                        </div>
+                                        <div class="price">@product.Price.ToString("N0").Replace(",", ".") VNĐ</div>
+                                    </div>
+                                    <div class="product-actions">
+                                        @if (product.Quantity > 0)
+                                        {
+                                            <button class="buy-btn" onclick="addToCart(@product.Id)">MUA NGAY</button>
+                                            <div class="sell-container">
+                                                <a href="@Url.Action("Create", "Sell", new { productId = product.Id })" class="sell-btn">THU MUA</a>
+                                                <div class="quote-text" onclick="getQuote(@product.Id)">Báo Giá</div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <button class="buy-btn disabled" disabled>Hết hàng</button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="no-products">
+                                <i class="fa fa-box-open fa-3x mb-3"></i>
+                                <p>Hiện tại không có đồng hồ @brand?.Name nào</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    @if (Model != null && Model.PageCount > 1)
+                    {
+                        <div class="pagination-wrapper">
+                            @Html.PagedListPager(Model, page => {
+                                var routeValues = new Dictionary<string, object>
+                                {
+                                    { "brandId", brand.Id },
+                                    { "page", page },
+                                    { "pageSize", ViewBag.PageSize },
+                                    { "sortBy", ViewBag.SortBy }
+                                };
+                                
+                                // Add filter parameters from current URL
+                                var currentUrl = Context.Request.Query;
+                                if (!string.IsNullOrEmpty(currentUrl["models"]))
+                                    routeValues["models"] = currentUrl["models"];
+                                if (!string.IsNullOrEmpty(currentUrl["materials"]))
+                                    routeValues["materials"] = currentUrl["materials"];
+                                if (!string.IsNullOrEmpty(currentUrl["genders"]))
+                                    routeValues["genders"] = currentUrl["genders"];
+                                if (!string.IsNullOrEmpty(currentUrl["conditions"]))
+                                    routeValues["conditions"] = currentUrl["conditions"];
+                                if (!string.IsNullOrEmpty(currentUrl["colors"]))
+                                    routeValues["colors"] = currentUrl["colors"];
+                                if (!string.IsNullOrEmpty(currentUrl["markers"]))
+                                    routeValues["markers"] = currentUrl["markers"];
+                                if (!string.IsNullOrEmpty(currentUrl["movements"]))
+                                    routeValues["movements"] = currentUrl["movements"];
+                                if (!string.IsNullOrEmpty(currentUrl["bracelets"]))
+                                    routeValues["bracelets"] = currentUrl["bracelets"];
+                                if (!string.IsNullOrEmpty(currentUrl["minPrice"]))
+                                    routeValues["minPrice"] = currentUrl["minPrice"];
+                                if (!string.IsNullOrEmpty(currentUrl["maxPrice"]))
+                                    routeValues["maxPrice"] = currentUrl["maxPrice"];
+                                
+                                return Url.Action("Brand", routeValues);
+                            })
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="~/js/brand-filter.js"></script>
+    <script src="~/js/simple-wishlist.js"></script>
+    <script>
+        function toggleFilter(element) {
+            const options = element.nextElementSibling;
+            const icon = element.querySelector('i');
+            
+            if (options.classList.contains('show')) {
+                options.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                options.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            }
+        }
+
+        function changePerPage(pageSize) {
+            const url = new URL(window.location);
+            url.searchParams.set('pageSize', pageSize);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function changeSortBy(sortBy) {
+            const url = new URL(window.location);
+            url.searchParams.set('sortBy', sortBy);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function addToCart(productId) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            fetch('/Home/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: `productId=${productId}&__RequestVerificationToken=${token}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    if (typeof updateCartCount === 'function') {
+                        updateCartCount();
+                    }
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Could not add to cart', 'error');
+            });
+        }
+
+        function getQuote(productId) {
+            window.location.href = '/Sell/Create?productId=' + productId;
+        }
+
+        // Function to show notifications - sử dụng SweetAlert
+        function showNotification(message, type) {
+            // Sử dụng SweetAlert nếu có, nếu không thì dùng alert đơn giản
+            if (typeof Swal !== 'undefined') {
+                let icon = 'info';
+                let title = 'Thông báo';
+                
+                if (type === 'success') {
+                    icon = 'success';
+                    title = 'Thành công';
+                } else if (type === 'error') {
+                    icon = 'error';
+                    title = 'Lỗi';
+                } else if (type === 'warning') {
+                    icon = 'warning';
+                    title = 'Cảnh báo';
+                }
+                
+                Swal.fire({
+                    title: title,
+                    text: message,
+                    icon: icon,
+                    timer: type === 'success' ? 2000 : 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            } else {
+                // Fallback: sử dụng alert đơn giản
+                alert(message);
+            }
+        }
+
+    </script>
+}

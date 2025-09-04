@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAYwDd2tplyUGZ4UPzsJUmIAAAAAACAAAAAAAQZgAAAAEAACAAAADtV9Hvvcj1aQBERiSvwoBsIUs9tH6LDMirooVJGCeiPwAAAAAOgAAAAAIAACAAAAC6BLYeR7QR5czJjuqWTaxCEi3Au71spoLzIbJM0cxNPCAAAACXVVjj8yodbdyZo3MDvhjCWYKbexZF7vyDsgnbBEPoI0AAAAD+GciWSOBJRFUYqtLD/L0GmC7NjeCa67wffMGJ29FwGjRcfCYKvsVZD6xvY6sMdWhIyPIVTGuzkXVmxRgVO8ad</EncryptedPassword>
+    <History>True|2025-06-06T03:40:04.7592990Z||;True|2025-06-06T05:53:45.9844205+07:00||;True|2025-06-04T00:34:43.5257562+07:00||;True|2025-06-04T00:29:01.0146508+07:00||;True|2025-05-30T14:55:34.1812859+07:00||;True|2025-05-28T22:10:00.5889069+07:00||;True|2025-05-28T22:01:15.7156892+07:00||;True|2025-05-28T21:56:44.1511560+07:00||;True|2025-05-26T21:31:43.0707112+07:00||;True|2025-05-21T21:26:56.7221242+07:00||;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="ConnectedDb">
+      <Value>Server=SQL1003.site4now.net%3bDatabase=db_ab9505_login%3bUser Id=db_ab9505_login_admin%3bPassword=nv123456%3bTrustServerCertificate=True%3bMultipleActiveResultSets=true%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

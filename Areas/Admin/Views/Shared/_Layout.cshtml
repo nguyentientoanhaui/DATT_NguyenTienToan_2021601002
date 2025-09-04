@@ -1,0 +1,533 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>@ViewData["title"] - Admin</title>
+
+    <!-- Custom fonts for this template -->
+    <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Custom styles for this template -->
+    <link href="~/css/sb-admin-2.css" rel="stylesheet" />
+
+    <!-- Styles from old template -->
+    <link href="~/css/prettyPhoto.css" rel="stylesheet" />
+    <link href="~/css/price-range.css" rel="stylesheet" />
+    <link href="~/css/animate.css" rel="stylesheet" />
+    <link href="~/css/main.css" rel="stylesheet" />
+    <link href="~/css/responsive.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css" />
+    <link href="~/css/datatables.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.min.css" />
+    <link rel="stylesheet" href="~/css/buttons.dataTables.min.css" />
+    <link rel="stylesheet" href="~/css/morris.css" />
+    <link rel="stylesheet" href="~/css/jquery-ui.css" />
+
+    <style>
+        :root {
+            --primary-black: #000000;
+            --secondary-black: #1a1a1a;
+            --dark-gray: #2d2d2d;
+            --medium-gray: #666666;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            --accent-gray: #e0e0e0;
+            --border-color: #e8e8e8;
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --soft-blue: #4a90e2;
+            --soft-gray: #8e8e93;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--white) !important;
+            color: var(--primary-black) !important;
+        }
+
+        /* Simple Sidebar Styles */
+        .sidebar {
+            background: var(--white) !important;
+            min-height: 100vh;
+            box-shadow: 2px 0 10px var(--shadow-light);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand {
+            background: var(--white) !important;
+            color: var(--primary-black) !important;
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand .sidebar-brand-text {
+            color: var(--primary-black) !important;
+            font-weight: 500;
+            font-size: 1.5rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar-brand .sidebar-brand-icon {
+            color: var(--primary-black) !important;
+            font-size: 1.5rem;
+        }
+
+        .nav-item {
+            margin: 0.25rem 1rem;
+        }
+
+        .nav-link {
+            color: var(--primary-black) !important;
+            padding: 0.75rem 1rem !important;
+            border-radius: 0 !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            text-decoration: none !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.2s ease;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-black) !important;
+            background: transparent !important;
+            font-weight: 600 !important;
+        }
+
+        .nav-link.active {
+            background: transparent !important;
+            color: var(--primary-black) !important;
+            font-weight: 600 !important;
+            border: none !important;
+            font-size: 0.9rem !important;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .sidebar-divider {
+            border-top: 1px solid var(--border-color) !important;
+            margin: 1rem 1rem;
+        }
+
+        #sidebarToggle {
+            background: transparent !important;
+            color: var(--primary-black) !important;
+            border: none !important;
+            width: 35px !important;
+            height: 35px !important;
+            border-radius: 50% !important;
+            margin: 1rem auto !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.2s ease;
+        }
+
+        #sidebarToggle:hover {
+            background: transparent !important;
+        }
+
+        /* Simple Topbar Styles */
+        .topbar {
+            background: var(--white) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+
+        .topbar .navbar-nav .nav-link {
+            color: var(--primary-black) !important;
+            font-weight: 400;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .topbar-divider {
+            border-left: 1px solid var(--border-color) !important;
+        }
+
+        /* Content Wrapper */
+        #content-wrapper {
+            background: var(--white) !important;
+        }
+
+        /* Simple Dropdown Styles */
+        .dropdown-menu {
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 4px 12px var(--shadow-light) !important;
+            border-radius: 8px !important;
+        }
+
+        .dropdown-item {
+            color: var(--primary-black) !important;
+            font-weight: 400;
+            padding: 0.5rem 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dropdown-item:hover {
+            background: var(--light-gray) !important;
+            color: var(--primary-black) !important;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+
+        /* Simple scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--white);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--medium-gray);
+            border-radius: 2px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-gray);
+        }
+    </style>
+</head>
+<body id="page-top">
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar">
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+                <div class="sidebar-brand-icon">
+                    <i class="fas fa-gem"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">Aurum</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0" />
+
+            <!-- Nav Items -->
+            <li class="nav-item">
+                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Home Client</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Product" asp-action="Index">
+                    <i class="fas fa-fw fa-clock"></i>
+                    <span>Đồng hồ</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Category" asp-action="Index">
+                    <i class="fas fa-fw fa-list"></i>
+                    <span>Danh mục</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Brand" asp-action="Index">
+                    <i class="fas fa-fw fa-crown"></i>
+                    <span>Thương hiệu</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Order" asp-action="Index">
+                    <i class="fas fa-fw fa-shopping-cart"></i>
+                    <span>Đơn hàng</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="User" asp-action="Index">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Khách hàng</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Rating" asp-action="Index">
+                    <i class="fas fa-fw fa-star"></i>
+                    <span>Đánh giá</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Coupon" asp-action="Index">
+                    <i class="fas fa-fw fa-ticket-alt"></i>
+                    <span>Phiếu giảm giá</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Slider" asp-action="Index">
+                    <i class="fas fa-fw fa-images"></i>
+                    <span>Banner</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Dashboard" asp-action="SalesStats">
+                    <i class="fas fa-fw fa-chart-line"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block" />
+
+            <!-- Sidebar Toggler -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+        </ul>
+        <!-- End of Sidebar -->
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <!-- Main Content -->
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+                        <li class="nav-item dropdown no-arrow d-sm-none">
+                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-search fa-fw"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
+                                <form class="form-inline mr-auto w-100 navbar-search">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-light border-0 small" placeholder="Search" aria-label="Search" aria-describedby="basic-addon2" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="button">
+                                                <i class="fas fa-search fa-sm"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </li>
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-user mr-3"></i> @User.Identity.Name <span class="caret"></span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                                @* <a class="dropdown-item" href="#"> *@
+                                @*     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> *@
+                                @*     Profile *@
+                                @* </a> *@
+                                @* <a class="dropdown-item" href="#"> *@
+                                @*     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> *@
+                                @*     Settings *@
+                                @* </a> *@
+                                @* <a class="dropdown-item" href="#"> *@
+                                @*     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i> *@
+                                @*     Activity Log *@
+                                @* </a> *@
+                                @* <div class="dropdown-divider"></div> *@
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    @* @Html.Partial("_NotificationPartial") *@
+                    @RenderBody()
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+            <!-- End of Main Content -->
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <p>Copyright © @DateTime.Now.Year Aurum Inc. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+        </div>
+        <!-- End of Content Wrapper -->
+    </div>
+    <!-- End of Page Wrapper -->
+    <!-- Scroll to Top Button -->
+    @* <a class="scroll-to-top rounded" href="#page-top"> *@
+    @*     <i class="fas fa-angle-up"></i> *@
+    @* </a> *@
+
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Select "Logout" below if you are ready to end your current session.
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-warning" asp-area="Admin" asp-controller="User" asp-action="AdminLogout">Log out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/vendor/jquery/jquery.min.js"></script>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="~/js/sb-admin-2.min.js"></script>
+
+    <!-- Scripts from old template -->
+    <script src="~/js/jquery.scrollUp.min.js"></script>
+    <script src="~/js/price-range.js"></script>
+    <script src="~/js/jquery.prettyPhoto.js"></script>
+    <script src="~/js/main.js"></script>
+    <script src="~/backend/js/site.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.min.js"></script>
+    <script src="~/js/dataTables.buttons.js"></script>
+    <script src="~/js/buttons.dataTables.js"></script>
+    <script src="~/js/jszip.min.js"></script>
+    <script src="~/js/pdfmake.min.js"></script>
+    <script src="~/js/vfs_fonts.js"></script>
+    <script src="~/js/buttons.html5.min.js"></script>
+    <script src="~/js/buttons.print.min.js"></script>
+    <script src="~/js/raphael-min.js"></script>
+    <script src="~/js/morris.min.js"></script>
+    <script src="~/js/jquery-ui.js"></script>
+    <script src="~/js//chart.min.js"></script>
+
+    <!-- Notification Script -->
+    <script>
+        var message = @Html.Raw(Json.Serialize(TempData["success"]));
+        var errorMessage = @Html.Raw(Json.Serialize(TempData["error"]));
+
+        if (message) {
+            Swal.fire({
+                title: "Thông báo",
+                text: message,
+                icon: "success"
+            });
+        }
+        if (errorMessage) {
+            Swal.fire({
+                title: "Lỗi!",
+                text: errorMessage,
+                icon: "error"
+            });
+        }
+    </script>
+
+    <!-- DataTables Script -->
+    <script>
+        let table = new DataTable('#myTable', {
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                },
+                bottomStart: {
+                    pageLength: {}, 
+                    info: {},
+                }
+            },
+            lengthMenu: [10, 25, 50, 100], 
+            pageLength: 10
+        });
+    </script>
+
+    <!-- Sidebar Active State Script -->
+    <script>
+        // Set active state for current page
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && currentPath.includes(href.replace('~', ''))) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Special case for Dashboard
+            if (currentPath.includes('/Admin/Dashboard') && !currentPath.includes('/SalesStats')) {
+                const dashboardLink = document.querySelector('.sidebar .nav-link[asp-controller="Dashboard"]');
+                if (dashboardLink) {
+                    dashboardLink.classList.add('active');
+                }
+            }
+        });
+
+        // Enhanced sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const icon = this.querySelector('i');
+            
+            if (sidebar.classList.contains('toggled')) {
+                sidebar.classList.remove('toggled');
+                icon.classList.remove('fa-angle-right');
+                icon.classList.add('fa-angle-left');
+            } else {
+                sidebar.classList.add('toggled');
+                icon.classList.remove('fa-angle-left');
+                icon.classList.add('fa-angle-right');
+            }
+        });
+
+        // Simple hover effects
+        const navLinks = document.querySelectorAll('.sidebar .nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.opacity = '1';
+                }
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.opacity = '0.8';
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

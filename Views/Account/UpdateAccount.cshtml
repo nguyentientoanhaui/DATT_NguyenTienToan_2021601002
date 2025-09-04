@@ -1,0 +1,83 @@
+﻿@model AppUserModel
+@{
+    ViewData["Title"] = "Cập nhật thông tin";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Cập nhật thông tin</h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["success"]
+                        </div>
+                    }
+                    
+                    @if (TempData["error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["error"]
+                        </div>
+                    }
+
+                    <form asp-action="UpdateInfoAccount" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" readonly />
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="FullName" class="form-label">Họ và tên</label>
+                            <input asp-for="FullName" class="form-control" placeholder="Nhập họ và tên" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="Nhập số điện thoại" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Gender" class="form-label">Giới tính</label>
+                            <select asp-for="Gender" class="form-control">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Age" class="form-label">Tuổi</label>
+                            <input asp-for="Age" type="number" min="1" max="120" class="form-control" placeholder="Nhập tuổi (1-120)" />
+                            <span asp-validation-for="Age" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Address" class="form-label">Địa chỉ</label>
+                            <textarea asp-for="Address" class="form-control" rows="3" placeholder="Nhập địa chỉ"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

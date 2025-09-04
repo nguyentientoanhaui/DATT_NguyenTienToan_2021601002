@@ -1,0 +1,270 @@
+@{
+    var rolesAllowed = new[] { "Admin", "Manager", "Staff", "Sale", "Shipper" };
+    bool showAdminMenu = rolesAllowed.Any(role => User.IsInRole(role));
+}
+
+<link rel="stylesheet" href="~/css/header.css" />
+
+<!-- Header Partial -->
+<div class="integrated-header @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "home-page" : "other-pages")">
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-content">
+                <div class="top-bar-left">
+                    <div class="contact-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <i class="fas fa-phone"></i>
+                        <a href="#" class="top-link">Liên Hệ</a>
+                        <a href="/" class="top-link">Đồng Hồ Cao Cấp</a>
+                        <a href="#" class="top-link">Thu Mua Đồng Hồ</a>
+                    </div>
+                </div>
+                <div class="top-bar-center">
+                    <div class="certified-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <span>100% Hàng Chính Hãng</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <div class="top-bar-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="Tìm kiếm đồng hồ..." id="search-input" autocomplete="off">
+                        <i class="fas fa-times" id="clear-search" style="display: none;"></i>
+                        <i class="fas fa-search" id="search-icon"></i>
+                        <div class="search-suggestions" id="search-suggestions">
+                            <!-- Recently Searched Section -->
+                            <div class="suggestion-section" id="recently-searched-section" style="display: none;">
+                                <div class="section-header">
+                                    <span>Tìm kiếm gần đây</span>
+                                    <button type="button" class="clear-history-btn" onclick="clearSearchHistory()">Xóa</button>
+                                </div>
+                                <div class="suggestion-items" id="recently-searched-items"></div>
+                            </div>
+                            
+                            <!-- Top Suggestions Section -->
+                            <div class="suggestion-section" id="top-suggestions-section" style="display: none;">
+                                <div class="section-header">
+                                    <span>Gợi ý hàng đầu</span>
+                                </div>
+                                <div class="suggestion-items" id="top-suggestions-items"></div>
+                            </div>
+                            
+                            <!-- Product Suggestions Section -->
+                            <div class="suggestion-section" id="product-suggestions-section" style="display: none;">
+                                <div class="section-header">
+                                    <span>Sản phẩm</span>
+                                </div>
+                                <div class="product-suggestions" id="product-suggestions-items"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-icons">
+                        <div class="compare-icon-wrapper">
+                            <a href="/Home/Compare" class="compare-link" title="So sánh sản phẩm">
+                                <i class="fas fa-balance-scale" id="compare-icon"></i>
+                                <span class="compare-count" id="compareCount" style="display: none;">0</span>
+                            </a>
+                        </div>
+                        <div class="cart-icon-wrapper">
+                            <i class="fas fa-shopping-bag" id="cart-icon"></i>
+                            <span class="cart-count" id="cart-count">0</span>
+                        </div>
+                        <div class="user-dropdown">
+                            <i class="fas fa-user" id="user-icon"></i>
+                            <div class="dropdown-menu" id="user-dropdown-menu">
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <a href="/Account/UpdateAccount" class="dropdown-item">
+                                        <i class="fas fa-user-circle"></i>
+                                        Tài khoản
+                                    </a>
+                                    <a href="/Account/History" class="dropdown-item">
+                                        <i class="fas fa-history"></i>
+                                        Lịch sử đơn hàng
+                                    </a>
+                                    <a href="/Home/Wishlist" class="dropdown-item">
+                                        <i class="fas fa-heart"></i>
+                                        Yêu thích
+                                    </a>
+                                    <a href="/Home/Compare" class="dropdown-item">
+                                        <i class="fas fa-balance-scale"></i>
+                                        So sánh
+                                    </a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a href="/Admin/Dashboard" class="dropdown-item">
+                                            <i class="fas fa-cog"></i>
+                                            Admin Panel
+                                        </a>
+                                    }
+                                    <a href="/Account/Logout" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                        Đăng xuất
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="/Account/Login" class="dropdown-item">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                        Đăng nhập
+                                    </a>
+                                    <a href="/Account/Register" class="dropdown-item">
+                                        <i class="fas fa-user-plus"></i>
+                                        Đăng ký
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                        <i class="fas fa-bars" id="menu-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @* <!-- Main Header with Logo - DISABLED -->
+    <div class="main-header">
+        <div class="container">
+            <div class="main-header-content">
+                <div class="header-logo">
+                    <a href="/" class="logo-link">
+                        <h1 class="logo-text">
+                            <span class="logo-aurum">Aurum</span>
+                        </h1>
+                    </a>
+                </div>
+                <div class="header-search">
+                    <div class="search-box-main">
+                        <input type="text" placeholder="Search" id="search-input-main" autocomplete="off">
+                        <i class="fas fa-search" id="search-icon-main"></i>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="cart-icon-wrapper-main">
+                        <i class="fas fa-shopping-bag" id="cart-icon-main"></i>
+                        <span class="cart-count-main" id="cart-count-main">0</span>
+                    </div>
+                    <div class="user-dropdown-main">
+                        <i class="fas fa-user" id="user-icon-main"></i>
+                        <div class="dropdown-menu-main" id="user-dropdown-menu-main">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a href="/Account/UpdateAccount" class="dropdown-item">
+                                    <i class="fas fa-user-circle"></i>
+                                    Tài khoản
+                                </a>
+                                <a href="/Account/History" class="dropdown-item">
+                                    <i class="fas fa-history"></i>
+                                    Lịch sử đơn hàng
+                                </a>
+                                <a href="/Home/Wishlist" class="dropdown-item">
+                                    <i class="fas fa-heart"></i>
+                                    Yêu thích
+                                </a>
+                                <a href="/Home/Compare" class="dropdown-item">
+                                    <i class="fas fa-balance-scale"></i>
+                                    So sánh
+                                </a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a href="/Admin/Dashboard" class="dropdown-item">
+                                        <i class="fas fa-cog"></i>
+                                        Admin Panel
+                                    </a>
+                                }
+                                <a href="/Account/Logout" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Đăng xuất
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="/Account/Login" class="dropdown-item">
+                                    <i class="fas fa-sign-in-alt"></i>
+                                    Đăng nhập
+                                </a>
+                                <a href="/Account/Register" class="dropdown-item">
+                                    <i class="fas fa-user-plus"></i>
+                                    Đăng ký
+                                </a>
+                            }
+                        </div>
+                    </div>
+                    <i class="fas fa-bars" id="menu-icon-main"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    *@
+</div>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay">
+    <div class="mobile-menu-content">
+        <div class="mobile-menu-header">
+            <h3>Danh Mục</h3>
+            <button class="close-menu" id="close-menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-menu-items">
+            <a href="/" class="menu-item">
+                <i class="fas fa-home"></i>
+                Trang chủ
+            </a>
+            <a href="/Product" class="menu-item">
+                <i class="fas fa-shopping-bag"></i>
+                Sản phẩm
+            </a>
+            <a href="/Category" class="menu-item">
+                <i class="fas fa-th-large"></i>
+                Danh mục
+            </a>
+            <a href="/Brand" class="menu-item">
+                <i class="fas fa-tags"></i>
+                Thương hiệu
+            </a>
+            <a href="/Home/Contact" class="menu-item">
+                <i class="fas fa-envelope"></i>
+                Liên hệ
+            </a>
+            <a href="/Home/Compare" class="menu-item">
+                <i class="fas fa-balance-scale"></i>
+                So sánh sản phẩm
+            </a>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a href="/Account/UpdateAccount" class="menu-item">
+                    <i class="fas fa-user"></i>
+                    Tài khoản
+                </a>
+                <a href="/Home/Wishlist" class="menu-item">
+                    <i class="fas fa-heart"></i>
+                    Yêu thích
+                </a>
+                <a href="/Cart" class="menu-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    Giỏ hàng
+                </a>
+                <a href="/Account/Logout" class="menu-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Đăng xuất
+                </a>
+            }
+            else
+            {
+                <a href="/Account/Login" class="menu-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Đăng nhập
+                </a>
+                <a href="/Account/Register" class="menu-item">
+                    <i class="fas fa-user-plus"></i>
+                    Đăng ký
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<script src="~/js/header.js"></script>

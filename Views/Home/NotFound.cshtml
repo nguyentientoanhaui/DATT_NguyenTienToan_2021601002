@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "404 - Không tìm thấy trang";
+}
+
+<div class="container text-center" style="padding: 50px 0;">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="error-template">
+                <img src="~/images/404/404.png" class="img-responsive" alt="404 Error" style="max-width: 300px; margin: 0 auto 30px;" />
+                <h1 style="color: #e74c3c; margin-bottom: 20px;">
+                    <i class="fa fa-exclamation-triangle"></i> OOPS! Không tìm thấy trang
+                </h1>
+                <div class="error-details" style="margin-bottom: 30px;">
+                    <p style="font-size: 18px; color: #666;">
+                        Trang bạn đang tìm kiếm có thể đã bị di chuyển, xóa hoặc không tồn tại.
+                    </p>
+                </div>
+                <div class="error-actions">
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-primary btn-lg" style="margin-right: 10px;">
+                        <i class="fa fa-home"></i> Về trang chủ
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-default btn-lg">
+                        <i class="fa fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .error-template {
+        padding: 40px 15px;
+        text-align: center;
+    }
+    
+    .error-template h1 {
+        font-size: 36px;
+        font-weight: bold;
+    }
+    
+    .error-template .error-details {
+        font-size: 16px;
+        margin: 20px 0;
+    }
+    
+    .error-template .error-actions {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .error-template .error-actions .btn {
+        margin-right: 10px;
+        padding: 10px 20px;
+    }
+</style>

@@ -1,0 +1,737 @@
+@model X.PagedList.IPagedList<Shopping_Demo.Models.ProductModel>
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+    ViewData["Title"] = "Sản Phẩm";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/aurum-style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1>Tất Cả Sản Phẩm</h1>
+            <p>Khám phá bộ sưu tập đồng hồ cao cấp của chúng tôi</p>
+        </div>
+    </div>
+</section>
+
+<!-- Filter Section -->
+<section class="filter-section">
+    <div class="container">
+        <div class="product-listing-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <div class="filter-header">
+                    <h3>Lọc Theo</h3>
+                    <button class="clear-all-btn" onclick="clearAllFilters()">Xóa Tất Cả</button>
+                </div>
+                
+                <form id="filter-form" method="get">
+                    <!-- Category Filter -->
+                    @if (ViewBag.CategoryData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Danh Mục <span class="filter-count-badge">@ViewBag.CategoryData.Count</span></span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var category in ViewBag.CategoryData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="category-@category.Name.ToLower().Replace(" ", "-")" name="categories" value="@category.Name" 
+                                               @(ViewBag.SelectedCategories != null && Array.IndexOf((string[])ViewBag.SelectedCategories, category.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="category-@category.Name.ToLower().Replace(" ", "-")">
+                                            <span>@category.Name</span>
+                                            <span class="filter-count">@category.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                                @if (ViewBag.CategoryData.Count > 8)
+                                {
+                                    <div class="filter-show-more">
+                                        <small>Cuộn để xem thêm (@ViewBag.CategoryData.Count options)</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Brand Filter -->
+                    @if (ViewBag.BrandData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Thương Hiệu <span class="filter-count-badge">@ViewBag.BrandData.Count</span></span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var brand in ViewBag.BrandData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="brand-@brand.Name.ToLower().Replace(" ", "-")" name="brands" value="@brand.Name" 
+                                               @(ViewBag.SelectedBrands != null && Array.IndexOf((string[])ViewBag.SelectedBrands, brand.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="brand-@brand.Name.ToLower().Replace(" ", "-")">
+                                            <span>@brand.Name</span>
+                                            <span class="filter-count">@brand.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                                @if (ViewBag.BrandData.Count > 8)
+                                {
+                                    <div class="filter-show-more">
+                                        <small>Cuộn để xem thêm (@ViewBag.BrandData.Count options)</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Model Filter -->
+                    @if (ViewBag.ModelData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Mẫu <span class="filter-count-badge">@ViewBag.ModelData.Count</span></span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var modelItem in ViewBag.ModelData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="model-@modelItem.Name.ToLower().Replace(" ", "-")" name="models" value="@modelItem.Name" 
+                                               @(ViewBag.SelectedModels != null && Array.IndexOf((string[])ViewBag.SelectedModels, modelItem.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="model-@modelItem.Name.ToLower().Replace(" ", "-")">
+                                            <span>@modelItem.Name</span>
+                                            <span class="filter-count">@modelItem.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                                @if (ViewBag.ModelData.Count > 8)
+                                {
+                                    <div class="filter-show-more">
+                                        <small>Cuộn để xem thêm (@ViewBag.ModelData.Count options)</small>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Price Filter -->
+                    <div class="filter-section">
+                        <div class="filter-title" onclick="toggleFilter(this)">
+                            <span>Giá</span>
+                            <i class="fa fa-chevron-down"></i>
+                        </div>
+                        <div class="filter-options" style="display: block;">
+                            <div class="price-range-inputs">
+                                <input type="number" name="minPrice" placeholder="Min" value="@ViewBag.MinPrice" onchange="applyFilters()">
+                                <span>-</span>
+                                <input type="number" name="maxPrice" placeholder="Max" value="@ViewBag.MaxPrice" onchange="applyFilters()">
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="price-under-2000" name="priceRanges" value="Under $2,000" 
+                                       @(ViewBag.SelectedPriceRanges != null && Array.IndexOf((string[])ViewBag.SelectedPriceRanges, "Under $2,000") >= 0 ? "checked" : "") onchange="applyFilters()">
+                                <label for="price-under-2000">
+                                    <span>Under $2,000</span>
+                                    <span class="filter-count">0</span>
+                                </label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="price-2000-5000" name="priceRanges" value="$2,000 to $5,000" 
+                                       @(ViewBag.SelectedPriceRanges != null && Array.IndexOf((string[])ViewBag.SelectedPriceRanges, "$2,000 to $5,000") >= 0 ? "checked" : "") onchange="applyFilters()">
+                                <label for="price-2000-5000">
+                                    <span>$2,000 to $5,000</span>
+                                    <span class="filter-count">0</span>
+                                </label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="price-5000-10000" name="priceRanges" value="$5,000 to $10,000" 
+                                       @(ViewBag.SelectedPriceRanges != null && Array.IndexOf((string[])ViewBag.SelectedPriceRanges, "$5,000 to $10,000") >= 0 ? "checked" : "") onchange="applyFilters()">
+                                <label for="price-5000-10000">
+                                    <span>$5,000 to $10,000</span>
+                                    <span class="filter-count">0</span>
+                                </label>
+                            </div>
+                            <div class="filter-option">
+                                <input type="checkbox" id="price-over-10000" name="priceRanges" value="Over $10,000" 
+                                       @(ViewBag.SelectedPriceRanges != null && Array.IndexOf((string[])ViewBag.SelectedPriceRanges, "Over $10,000") >= 0 ? "checked" : "") onchange="applyFilters()">
+                                <label for="price-over-10000">
+                                    <span>Over $10,000</span>
+                                    <span class="filter-count">0</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Size Filter -->
+                    @if (ViewBag.SizeData != null && ViewBag.SizeData.Count > 0)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Kích Thước <span class="filter-count-badge">@ViewBag.SizeData.Count</span></span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var size in ViewBag.SizeData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="size-@size.Name.ToLower().Replace(" ", "-")" name="sizes" value="@size.Name" 
+                                               @(ViewBag.SelectedSizes != null && Array.IndexOf((string[])ViewBag.SelectedSizes, size.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="size-@size.Name.ToLower().Replace(" ", "-")">
+                                            <span>@size.Name</span>
+                                            <span class="filter-count">@size.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title">
+                                <span>Kích Thước <span class="filter-count-badge">0</span></span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                <div class="filter-option">
+                                    <small style="color: #6c757d;">No size data available (SizeData: @(ViewBag.SizeData?.Count ?? 0))</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Case Material Filter -->
+                    @if (ViewBag.CaseMaterialData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Chất Liệu Vỏ</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var material in ViewBag.CaseMaterialData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="material-@material.Name.ToLower().Replace(" ", "-")" name="materials" value="@material.Name" 
+                                               @(ViewBag.SelectedMaterials != null && Array.IndexOf((string[])ViewBag.SelectedMaterials, material.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="material-@material.Name.ToLower().Replace(" ", "-")">
+                                            <span>@material.Name</span>
+                                            <span class="filter-count">@material.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Gender Filter -->
+                    @if (ViewBag.GenderData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Giới Tính</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var gender in ViewBag.GenderData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="gender-@gender.Name.ToLower().Replace(" ", "-")" name="genders" value="@gender.Name" 
+                                               @(ViewBag.SelectedGenders != null && Array.IndexOf((string[])ViewBag.SelectedGenders, gender.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="gender-@gender.Name.ToLower().Replace(" ", "-")">
+                                            <span>@gender.Name</span>
+                                            <span class="filter-count">@gender.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Condition Filter -->
+                    @if (ViewBag.ConditionData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Tình Trạng</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var condition in ViewBag.ConditionData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="condition-@condition.Name.ToLower().Replace(" ", "-")" name="conditions" value="@condition.Name" 
+                                               @(ViewBag.SelectedConditions != null && Array.IndexOf((string[])ViewBag.SelectedConditions, condition.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="condition-@condition.Name.ToLower().Replace(" ", "-")">
+                                            <span>@condition.Name</span>
+                                            <span class="filter-count">@condition.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Dial Color Filter -->
+                    @if (ViewBag.DialColorData != null && ViewBag.DialColorData.Count > 0)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Màu Mặt Số <span class="filter-count-badge">@ViewBag.DialColorData.Count</span></span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var color in ViewBag.DialColorData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="color-@color.Name.ToLower().Replace(" ", "-")" name="colors" value="@color.Name" 
+                                               @(ViewBag.SelectedColors != null && Array.IndexOf((string[])ViewBag.SelectedColors, color.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="color-@color.Name.ToLower().Replace(" ", "-")">
+                                            <span>@color.Name</span>
+                                            <span class="filter-count">@color.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title">
+                                <span>Màu Mặt Số <span class="filter-count-badge">0</span></span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                <div class="filter-option">
+                                    <small style="color: #6c757d;">No color data available (ColorData: @(ViewBag.DialColorData?.Count ?? 0))</small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Hour Markers Filter -->
+                    @if (ViewBag.HourMarkersData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Vạch Số Giờ</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var marker in ViewBag.HourMarkersData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="marker-@marker.Name.ToLower().Replace(" ", "-")" name="markers" value="@marker.Name" 
+                                               @(ViewBag.SelectedMarkers != null && Array.IndexOf((string[])ViewBag.SelectedMarkers, marker.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="marker-@marker.Name.ToLower().Replace(" ", "-")">
+                                            <span>@marker.Name</span>
+                                            <span class="filter-count">@marker.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Movement Type Filter -->
+                    @if (ViewBag.MovementTypeData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Loại Máy</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var movement in ViewBag.MovementTypeData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="movement-@movement.Name.ToLower().Replace(" ", "-")" name="movements" value="@movement.Name" 
+                                               @(ViewBag.SelectedMovements != null && Array.IndexOf((string[])ViewBag.SelectedMovements, movement.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="movement-@movement.Name.ToLower().Replace(" ", "-")">
+                                            <span>@movement.Name</span>
+                                            <span class="filter-count">@movement.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Bracelet Material Filter -->
+                    @if (ViewBag.BraceletMaterialData != null)
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Chất Liệu Dây</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var bracelet in ViewBag.BraceletMaterialData)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="bracelet-@bracelet.Name.ToLower().Replace(" ", "-")" name="bracelets" value="@bracelet.Name" 
+                                               @(ViewBag.SelectedBracelets != null && Array.IndexOf((string[])ViewBag.SelectedBracelets, bracelet.Name) >= 0 ? "checked" : "") onchange="applyFilters()">
+                                        <label for="bracelet-@bracelet.Name.ToLower().Replace(" ", "-")">
+                                            <span>@bracelet.Name</span>
+                                            <span class="filter-count">@bracelet.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Hidden inputs for current state -->
+                    <input type="hidden" name="page" value="1">
+                    <input type="hidden" name="pageSize" value="@ViewBag.PageSize">
+                    <input type="hidden" name="sortBy" value="@ViewBag.SortBy">
+                </form>
+            </div>
+            
+            <!-- Products Content -->
+            <div class="products-content">
+                <!-- Products Header -->
+                <div class="products-header">
+                    <div class="products-count">
+                        <span>@Model.TotalItemCount Sản Phẩm</span>
+                    </div>
+                    <div class="products-controls">
+                        <div class="per-page-selector">
+                            <label>Mỗi Trang:</label>
+                            <select onchange="changePerPage(this.value)">
+                                @if (ViewBag.PageSize == 12)
+                                {
+                                    <option value="12" selected>12</option>
+                                }
+                                else
+                                {
+                                    <option value="12">12</option>
+                                }
+                                @if (ViewBag.PageSize == 24)
+                                {
+                                    <option value="24" selected>24</option>
+                                }
+                                else
+                                {
+                                    <option value="24">24</option>
+                                }
+                                @if (ViewBag.PageSize == 48)
+                                {
+                                    <option value="48" selected>48</option>
+                                }
+                                else
+                                {
+                                    <option value="48">48</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="sort-selector">
+                            <label>Sắp Xếp:</label>
+                            <select onchange="changeSortBy(this.value)">
+                                @if (ViewBag.SortBy == "featured")
+                                {
+                                    <option value="featured" selected>Nổi Bật</option>
+                                }
+                                else
+                                {
+                                    <option value="featured">Nổi Bật</option>
+                                }
+                                @if (ViewBag.SortBy == "name")
+                                {
+                                    <option value="name" selected>Tên A-Z</option>
+                                }
+                                else
+                                {
+                                    <option value="name">Tên A-Z</option>
+                                }
+                                @if (ViewBag.SortBy == "price-low")
+                                {
+                                    <option value="price-low" selected>Giá Thấp Đến Cao</option>
+                                }
+                                else
+                                {
+                                    <option value="price-low">Giá Thấp Đến Cao</option>
+                                }
+                                @if (ViewBag.SortBy == "price-high")
+                                {
+                                    <option value="price-high" selected>Giá Cao Đến Thấp</option>
+                                }
+                                else
+                                {
+                                    <option value="price-high">Giá Cao Đến Thấp</option>
+                                }
+                                @if (ViewBag.SortBy == "newest")
+                                {
+                                    <option value="newest" selected>Mới Nhất</option>
+                                }
+                                else
+                                {
+                                    <option value="newest">Mới Nhất</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="product-grid">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var product in Model)
+                        {
+                            <div class="product-card">
+                                <!-- Product Image -->
+                                <div class="product-image">
+                                    <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="product-link">
+                                        <img src="@Url.Action("GetProductImage", "Home", new { productId = product.Id })" alt="@product.Name" class="product-img" />
+                                    </a>
+                                    <button class="wishlist-btn" data-product-id="@product.Id">
+                                        <i class="fa fa-heart"></i>
+                                    </button>
+                                    @await Html.PartialAsync("_CompareButton", product.Id)
+                                    @if (product.Quantity <= 0)
+                                    {
+                                        <div class="out-of-stock-badge">Hết hàng</div>
+                                    }
+                                </div>
+
+                                <!-- Product Info -->
+                                <div class="product-info">
+                                    <div class="product-title">
+                                        <a href="@Url.Action("Details", "Product", new { id = product.Id })">@product.Name</a>
+                                    </div>
+                                    <div class="product-specs">
+                                        <p>Danh mục: @product.Category?.Name</p>
+                                        <p>Thương hiệu: @product.Brand?.Name</p>
+                                    </div>
+                                    <div class="price">@product.Price.ToString("N0").Replace(",", ".") VNĐ</div>
+                                    <div class="product-actions">
+                                        @if (product.Quantity > 0)
+                                        {
+                                            <a href="#" class="buy-btn">MUA NGAY</a>
+                                            <div class="sell-container">
+                                                <a href="javascript:void(0)" onclick="getQuote(@product.Id)" class="sell-btn">THU MUA</a>
+                                                <div class="quote-text" onclick="getQuote(@product.Id)">Báo Giá</div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <button class="buy-btn disabled" disabled>Hết hàng</button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-products">
+                            <i class="fa fa-box-open fa-3x mb-3"></i>
+                            <p>No products available at the moment</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model != null && Model.PageCount > 1)
+                {
+                    <div class="pagination-wrapper">
+                        @Html.PagedListPager(Model, page => {
+                            var routeValues = new Dictionary<string, object>
+                            {
+                                { "page", page },
+                                { "pageSize", ViewBag.PageSize },
+                                { "sortBy", ViewBag.SortBy }
+                            };
+                            
+                            // Add filter parameters from current URL
+                            var currentUrl = Context.Request.Query;
+                            if (!string.IsNullOrEmpty(currentUrl["categories"]))
+                                routeValues["categories"] = currentUrl["categories"];
+                            if (!string.IsNullOrEmpty(currentUrl["brands"]))
+                                routeValues["brands"] = currentUrl["brands"];
+                            if (!string.IsNullOrEmpty(currentUrl["models"]))
+                                routeValues["models"] = currentUrl["models"];
+                            if (!string.IsNullOrEmpty(currentUrl["materials"]))
+                                routeValues["materials"] = currentUrl["materials"];
+                            if (!string.IsNullOrEmpty(currentUrl["genders"]))
+                                routeValues["genders"] = currentUrl["genders"];
+                            if (!string.IsNullOrEmpty(currentUrl["conditions"]))
+                                routeValues["conditions"] = currentUrl["conditions"];
+                            if (!string.IsNullOrEmpty(currentUrl["colors"]))
+                                routeValues["colors"] = currentUrl["colors"];
+                            if (!string.IsNullOrEmpty(currentUrl["markers"]))
+                                routeValues["markers"] = currentUrl["markers"];
+                            if (!string.IsNullOrEmpty(currentUrl["movements"]))
+                                routeValues["movements"] = currentUrl["movements"];
+                            if (!string.IsNullOrEmpty(currentUrl["bracelets"]))
+                                routeValues["bracelets"] = currentUrl["bracelets"];
+                            if (!string.IsNullOrEmpty(currentUrl["minPrice"]))
+                                routeValues["minPrice"] = currentUrl["minPrice"];
+                            if (!string.IsNullOrEmpty(currentUrl["maxPrice"]))
+                                routeValues["maxPrice"] = currentUrl["maxPrice"];
+                            
+                            return Url.Action("Index", routeValues);
+                        })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="~/js/simple-wishlist.js"></script>
+    <script>
+        function toggleFilter(element) {
+            const options = element.nextElementSibling;
+            const icon = element.querySelector('i');
+            
+            if (options.classList.contains('show')) {
+                options.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                options.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            }
+        }
+
+        function changePerPage(pageSize) {
+            const url = new URL(window.location);
+            url.searchParams.set('pageSize', pageSize);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function changeSortBy(sortBy) {
+            const url = new URL(window.location);
+            url.searchParams.set('sortBy', sortBy);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function applyFilters() {
+            const form = document.getElementById('filter-form');
+            if (!form) return;
+            
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            
+            // Add all form data to URL parameters
+            for (let [key, value] of formData.entries()) {
+                if (value) {
+                    params.append(key, value);
+                }
+            }
+            
+            // Add current page size and sort if they exist
+            const currentUrl = new URL(window.location);
+            const pageSize = currentUrl.searchParams.get('pageSize');
+            const sortBy = currentUrl.searchParams.get('sortBy');
+            
+            if (pageSize) params.set('pageSize', pageSize);
+            if (sortBy) params.set('sortBy', sortBy);
+            
+            // Reset to page 1 when applying filters
+            params.set('page', '1');
+            
+            // Update URL
+            window.location.search = '?' + params.toString();
+        }
+
+        function clearAllFilters() {
+            const form = document.getElementById('filter-form');
+            if (!form) return;
+            
+            // Clear all checkboxes
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // Clear price inputs
+            const priceInputs = form.querySelectorAll('input[name="minPrice"], input[name="maxPrice"]');
+            priceInputs.forEach(input => {
+                input.value = '';
+            });
+            
+            // Apply the cleared filters
+            applyFilters();
+        }
+
+        function addToCart(productId) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            fetch('/Home/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: `productId=${productId}&__RequestVerificationToken=${token}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Success', data.message, 'success');
+                    if (typeof updateCartCount === 'function') {
+                        updateCartCount();
+                    }
+                } else {
+                    showNotification('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Could not add to cart', 'error');
+            });
+        }
+
+        function getQuote(productId) {
+            window.location.href = '/Sell/Create?productId=' + productId;
+        }
+
+        function showNotification(title, message, type) {
+            // Sử dụng SweetAlert nếu có, nếu không thì dùng alert đơn giản
+            if (typeof Swal !== 'undefined') {
+                let icon = 'info';
+                let swalTitle = title;
+                
+                if (type === 'success') {
+                    icon = 'success';
+                    swalTitle = 'Thành công';
+                } else if (type === 'error') {
+                    icon = 'error';
+                    swalTitle = 'Lỗi';
+                } else if (type === 'warning') {
+                    icon = 'warning';
+                    swalTitle = 'Cảnh báo';
+                }
+                
+                Swal.fire({
+                    title: swalTitle,
+                    text: message,
+                    icon: icon,
+                    timer: type === 'success' ? 2000 : 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            } else {
+                // Fallback: sử dụng alert đơn giản
+                alert(`${title}: ${message}`);
+            }
+        }
+    </script>
+}

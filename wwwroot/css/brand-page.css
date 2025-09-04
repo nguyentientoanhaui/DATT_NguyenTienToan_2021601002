@@ -1,0 +1,576 @@
+/* Brand Page Styles - Inspired by Bob's Watches */
+
+/* Brand Header Section */
+.brand-header {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: white;
+    padding: 60px 0 40px;
+    margin-bottom: 0;
+}
+
+.brand-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.brand-info {
+    flex: 1;
+    max-width: 600px;
+}
+
+.brand-title {
+    font-size: 3.5rem;
+    font-weight: 300;
+    margin: 0 0 20px 0;
+    letter-spacing: -1px;
+    line-height: 1.1;
+}
+
+.brand-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+    margin: 0;
+    font-weight: 300;
+}
+
+.brand-stats {
+    text-align: center;
+    min-width: 200px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 200;
+    color: #ffd700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #b0b0b0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Main Layout */
+.product-listing-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    min-height: calc(100vh - 200px);
+}
+
+/* Filter Sidebar - Bob's Watches Style */
+.filter-sidebar {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    padding: 25px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.filter-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.clear-all-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.clear-all-btn:hover {
+    color: #0056b3;
+}
+
+/* Filter Sections */
+.filter-section {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 20px;
+}
+
+.filter-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.filter-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 0;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    transition: color 0.2s ease;
+}
+
+.filter-title:hover {
+    color: #007bff;
+}
+
+.filter-title i {
+    transition: transform 0.3s ease;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.filter-title.collapsed i {
+    transform: rotate(-90deg);
+}
+
+/* Filter Options */
+.filter-options {
+    margin-top: 0;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 6px 0;
+    transition: background-color 0.2s ease;
+}
+
+.filter-option:hover {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding-left: 8px;
+    margin-left: -8px;
+}
+
+.filter-option input[type="checkbox"] {
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
+    accent-color: #007bff;
+}
+
+.filter-option label {
+    font-size: 0.9rem;
+    color: #555;
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 400;
+}
+
+.filter-option label span:last-child {
+    color: #999;
+    font-size: 0.8rem;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Price Range Inputs */
+.price-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.price-range-inputs input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+}
+
+.price-range-inputs input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.1);
+}
+
+.price-range-inputs span {
+    color: #666;
+    font-weight: 500;
+}
+
+/* Products Content */
+.products-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+/* Products Header */
+.products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 30px;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafafa;
+}
+
+.products-count {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.products-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.per-page-selector,
+.sort-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.per-page-selector label,
+.sort-selector label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.per-page-selector select,
+.sort-selector select {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.per-page-selector select:focus,
+.sort-selector select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+/* Product Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    padding: 30px;
+}
+
+/* Product Card - Bob's Watches Style */
+.product-card {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-color: #007bff;
+}
+
+/* Wishlist Button */
+.wishlist-btn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.wishlist-btn:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.wishlist-btn i {
+    color: #666;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.wishlist-btn:hover i {
+    color: #e74c3c;
+}
+
+/* Product Image */
+.product-image {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.product-image a {
+    display: block;
+    height: 100%;
+}
+
+/* Product Info */
+.product-info {
+    padding: 20px;
+}
+
+.product-title {
+    margin-bottom: 8px;
+}
+
+.product-title a {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    line-height: 1.3;
+    transition: color 0.2s ease;
+}
+
+.product-title a:hover {
+    color: #007bff;
+}
+
+.product-reference {
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 8px;
+    font-family: 'Courier New', monospace;
+}
+
+.product-specs {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Product Actions */
+.product-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.buy-btn {
+    flex: 1;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.buy-btn:hover {
+    background: #0056b3;
+}
+
+.sell-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.sell-btn:hover {
+    background: #218838;
+}
+
+.quote-text {
+    font-size: 0.7rem;
+    color: #e0e0e0;
+    text-align: center;
+    margin-top: 2px;
+}
+
+/* No Products */
+.no-products {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.no-products i {
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.no-products p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Pagination */
+.pagination-wrapper {
+    padding: 30px;
+    border-top: 1px solid #f0f0f0;
+    background: #fafafa;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .product-listing-layout {
+        grid-template-columns: 250px 1fr;
+        gap: 30px;
+        padding: 30px 15px;
+    }
+    
+    .brand-title {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-listing-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px 15px;
+    }
+    
+    .filter-sidebar {
+        position: static;
+        order: 2;
+    }
+    
+    .products-content {
+        order: 1;
+    }
+    
+    .brand-hero {
+        flex-direction: column;
+        text-align: center;
+        gap: 30px;
+    }
+    
+    .brand-title {
+        font-size: 2.5rem;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .products-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .products-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+    
+    .brand-title {
+        font-size: 2rem;
+    }
+    
+    .brand-description {
+        font-size: 1rem;
+    }
+    
+    .product-actions {
+        flex-direction: column;
+    }
+    
+    .buy-btn,
+    .sell-btn {
+        width: 100%;
+    }
+}

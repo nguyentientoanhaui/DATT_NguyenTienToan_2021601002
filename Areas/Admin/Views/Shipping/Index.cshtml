@@ -1,0 +1,168 @@
+﻿@model IEnumerable<ShippingModel>
+@{
+    ViewData["title"] = "Thêm Vận Chuyển";
+}
+
+<style type="text/css">
+    .css_select_div {
+        text-align: center;
+    }
+
+    .css_select {
+        display: inline-table;
+        width: 25%;
+        padding: 5px;
+        margin: 5px 2%;
+        border: solid 1px #686868;
+        border-radius: 5px;
+    }
+</style>
+<h3>Thêm Vận Chuyển</h3>
+
+<div class="col-md-9">
+    @*  <form asp-action="Create" enctype="multipart/form-data"> *@
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label>Tỉnh thành phố</label>
+        <select class="css_select form-control" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+            <option value="0">Tỉnh Thành</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Quận huyện</label>
+        <select class="css_select form-control" id="quan" name="quan" title="Chọn Quận Huyện">
+            <option value="0">Quận Huyện</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Phường Xã</label>
+        <select class="css_select form-control" id="phuong" name="phuong" title="Chọn Phường Xã">
+            <option value="0">Phường Xã</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Giá</label>
+        <input id="price-shipping" type="number" placeholder="vd: 20000" min="1" class="form-control" />
+
+    </div>
+
+    <div class="form-group">
+        <button type="button" class="btn btn-primary btn-add-shipping">Thêm mới</button>
+    </div>
+
+    <h2>Danh Sách Vận Chuyển</h2>
+
+    <table class="table table-striped" id="myTable">
+        <thead>
+            <tr>
+                <th>Thành phố</th>
+                <th>Quận huyện</th>
+                <th>Phường xã</th>
+                <th>Giá</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var shipping in ViewBag.Shippings)
+            {
+                <tr>
+                    <td>@shipping.City</td>
+                    <td>@shipping.District</td>
+                    <td>@shipping.Ward</td>
+                    <td>@shipping.Price.ToString("#,##0 VNĐ")</td>
+                    <td>
+                        <a onclick="return confirm('Bạn có chắc chắn muốn xóa?')" href="@Url.Action("Delete", "Shipping", new { id = shipping.Id })" class="btn btn-danger">Xóa</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(".btn-add-shipping").click(function(){
+            var tinh = $("#tinh").find('option:selected').text();
+            var quan = $("#quan").find('option:selected').text();
+            var phuong = $("#phuong").find('option:selected').text();
+            var price = $("#price-shipping").val();
+            // alert(tinh);
+            // alert(quan);
+            // alert(phuong);
+            // alert(price);
+            if (tinh == '' || quan == '' || phuong == '' || price == '') {
+                Swal.fire("Làm ơn ko bỏ trống.");
+            }else{
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("StoreShipping", "Shipping")",
+                    data: { tinh: tinh, quan: quan, phuong: phuong, price: price }, // Send data to the server
+
+                    success: function (result) {
+                        // Handle successful update
+                        if (result.success) {
+
+                            Swal.fire("Thêm vận chuyển thành công. Load lại page để thấy data.");
+
+                        } else if (result.duplicate) {
+
+                            Swal.fire("Dữ liệu trùng lặp.");
+
+                        }
+                    }
+
+                });
+            }
+
+
+        })
+        $(document).ready(function () {
+            //Lấy tỉnh thành
+            $.getJSON('https://esgoo.net/api-tinhthanh/1/0.htm', function (data_tinh) {
+                if (data_tinh.error == 0) {
+                    $.each(data_tinh.data, function (key_tinh, val_tinh) {
+                        $("#tinh").append('<option value="' + val_tinh.id + '">' + val_tinh.full_name + '</option>');
+                    });
+                    $("#tinh").change(function (e) {
+                        var idtinh = $(this).val();
+                        //Lấy quận huyện
+                        $.getJSON('https://esgoo.net/api-tinhthanh/2/' + idtinh + '.htm', function (data_quan) {
+                            if (data_quan.error == 0) {
+                                $("#quan").html('<option value="0">Quận Huyện</option>');
+                                $("#phuong").html('<option value="0">Phường Xã</option>');
+                                $.each(data_quan.data, function (key_quan, val_quan) {
+                                    $("#quan").append('<option value="' + val_quan.id + '">' + val_quan.full_name + '</option>');
+                                });
+                                //Lấy phường xã
+                                $("#quan").change(function (e) {
+                                    var idquan = $(this).val();
+                                    $.getJSON('https://esgoo.net/api-tinhthanh/3/' + idquan + '.htm', function (data_phuong) {
+                                        if (data_phuong.error == 0) {
+                                            $("#phuong").html('<option value="0">Phường Xã</option>');
+                                            $.each(data_phuong.data, function (key_phuong, val_phuong) {
+                                                $("#phuong").append('<option value="' + val_phuong.id + '">' + val_phuong.full_name + '</option>');
+                                            });
+                                        }
+                                    });
+                                });
+
+                            }
+                        }); //end $.getJson
+
+                    });
+
+                }
+            });
+        });
+    </script>
+
+}
+
+

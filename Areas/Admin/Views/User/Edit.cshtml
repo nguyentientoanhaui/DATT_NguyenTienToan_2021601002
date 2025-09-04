@@ -1,0 +1,68 @@
+﻿@model AppUserModel
+@{
+    ViewData["title"] = "Chỉnh sửa người dùng";
+}
+<h4>Chỉnh sửa người dùng</h4>
+<div class="col-md-9">
+    <form asp-action="Edit" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id"/>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label>Tên đăng nhập:</label>
+            <input asp-for="UserName" readonly class="form-control" />
+            <span asp-validation-for="UserName" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Họ và tên:</label>
+            <input asp-for="FullName" class="form-control" />
+            <span asp-validation-for="FullName" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Giới tính:</label>
+            <select asp-for="Gender" class="form-control">
+                <option value="">-- Select Gender --</option>
+                <option value="Male">Nam</option>
+                <option value="Female">Nữ</option>
+                <option value="Other">Khác</option>
+            </select>
+            <span asp-validation-for="Gender" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Tuổi:</label>
+            <input asp-for="Age" type="number" min="1" max="120" class="form-control" placeholder="Nhập tuổi (1-120)" />
+            <span asp-validation-for="Age" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Địa chỉ:</label>
+            <input asp-for="Address" class="form-control" />
+            <span asp-validation-for="Address" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Email:</label>
+            <input asp-for="Email" readonly class="form-control" />
+            <span asp-validation-for="Email" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input asp-for="PhoneNumber" class="form-control" />
+            <span asp-validation-for="PhoneNumber" class="text-danger" />
+        </div>
+
+         <div class="form-group">
+             <label>Phân quyền:</label>
+            <select asp-for="RoleId" required class="form-control" asp-items="ViewBag.Roles">
+             </select>
+             <span asp-validation-for="RoleId" class="text-danger" />
+         </div>
+        <div class="form-group d-flex gap-3">
+            <button class="btn btn-primary">Lưu</button>
+        </div>
+    </form>
+<a asp-action="Index" >Trở lại danh sách</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

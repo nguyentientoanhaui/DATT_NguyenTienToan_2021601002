@@ -1,0 +1,35 @@
+@model Shopping_Demo.Models.PaymentModel
+@{
+    ViewData["Title"] = "Thanh Toán Thất Bại";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="alert alert-danger">
+                <h1><i class="fa fa-times-circle"></i></h1>
+                <h2>Thanh Toán Thất Bại</h2>
+                <p>Rất tiếc, giao dịch thanh toán của bạn không thể hoàn tất.</p>
+                
+                @if (Model != null)
+                {
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5>Thông Tin Đơn Hàng</h5>
+                            <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
+                            <p><strong>Số tiền:</strong> @Model.TotalAmount.ToString("N0").Replace(",", ".")₫</p>
+                        </div>
+                    </div>
+                }
+                
+                <div class="mt-4">
+                    <a href="/Cart" class="btn btn-primary">Thử Lại</a>
+                    <a href="/" class="btn btn-secondary">Về Trang Chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

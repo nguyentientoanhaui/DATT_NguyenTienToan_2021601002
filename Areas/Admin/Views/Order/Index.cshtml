@@ -1,0 +1,183 @@
+﻿@model IEnumerable<OrderModel>
+
+@{
+    ViewData["title"] = "Danh sách đơn hàng";
+}
+
+<style>
+    .page-header {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: 0;
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .page-title {
+        color: var(--primary-black);
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .delete-all-btn {
+        background: transparent;
+        color: var(--primary-black);
+        border: 1px solid var(--border-color);
+        padding: 8px 16px;
+        border-radius: 0;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        transition: all 0.2s ease;
+    }
+
+    .delete-all-btn:hover {
+        background: var(--light-gray);
+        color: var(--primary-black);
+        text-decoration: none;
+    }
+
+    .table {
+        background: var(--white);
+        border: none;
+        border-radius: 0;
+    }
+
+    .table th {
+        background: var(--white);
+        color: var(--primary-black);
+        font-weight: 600;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .table td {
+        color: var(--primary-black);
+        font-weight: 600;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .btn-warning {
+        background: transparent;
+        color: var(--primary-black);
+        border: 1px solid var(--border-color);
+        border-radius: 0;
+        font-weight: 600;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .btn-warning:hover {
+        background: var(--light-gray);
+        color: var(--primary-black);
+        border: 1px solid var(--border-color);
+    }
+</style>
+
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="page-title">Danh sách đơn hàng</h1>
+        <a href="@Url.Action("DeleteAllOrders", "Order")" class="delete-all-btn" 
+           onclick="return confirm('Bạn có chắc chắn muốn xóa TẤT CẢ dữ liệu đơn hàng cũ? Hành động này không thể hoàn tác!')">
+            <i class="fas fa-trash"></i>
+            Xóa tất cả đơn hàng
+        </a>
+    </div>
+</div>
+
+<table class="table" id="myTable">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Mã đơn hàng</th>
+            <th scope="col">Người đặt hàng</th>
+            <th scope="col">Địa chỉ giao hàng</th>
+            <th scope="col">Phí vận chuyển</th>
+            <th scope="col">Mã giảm giá</th>
+            <th scope="col">Ngày đặt hàng</th>
+            <th scope="col">Trạng thái</th>
+            <th scope="col">Phương thức thanh toán</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int i = 1;
+        }
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@i</td>
+                <td>@item.OrderCode</td>
+                <td>@item.UserName</td>
+                <td>
+                    @(string.IsNullOrEmpty(item.ShippingAddress) ? "-" : item.ShippingAddress),
+                    @(string.IsNullOrEmpty(item.ShippingWard) ? "-" : item.ShippingWard),
+                    @(string.IsNullOrEmpty(item.ShippingDistrict) ? "-" : item.ShippingDistrict),
+                    @(string.IsNullOrEmpty(item.ShippingCity) ? "-" : item.ShippingCity)
+                </td>
+                <td>@item.ShippingCost.ToString("#,##0 VNĐ")</td>
+                <td>@item.CouponCode</td>
+                <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    @if (item.Status == 1)
+                    {
+                        <span class="badge" style="background-color: #007bff; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Đơn hàng mới</span>
+                    }
+                    else if (item.Status == 2)
+                    {
+                        <span class="badge" style="background-color: #ffc107; color: black; border-radius: 5px; padding: 0.25em 0.6em;">Chờ xác nhận</span>
+                    }
+                    else if (item.Status == 4)
+                    {
+                        <span class="badge" style="background-color: #17a2b8; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Đang giao hàng</span>
+                    }
+                    else if (item.Status == 0)
+                    {
+                        <span class="badge" style="background-color: #28a745; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Đã giao hàng</span>
+                    }
+                    else if (item.Status == 3)
+                    {
+                        <span class="badge" style="background-color: #dc3545; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Đã hủy</span>
+                    }
+                    else if (item.Status == 5)
+                    {
+                        <span class="badge" style="background-color: #ff9800; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Yêu cầu hoàn hàng</span>
+                    }
+                    else if (item.Status == 6)
+                    {
+                        <span class="badge" style="background-color: #673ab7; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Hoàn hàng thành công</span>
+                    }
+                    else
+                    {
+                        <span class="badge" style="background-color: #6c757d; color: white; border-radius: 5px; padding: 0.25em 0.6em;">Không xác định</span>
+                    }
+                </td>
+                <td>
+                    @if (item.PaymentMethod == "COD" || item.PaymentMethod == null)
+                    {
+                        <span class="text text-primary">@item.PaymentMethod</span>
+                    }
+                    else
+                    {
+                        <span class="text text-danger">
+                            Qua MOMO: <a asp-route-orderId="@item.PaymentMethod" asp-action="PaymentMomoInfo" asp-controller="Order"> @item.PaymentMethod</a>
+                        </span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="ViewOrder" class="btn btn-warning btn-sm" asp-controller="Order" asp-route-orderCode="@item.OrderCode">Chi tiết</a>
+                    @* <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Order" asp-route-orderCode="@item.OrderCode">Xóa</a> *@
+                </td>
+            </tr>
+            i++;
+        }
+    </tbody>
+</table>

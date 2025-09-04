@@ -1,0 +1,490 @@
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@model X.PagedList.IPagedList<Shopping_Demo.Models.ProductModel>
+@{
+    ViewData["Title"] = $"Search Results for \"{ViewBag.Keyword}\"";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/aurum-style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+}
+
+<!-- Search Header Section -->
+<section class="brand-header">
+    <div class="container">
+        <div class="brand-hero">
+            <div class="brand-info">
+                <h1 class="brand-title">Kết Quả Tìm Kiếm Cho "@ViewBag.Keyword"</h1>
+                <p class="brand-description">
+                    Khám phá chiếc đồng hồ cao cấp hoàn hảo phù hợp với tiêu chí tìm kiếm của bạn. 
+                    Duyệt qua bộ sưu tập được tuyển chọn kỹ lưỡng của chúng tôi gồm các tác phẩm đồng hồ cao cấp 
+                    từ những thương hiệu danh tiếng nhất thế giới.
+                </p>
+            </div>
+            <div class="brand-stats">
+                <div class="stat-item">
+                    <span class="stat-number">@Model.TotalItemCount</span>
+                    <span class="stat-label">Đồng Hồ Tìm Thấy</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filter Section -->
+<section class="filter-section">
+    <div class="container">
+        <div class="product-listing-layout">
+            <!-- Filter Sidebar -->
+            <div class="filter-sidebar">
+                <div class="filter-header">
+                    <h3>Lọc Theo</h3>
+                    <button class="clear-all-btn" onclick="clearAllFilters()">Xóa Tất Cả</button>
+                </div>
+                
+                <form id="filter-form" method="get">
+                    <!-- Model Filter -->
+                    @{ 
+                        var modelCounts = ViewBag.ModelCounts as IEnumerable<dynamic>;
+                    }
+                    @if (modelCounts != null && modelCounts.Any())
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Mẫu</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var modelItem in modelCounts)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="model-@(modelItem.Name.ToString().ToLower().Replace(" ", "-"))" name="models" value="@modelItem.Name" onchange="applyFilters()">
+                                        <label for="model-@(modelItem.Name.ToString().ToLower().Replace(" ", "-"))">
+                                            <span>@modelItem.Name</span>
+                                            <span class="filter-count">@modelItem.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Brand Filter -->
+                    @{ 
+                        var brandCounts = ViewBag.BrandCounts as IEnumerable<dynamic>;
+                    }
+                    @if (brandCounts != null && brandCounts.Any())
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Thương Hiệu</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var brand in brandCounts)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="brand-@(brand.Name.ToString().ToLower().Replace(" ", "-"))" name="brands" value="@brand.Name" onchange="applyFilters()">
+                                        <label for="brand-@(brand.Name.ToString().ToLower().Replace(" ", "-"))">
+                                            <span>@brand.Name</span>
+                                            <span class="filter-count">@brand.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Size Filter -->
+                    @{ 
+                        var sizeCounts = ViewBag.SizeCounts as IEnumerable<dynamic>;
+                    }
+                    @if (sizeCounts != null && sizeCounts.Any())
+                    {
+                        <div class="filter-section">
+                            <div class="filter-title" onclick="toggleFilter(this)">
+                                <span>Kích Thước</span>
+                                <i class="fa fa-chevron-down"></i>
+                            </div>
+                            <div class="filter-options" style="display: block;">
+                                @foreach (var size in sizeCounts)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="size-@(size.Name.ToString().ToLower().Replace(" ", "-"))" name="sizes" value="@size.Name" onchange="applyFilters()">
+                                        <label for="size-@(size.Name.ToString().ToLower().Replace(" ", "-"))">
+                                            <span>@size.Name</span>
+                                            <span class="filter-count">@size.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Price Filter -->
+                    <div class="filter-section">
+                        <div class="filter-title" onclick="toggleFilter(this)">
+                            <span>Giá</span>
+                            <i class="fa fa-chevron-down"></i>
+                        </div>
+                        <div class="filter-options" style="display: block;">
+                            <div class="price-range-inputs">
+                                <input type="number" name="minPrice" placeholder="Min" onchange="applyFilters()">
+                                <span>-</span>
+                                <input type="number" name="maxPrice" placeholder="Max" onchange="applyFilters()">
+                            </div>
+                            @{ 
+                                var priceCounts = ViewBag.PriceCounts as IEnumerable<dynamic>;
+                            }
+                            @if (priceCounts != null && priceCounts.Any())
+                            {
+                                @foreach (var price in priceCounts)
+                                {
+                                    <div class="filter-option">
+                                        <input type="checkbox" id="price-@(price.Range.ToString().ToLower().Replace(" ", "-").Replace("$", "").Replace(",", ""))" name="priceRanges" value="@price.Range" onchange="applyFilters()">
+                                        <label for="price-@(price.Range.ToString().ToLower().Replace(" ", "-").Replace("$", "").Replace(",", ""))">
+                                            <span>@price.Range</span>
+                                            <span class="filter-count">@price.Count</span>
+                                        </label>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden inputs for current state -->
+                    <input type="hidden" name="searchTerm" value="@ViewBag.Keyword">
+                    <input type="hidden" name="page" value="1">
+                    <input type="hidden" name="pageSize" value="@ViewBag.PageSize">
+                    <input type="hidden" name="sortBy" value="@ViewBag.SortBy">
+                </form>
+            </div>
+            
+            <!-- Products Content -->
+            <div class="products-content">
+                <!-- Products Header -->
+                <div class="products-header">
+                    <div class="products-count">
+                        <span>@Model.TotalItemCount Sản Phẩm</span>
+                    </div>
+                    <div class="products-controls">
+                        <div class="per-page-selector">
+                            <label>Mỗi Trang:</label>
+                            <select onchange="changePerPage(this.value)" id="pageSize-select">
+                                @if (ViewBag.PageSize == 12)
+                                {
+                                    <option value="12" selected>12</option>
+                                }
+                                else
+                                {
+                                    <option value="12">12</option>
+                                }
+                                @if (ViewBag.PageSize == 24)
+                                {
+                                    <option value="24" selected>24</option>
+                                }
+                                else
+                                {
+                                    <option value="24">24</option>
+                                }
+                                @if (ViewBag.PageSize == 48)
+                                {
+                                    <option value="48" selected>48</option>
+                                }
+                                else
+                                {
+                                    <option value="48">48</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="sort-selector">
+                            <label>Sắp Xếp:</label>
+                            <select onchange="changeSortBy(this.value)" id="sortBy-select">
+                                @if (ViewBag.SortBy == "featured")
+                                {
+                                    <option value="featured" selected>Nổi Bật</option>
+                                }
+                                else
+                                {
+                                    <option value="featured">Nổi Bật</option>
+                                }
+                                @if (ViewBag.SortBy == "name")
+                                {
+                                    <option value="name" selected>Tên A-Z</option>
+                                }
+                                else
+                                {
+                                    <option value="name">Tên A-Z</option>
+                                }
+                                @if (ViewBag.SortBy == "price-low")
+                                {
+                                    <option value="price-low" selected>Giá Thấp Đến Cao</option>
+                                }
+                                else
+                                {
+                                    <option value="price-low">Giá Thấp Đến Cao</option>
+                                }
+                                @if (ViewBag.SortBy == "price-high")
+                                {
+                                    <option value="price-high" selected>Giá Cao Đến Thấp</option>
+                                }
+                                else
+                                {
+                                    <option value="price-high">Giá Cao Đến Thấp</option>
+                                }
+                                @if (ViewBag.SortBy == "newest")
+                                {
+                                    <option value="newest" selected>Mới Nhất</option>
+                                }
+                                else
+                                {
+                                    <option value="newest">Mới Nhất</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="product-grid">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var product in Model)
+                        {
+                            <div class="product-card">
+                                <!-- Product Image -->
+                                <div class="product-image">
+                                    <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="product-link">
+                                        <img src="@Url.Action("GetProductImage", "Home", new { productId = product.Id })" alt="@product.Name" class="product-img" />
+                                    </a>
+                                    <button class="wishlist-btn" data-product-id="@product.Id">
+                                        <i class="fa fa-heart"></i>
+                                    </button>
+                                    @await Html.PartialAsync("_CompareButton", product.Id)
+                                    @if (product.Quantity <= 0)
+                                    {
+                                        <div class="out-of-stock-badge">Hết hàng</div>
+                                    }
+                                </div>
+
+                                <!-- Product Info -->
+                                <div class="product-info">
+                                    <div class="product-title">
+                                        <a href="@Url.Action("Details", "Product", new { id = product.Id })">@product.Name</a>
+                                    </div>
+                                    <div class="product-specs">
+                                        <p>Danh mục: @product.Category?.Name</p>
+                                        <p>Thương hiệu: @product.Brand?.Name</p>
+                                    </div>
+                                    <div class="price">@product.Price.ToString("N0").Replace(",", ".") VNĐ</div>
+                                </div>
+                                <div class="product-actions">
+                                    @if (product.Quantity > 0)
+                                    {
+                                        <button class="buy-btn" onclick="addToCart(@product.Id)">MUA NGAY</button>
+                                        <div class="sell-container">
+                                            <button class="sell-btn" onclick="getQuote(@product.Id)">THU MUA</button>
+                                            <div class="quote-text" onclick="getQuote(@product.Id)">Báo Giá</div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <button class="buy-btn disabled" disabled>Hết hàng</button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-products">
+                            <i class="fa fa-search fa-3x mb-3"></i>
+                            <p>Không tìm thấy sản phẩm cho "@ViewBag.Keyword"</p>
+                            <p class="text-muted">Thử điều chỉnh từ khóa tìm kiếm hoặc bộ lọc</p>
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Trở Về Trang Chủ</a>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model != null && Model.PageCount > 1)
+                {
+                    <div class="pagination-wrapper">
+                        @Html.PagedListPager(Model, page => {
+                            var routeValues = new Dictionary<string, object>
+                            {
+                                { "searchTerm", ViewBag.Keyword },
+                                { "page", page },
+                                { "pageSize", ViewBag.PageSize },
+                                { "sortBy", ViewBag.SortBy }
+                            };
+                            
+                            // Add filter parameters from current URL
+                            var currentUrl = Context.Request.Query;
+                            if (!string.IsNullOrEmpty(currentUrl["models"]))
+                                routeValues["models"] = currentUrl["models"];
+                            if (!string.IsNullOrEmpty(currentUrl["brands"]))
+                                routeValues["brands"] = currentUrl["brands"];
+                            if (!string.IsNullOrEmpty(currentUrl["minPrice"]))
+                                routeValues["minPrice"] = currentUrl["minPrice"];
+                            if (!string.IsNullOrEmpty(currentUrl["maxPrice"]))
+                                routeValues["maxPrice"] = currentUrl["maxPrice"];
+                            
+                            return Url.Action("Search", routeValues);
+                        })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="~/js/simple-wishlist.js"></script>
+    <script>
+        function toggleFilter(element) {
+            const options = element.nextElementSibling;
+            const icon = element.querySelector('i');
+            
+            if (options.classList.contains('show')) {
+                options.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                options.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            }
+        }
+
+        function changePerPage(pageSize) {
+            const url = new URL(window.location);
+            url.searchParams.set('pageSize', pageSize);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function changeSortBy(sortBy) {
+            const url = new URL(window.location);
+            url.searchParams.set('sortBy', sortBy);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        function applyFilters() {
+            const form = document.getElementById('filter-form');
+            if (!form) return;
+            
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            
+            // Add all form data to URL parameters
+            for (let [key, value] of formData.entries()) {
+                if (value) {
+                    params.append(key, value);
+                }
+            }
+            
+            // Add current page size and sort if they exist
+            const currentUrl = new URL(window.location);
+            const pageSize = currentUrl.searchParams.get('pageSize');
+            const sortBy = currentUrl.searchParams.get('sortBy');
+            const searchTerm = currentUrl.searchParams.get('searchTerm');
+            
+            if (pageSize) params.set('pageSize', pageSize);
+            if (sortBy) params.set('sortBy', sortBy);
+            if (searchTerm) params.set('searchTerm', searchTerm);
+            
+            // Reset to page 1 when applying filters
+            params.set('page', '1');
+            
+            // Update URL to Search action
+            window.location.href = '/Product/Search?' + params.toString();
+        }
+
+        function clearAllFilters() {
+            const form = document.getElementById('filter-form');
+            if (!form) return;
+            
+            // Clear all checkboxes
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // Clear price inputs
+            const priceInputs = form.querySelectorAll('input[name="minPrice"], input[name="maxPrice"]');
+            priceInputs.forEach(input => {
+                input.value = '';
+            });
+            
+            // Apply the cleared filters
+            applyFilters();
+        }
+
+        function addToCart(productId) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            fetch('/Home/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: `productId=${productId}&__RequestVerificationToken=${token}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Success', data.message, 'success');
+                    if (typeof updateCartCount === 'function') {
+                        updateCartCount();
+                    }
+                } else {
+                    showNotification('Error', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Could not add to cart', 'error');
+            });
+        }
+
+        function getQuote(productId) {
+            window.location.href = '/Sell/Create?productId=' + productId;
+        }
+
+        function showNotification(title, message, type) {
+            // Sử dụng SweetAlert nếu có, nếu không thì dùng alert đơn giản
+            if (typeof Swal !== 'undefined') {
+                let icon = 'info';
+                let swalTitle = title;
+                
+                if (type === 'success') {
+                    icon = 'success';
+                    swalTitle = 'Thành công';
+                } else if (type === 'error') {
+                    icon = 'error';
+                    swalTitle = 'Lỗi';
+                } else if (type === 'warning') {
+                    icon = 'warning';
+                    swalTitle = 'Cảnh báo';
+                }
+                
+                Swal.fire({
+                    title: swalTitle,
+                    text: message,
+                    icon: icon,
+                    timer: type === 'success' ? 2000 : 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            } else {
+                // Fallback: sử dụng alert đơn giản
+                alert(`${title}: ${message}`);
+            }
+        }
+    </script>
+}

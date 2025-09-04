@@ -1,0 +1,172 @@
+﻿@model AppUserModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Login | E-Shopper</title>
+
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="~/css/sweetalert2.min.css" rel="stylesheet">
+    <link href="~/css/main.css" rel="stylesheet">
+    <link rel="shortcut icon" href="images/ico/favicon.ico">
+
+    <style>
+        body {
+            background-color: #ee4d2d;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-container {
+            width: 500px;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+
+            .login-container h2 {
+                text-align: center;
+                margin-bottom: 30px;
+                color: #333;
+            }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-control {
+            border-radius: 4px;
+            height: 40px;
+            padding: 0 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .btn-login {
+            background-color: #f53d2d;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+            .btn-login:hover {
+                background-color: #e22f20;
+            }
+
+        .text-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+            .text-links a {
+                display: block;
+                color: #f53d2d;
+                margin-top: 5px;
+                text-decoration: none;
+            }
+
+        .text-danger {
+            font-size: 14px;
+        }
+
+        .search_box {
+            background: #ffffff;
+            border: 1px solid #d1d1d1;
+            color: #333;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            height: 35px;
+            outline: none;
+            padding-left: 15px;
+            padding-right: 40px;
+            width: 300px;
+            border-radius: 5px;
+            background-image: url('../images/home/searchicon.png');
+            background-repeat: no-repeat;
+            background-position: calc(100% - 10px) center;
+            background-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="header-middle" style="background: #ffffff;">
+            <div class="container">
+                <div class="row" style="align-items:center; display:flex">
+                    <div class="col-sm-4">
+                        <div class="logo pull-left">
+                            <a asp-controller="Home" asp-action="Index">
+                                @await Component.InvokeAsync("LoginContact")
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <a asp-controller="Home" asp-action="Contact" style="color:#ee4d2d; display: flex; justify-content: end;">Bạn cần giúp đỡ?</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <section class="mt-3" style="display: flex; justify-content: space-evenly; margin: 80px;">
+        @await Component.InvokeAsync("Logo")
+
+        <div class="login-container">
+            <h2>Enter New Password</h2>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <form asp-action="UpdateNewPassword" asp-controller="Account">
+                <input type="hidden" name="token" value="@ViewBag.Token" />
+                <div class="form-group">
+                    <label>Email</label>
+                    <input asp-for="Email" readonly value="@ViewBag.Email" class="form-control"> </input>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input asp-for="PasswordHash" class="form-control" />
+                    <span asp-validation-for="PasswordHash" class="text-danger"></span>
+
+                </div>
+
+                <button type="submit" class="btn btn-login">Xác nhận</button>
+            </form>
+        </div>
+    </section>
+    <footer id="footer">
+        <!--Footer-->
+        <partial name="_FooterPartial" />
+
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="row">
+                    <p class="pull-left">Copyright © @DateTime.Now.Year E-SHOPPER Inc. All rights reserved.</p>
+                    <p class="pull-right">Designed by <span><a target="_blank" href="http://www.themeum.com">Themeum</a></span></p>
+                </div>
+            </div>
+        </div>
+
+    </footer><!--/Footer-->
+    <script src="~/js/jquery.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+    <script src="~/js/sweetalert2.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+﻿@using Shopping_Demo.Models.Momo
+@using System.Globalization
+@model MomoExecuteResponseModel
+
+@{
+    ViewData["Title"] = "Kết quả thông tin giao dịch thanh toán thành công";
+}
+
+<style>
+    .body-card {
+        margin: 0;
+        font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #858796;
+        text-align: left;
+        background-color: #fff;
+    }
+
+    /* Style cho card */
+    .card {
+        border: 1px solid #e3e6f0;
+        border-radius: 16px;
+        box-shadow: 0 2px 28px 0 rgba(58, 59, 69, 0.15);
+        margin-bottom: 16px;
+    }
+
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+        padding: 16px;
+    }
+
+        .card-header h4 {
+            margin: 0;
+            font-size: 28px;
+            color: black;
+        }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    /* Style cho nút "Xem lịch sử đơn hàng" */
+    .btn-primary {
+        background-color: #4e73df;
+        border-color: #4e73df;
+        padding: 6px 12px;
+        font-size: 16px;
+        border-radius: 6px;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .btn-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2653d4;
+            color: white;
+            text-decoration: none;
+        }
+</style>
+
+<div class="body-card">
+    <h2>Kết quả thanh toán</h2>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Thông tin giao dịch MoMo</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Thanh toán MoMo thành công với:</strong></p>
+            <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
+            <p><strong>Thông tin đơn hàng:</strong> @Model.OrderInfo</p>
+            <p><strong>Tổng tiền:</strong> @(long.TryParse(Model.Amount, out long amount) ? amount.ToString("N0", CultureInfo.InvariantCulture) : "Invalid Amount") VNĐ</p>            
+            <a asp-controller="Account" asp-action="History" class="btn btn-primary">Xem lịch sử đơn hàng</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,300 @@
+@model List<ProductModel>
+@{
+    ViewData["title"] = "So sánh sản phẩm";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">So sánh sản phẩm</h2>
+            
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered comparison-table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th style="min-width: 200px;">Thuộc tính</th>
+                                @foreach (var product in Model)
+                                {
+                                    <th class="text-center" style="min-width: 250px;">
+                                        <div class="product-header">
+                                                                                         <img src="@(string.IsNullOrEmpty(product.Image) ? "/images/placeholder-product.jpg" : "/media/products/" + product.Image)"  
+                                                 alt="@product.Name" class="img-thumbnail mb-2" style="width: 120px; height: 100px; object-fit: cover;" />
+                                            <h6 class="mb-1">@product.Name</h6>
+                                            <small class="text-muted">@product.Brand?.Name</small>
+                                        </div>
+                                    </th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Thông tin cơ bản -->
+                            <tr class="table-primary">
+                                <td colspan="@(Model.Count + 1)" class="font-weight-bold">Thông tin cơ bản</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Thương hiệu</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@product.Brand?.Name</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Phân loại</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@product.Category?.Name</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Giá bán</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center text-success font-weight-bold">
+                                        @product.Price.ToString("N0").Replace(",", ".") VNĐ
+                                    </td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Giá nhập</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center text-info">
+                                        @product.CapitalPrice.ToString("N0").Replace(",", ".") VNĐ
+                                    </td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Số lượng</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@product.Quantity</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Đã bán</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@product.Sold</td>
+                                }
+                            </tr>
+
+                            <!-- Thông tin đồng hồ -->
+                            <tr class="table-success">
+                                <td colspan="@(Model.Count + 1)" class="font-weight-bold">Thông tin đồng hồ</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mẫu đồng hồ</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.Model) ? "N/A" : product.Model)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Số hiệu mẫu</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.ModelNumber) ? "N/A" : product.ModelNumber)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Năm sản xuất</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(product.Year?.ToString() ?? "N/A")</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Giới tính</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.Gender) ? "N/A" : product.Gender)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Tình trạng</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.Condition) ? "N/A" : product.Condition)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Kích cỡ case</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.CaseSize) ? "N/A" : product.CaseSize)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Chất liệu case</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.CaseMaterial) ? "N/A" : product.CaseMaterial)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Loại máy</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.MovementType) ? "N/A" : product.MovementType)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Cỡ máy (Calibre)</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.Calibre) ? "N/A" : product.Calibre)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Chất liệu dây</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.BraceletMaterial) ? "N/A" : product.BraceletMaterial)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Màu mặt đồng hồ</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.DialColor) ? "N/A" : product.DialColor)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Serial Number</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.SerialNumber) ? "N/A" : product.SerialNumber)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Hộp và giấy tờ</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(product.BoxAndPapers.HasValue ? (product.BoxAndPapers.Value ? "Có" : "Không") : "N/A")</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Chứng nhận</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.Certificate) ? "N/A" : product.Certificate)</td>
+                                }
+                            </tr>
+                            <tr>
+                                <td><strong>Bảo hành</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">@(string.IsNullOrEmpty(product.WarrantyInfo) ? "N/A" : product.WarrantyInfo)</td>
+                                }
+                            </tr>
+
+                            <!-- Hành động -->
+                            <tr class="table-info">
+                                <td colspan="@(Model.Count + 1)" class="font-weight-bold">Hành động</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Thao tác</strong></td>
+                                @foreach (var product in Model)
+                                {
+                                    <td class="text-center">
+                                        <a href="@Url.Action("Details", "Product", new { Id = product.Id })" 
+                                           class="btn btn-primary btn-sm mb-1">Xem chi tiết</a>
+                                        <br />
+                                        <a href="@Url.Action("AddToCart", "Cart", new { productId = product.Id })" 
+                                           class="btn btn-success btn-sm">Thêm vào giỏ</a>
+                                    </td>
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">Quay lại danh sách sản phẩm</a>
+                    <button onclick="clearComparison()" class="btn btn-warning ml-2">Xóa danh sách so sánh</button>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <h4>Không có sản phẩm nào để so sánh</h4>
+                    <p>Vui lòng chọn ít nhất 2 sản phẩm để so sánh.</p>
+                    <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Chọn sản phẩm</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .comparison-table th,
+    .comparison-table td {
+        vertical-align: middle;
+        text-align: center;
+    }
+    
+    .product-header {
+        padding: 10px;
+    }
+    
+    .product-header img {
+        border: 2px solid #ddd;
+        border-radius: 8px;
+    }
+    
+    .product-header h6 {
+        margin: 8px 0 4px 0;
+        font-size: 14px;
+        line-height: 1.2;
+    }
+    
+    .table-primary,
+    .table-success,
+    .table-info {
+        background-color: #f8f9fa !important;
+    }
+    
+    .table-primary td,
+    .table-success td,
+    .table-info td {
+        background-color: #e9ecef !important;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+    @@media (max-width: 768px) {
+        .comparison-table {
+            font-size: 12px;
+        }
+        
+        .product-header img {
+            width: 80px !important;
+            height: 60px !important;
+        }
+        
+        .product-header h6 {
+            font-size: 12px;
+        }
+        
+        .btn-sm {
+            padding: 2px 4px;
+            font-size: 10px;
+        }
+    }
+</style>
+
+<script>
+    function clearComparison() {
+        if (typeof window.productListing !== 'undefined' && typeof window.productListing.clearComparison === 'function') {
+            window.productListing.clearComparison();
+        }
+        window.location.href = '@Url.Action("Index", "Product")';
+    }
+</script>
