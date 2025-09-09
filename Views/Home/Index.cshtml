@@ -106,7 +106,7 @@
                                     <div class="product-actions">
                                         @if (product.Quantity > 0)
                                         {
-                                            <a href="#" class="buy-btn">MUA NGAY</a>
+                                            <a href="javascript:void(0)" onclick="addToCart(@product.Id)" class="buy-btn">MUA NGAY</a>
                                             <div class="sell-container">
                                                 <a href="javascript:void(0)" onclick="getQuote(@product.Id)" class="sell-btn">THU MUA</a>
                                                 <div class="quote-text" onclick="getQuote(@product.Id)">Báo Giá</div>

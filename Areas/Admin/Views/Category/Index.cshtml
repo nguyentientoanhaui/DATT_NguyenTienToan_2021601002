@@ -1,47 +1,327 @@
 ﻿@model IEnumerable<CategoryModel>
 @{
-    ViewData["Title"] = "Danh sách danh mục";
+    ViewData["Title"] = "Quản Lý Danh Mục";
 }
 
-<h1>Danh mục</h1>
-<a class="btn btn-primary mb-3" asp-action="Create">Thêm danh mục mới</a>
+<div class="category-admin-container">
+    <div class="category-header">
+        <div class="header-content">
+            <h2>Danh Mục Sản Phẩm</h2>
+            <p>Quản lý các danh mục và phân loại sản phẩm</p>
+        </div>
+        <a class="btn-add" asp-action="Create">
+            <i class="fas fa-plus"></i>
+            Thêm Danh Mục
+        </a>
+    </div>
 
-<table class="table table-bordered" id="myTable">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Tên</th>
-            <th>Mô tả</th>
-            <th>Loại</th>
-            <th>Danh mục chính</th>
-            <th>Trạng thái</th>
-            <th>Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Id</td>
-                <td>@item.Name</td>
-                <td>@item.Description</td>
-                <td>@(item.Level == 1 ? "Danh mục chính" : "Danh mục phụ")</td>
-                <td>@(item.ParentCategory?.Name ?? "-")</td>
-                <td>
-                    @if (item.Status == 1)
-                    {
-                        <span class="text text-success">Hiển thị</span>
-                    }
-                    else
-                    {
-                        <span class="text text-danger">Ẩn</span>
-                    }
-                </td>
-                <td>
-                    <a class="btn btn-warning" asp-action="Edit" asp-route-id="@item.Id">Sửa</a>
-                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id" onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">Xóa</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="category-table-container">
+        <table class="category-table" id="myTable">
+            <thead>
+                <tr>
+                    <th class="col-id">ID</th>
+                    <th class="col-name">Tên Danh Mục</th>
+                    <th class="col-desc">Mô Tả</th>
+                    <th class="col-type">Loại</th>
+                    <th class="col-parent">Danh Mục Chính</th>
+                    <th class="col-status">Trạng Thái</th>
+                    <th class="col-actions">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="category-row">
+                        <td class="col-id">@item.Id</td>
+                        <td class="col-name">
+                            <div class="category-name">
+                                <strong>@item.Name</strong>
+                            </div>
+                        </td>
+                        <td class="col-desc">
+                            <div class="category-desc">
+                                @(string.IsNullOrEmpty(item.Description) ? "-" : (item.Description.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description))
+                            </div>
+                        </td>
+                        <td class="col-type">
+                            <span class="category-type @(item.Level == 1 ? "main" : "sub")">
+                                @(item.Level == 1 ? "Chính" : "Phụ")
+                            </span>
+                        </td>
+                        <td class="col-parent">
+                            @(item.ParentCategory?.Name ?? "-")
+                        </td>
+                        <td class="col-status">
+                            <span class="status-badge @(item.Status == 1 ? "active" : "inactive")">
+                                @(item.Status == 1 ? "Hiển thị" : "Ẩn")
+                            </span>
+                        </td>
+                        <td class="col-actions">
+                            <div class="action-buttons">
+                                <a class="btn-edit" asp-action="Edit" asp-route-id="@item.Id" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a class="btn-delete" asp-action="Delete" asp-route-id="@item.Id" 
+                                   onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.category-admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-content h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+
+.header-content p {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.btn-add {
+    background: #000;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-add:hover {
+    background: #333;
+    color: #fff;
+}
+
+.category-table-container {
+    overflow-x: auto;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.category-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.category-table thead {
+    background: #f8f9fa;
+}
+
+.category-table th {
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+    border-bottom: 1px solid #e0e0e0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.category-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.category-row:hover {
+    background: #f8f9fa;
+}
+
+.col-id {
+    width: 60px;
+    text-align: center;
+    font-weight: 500;
+    color: #666;
+}
+
+.col-name {
+    min-width: 150px;
+}
+
+.category-name strong {
+    color: #333;
+    font-size: 14px;
+}
+
+.col-desc {
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.category-desc {
+    color: #666;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.col-type {
+    width: 80px;
+    text-align: center;
+}
+
+.category-type {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.category-type.main {
+    background: #e8f5e8;
+    color: #2d5a2d;
+}
+
+.category-type.sub {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.col-parent {
+    min-width: 120px;
+    color: #666;
+    font-size: 13px;
+}
+
+.col-status {
+    width: 100px;
+    text-align: center;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.active {
+    background: #e8f5e8;
+    color: #2d5a2d;
+}
+
+.status-badge.inactive {
+    background: #ffeaea;
+    color: #8b0000;
+}
+
+.col-actions {
+    width: 100px;
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-edit, .btn-delete {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-edit {
+    background: #f8f9fa;
+    color: #666;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-edit:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.btn-delete {
+    background: #fff;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.btn-delete:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .category-admin-container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .category-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .btn-add {
+        justify-content: center;
+    }
+    
+    .category-table th,
+    .category-table td {
+        padding: 10px 8px;
+    }
+    
+    .col-desc {
+        max-width: 150px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .btn-edit, .btn-delete {
+        width: 28px;
+        height: 28px;
+    }
+}
+</style>

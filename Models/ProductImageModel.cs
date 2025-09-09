@@ -11,8 +11,10 @@ namespace Shopping_Demo.Models
 
         public int ProductId { get; set; }
 
+        [StringLength(200)]
         public string ImageName { get; set; }
         
+        [StringLength(500)]
         public string ImageUrl { get; set; }
 
         public bool IsDefault { get; set; }
@@ -22,8 +24,8 @@ namespace Shopping_Demo.Models
         [ForeignKey("ProductId")]
         public ProductModel Product { get; set; }
 
-        [ForeignKey("ColorId")]
-        public ColorModel Color { get; set; }
+        // [ForeignKey("ColorId")]
+        // public ColorModel Color { get; set; } // Commented out - ColorModel removed
 
         [NotMapped]
         [FileExtension]

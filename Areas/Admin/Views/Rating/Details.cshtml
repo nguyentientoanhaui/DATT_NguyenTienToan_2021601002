@@ -1,0 +1,122 @@
+@model Shopping_Demo.Models.ProductReviewModel
+@{
+    ViewData["Title"] = "Chi tiết đánh giá";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Chi tiết đánh giá sản phẩm</h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="150">ID đánh giá:</th>
+                                    <td>@Model.Id</td>
+                                </tr>
+                                <tr>
+                                    <th>Sản phẩm:</th>
+                                    <td>
+                                        @if (Model.Product != null)
+                                        {
+                                            <a href="@Url.Action("Details", "Product", new { id = Model.ProductId })" target="_blank">
+                                                @Model.Product.Name
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sản phẩm đã bị xóa</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Người dùng:</th>
+                                    <td>@Model.UserName</td>
+                                </tr>
+                                <tr>
+                                    <th>Mã đơn hàng:</th>
+                                    <td>@Model.OrderCode</td>
+                                </tr>
+                                <tr>
+                                    <th>Đánh giá:</th>
+                                    <td>
+                                        <div class="rating">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= Model.Rating)
+                                                {
+                                                    <i class="fas fa-star text-warning" style="font-size: 20px;"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="far fa-star text-muted" style="font-size: 20px;"></i>
+                                                }
+                                            }
+                                            <span class="ml-2 h5">@Model.Rating/5 sao</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Bình luận:</th>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(Model.Comment))
+                                        {
+                                            <div class="border p-3 bg-light rounded">
+                                                @Model.Comment
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Không có bình luận</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Ngày tạo:</th>
+                                    <td>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Thao tác</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="btn-group-vertical w-100">
+                                        <a href="@Url.Action("Index")" class="btn btn-secondary mb-2">
+                                            <i class="fas fa-list"></i> Danh sách đánh giá
+                                        </a>
+                                        @if (Model.Product != null)
+                                        {
+                                            <a href="@Url.Action("ProductReviews", new { productId = Model.ProductId })" class="btn btn-info mb-2">
+                                                <i class="fas fa-eye"></i> Xem tất cả đánh giá sản phẩm
+                                            </a>
+                                        }
+                                        <form asp-action="Delete" method="post">
+                                            <input type="hidden" name="id" value="@Model.Id" />
+                                            <button type="submit" class="btn btn-danger w-100" 
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')">
+                                                <i class="fas fa-trash"></i> Xóa đánh giá
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

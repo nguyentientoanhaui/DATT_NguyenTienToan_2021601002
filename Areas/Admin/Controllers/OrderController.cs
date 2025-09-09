@@ -37,7 +37,6 @@ namespace Shopping_Demo.Areas.Admin.Controllers
                 ViewBag.ShippingCost = order.ShippingCost;
                 ViewBag.DiscountAmount = order.DiscountAmount; // Thêm giá trị giảm giá
                 ViewBag.Status = order.Status; // Thêm trạng thái đơn hàng
-                ViewBag.CouponCode = order.CouponCode; // Thêm mã giảm giá nếu cần hiển thị
 
                 ViewBag.ShippingCity = order.ShippingCity;
                 ViewBag.ShippingDistrict = order.ShippingDistrict;
@@ -301,7 +300,7 @@ namespace Shopping_Demo.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> PaymentMomoInfo(string orderId)
         {
-            var momoInfo = await _dataContext.MomoInfos.FirstOrDefaultAsync(m => m.OrderId == orderId);
+            var momoInfo = await _dataContext.MomoInfos.FirstOrDefaultAsync(m => m.OrderCode == orderId);
 
             if (momoInfo == null)
             {
@@ -310,34 +309,6 @@ namespace Shopping_Demo.Areas.Admin.Controllers
             return View(momoInfo);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> DeleteAllOrders()
-        {
-            try
-            {
-                // Xóa tất cả OrderDetails trước
-                var allOrderDetails = await _dataContext.OrderDetails.ToListAsync();
-                _dataContext.OrderDetails.RemoveRange(allOrderDetails);
-
-                // Xóa tất cả Orders
-                var allOrders = await _dataContext.Orders.ToListAsync();
-                _dataContext.Orders.RemoveRange(allOrders);
-
-                // Xóa tất cả MomoInfos
-                var allMomoInfos = await _dataContext.MomoInfos.ToListAsync();
-                _dataContext.MomoInfos.RemoveRange(allMomoInfos);
-
-                await _dataContext.SaveChangesAsync();
-
-                TempData["success"] = "Đã xóa tất cả dữ liệu đơn hàng cũ thành công!";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                TempData["error"] = "Có lỗi xảy ra khi xóa dữ liệu: " + ex.Message;
-                return RedirectToAction("Index");
-            }
-        }
     }
 }
 

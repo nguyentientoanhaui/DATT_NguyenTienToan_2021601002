@@ -17,24 +17,27 @@ namespace Shopping_Demo.Areas.Admin.Controllers
             _dataContext = context;
         }
 
+        // DISABLED: This controller is disabled because the Colors table was removed from the database
+        // All methods return empty results or NotFound to prevent errors
+
         // GET: Admin/Color
         public async Task<IActionResult> Index()
         {
-            var colors = await _dataContext.Colors.OrderBy(c => c.Name).ToListAsync();
+            // var colors = await _dataContext.Colors.OrderBy(c => c.Name).ToListAsync();
+            var colors = new List<ColorModel>(); // Empty list since table was removed
             return View(colors);
         }
 
         // GET: Admin/Color/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var color = await _dataContext.Colors.FirstOrDefaultAsync(c => c.Id == id);
-
-            if (color == null)
-            {
-                return NotFound();
-            }
-
-            return View(color);
+            // var color = await _dataContext.Colors.FirstOrDefaultAsync(c => c.Id == id);
+            // if (color == null)
+            // {
+            //     return NotFound();
+            // }
+            // return View(color);
+            return NotFound(); // Always return not found since table was removed
         }
 
         // GET: Admin/Color/Create
@@ -48,35 +51,26 @@ namespace Shopping_Demo.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ColorModel color)
         {
-            if (ModelState.IsValid)
-            {
-                // Kiểm tra tên màu đã tồn tại chưa
-                var existingColor = await _dataContext.Colors.FirstOrDefaultAsync(c => c.Name == color.Name);
-                if (existingColor != null)
-                {
-                    ModelState.AddModelError("Name", "Tên màu sắc này đã tồn tại");
-                    return View(color);
-                }
-
-                _dataContext.Add(color);
-                await _dataContext.SaveChangesAsync();
-                TempData["success"] = "Thêm màu sắc thành công";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(color);
+            // if (ModelState.IsValid)
+            // {
+            //     _dataContext.Add(color);
+            //     await _dataContext.SaveChangesAsync();
+            //     return RedirectToAction(nameof(Index));
+            // }
+            // return View(color);
+            return RedirectToAction(nameof(Index)); // Always redirect since table was removed
         }
 
         // GET: Admin/Color/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var color = await _dataContext.Colors.FindAsync(id);
-
-            if (color == null)
-            {
-                return NotFound();
-            }
-
-            return View(color);
+            // var color = await _dataContext.Colors.FindAsync(id);
+            // if (color == null)
+            // {
+            //     return NotFound();
+            // }
+            // return View(color);
+            return NotFound(); // Always return not found since table was removed
         }
 
         // POST: Admin/Color/Edit/5
@@ -84,74 +78,68 @@ namespace Shopping_Demo.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, ColorModel color)
         {
-            if (id != color.Id)
-            {
-                return NotFound();
-            }
+            // if (id != color.Id)
+            // {
+            //     return NotFound();
+            // }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Kiểm tra tên màu đã tồn tại chưa (ngoại trừ màu hiện tại)
-                    var existingColor = await _dataContext.Colors
-                        .FirstOrDefaultAsync(c => c.Name == color.Name && c.Id != id);
-
-                    if (existingColor != null)
-                    {
-                        ModelState.AddModelError("Name", "Tên màu sắc này đã tồn tại");
-                        return View(color);
-                    }
-
-                    _dataContext.Update(color);
-                    await _dataContext.SaveChangesAsync();
-                    TempData["success"] = "Cập nhật màu sắc thành công";
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ColorExists(color.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(color);
+            // if (ModelState.IsValid)
+            // {
+            //     try
+            //     {
+            //         _dataContext.Update(color);
+            //         await _dataContext.SaveChangesAsync();
+            //     }
+            //     catch (DbUpdateConcurrencyException)
+            //     {
+            //         if (!ColorExists(color.Id))
+            //         {
+            //             return NotFound();
+            //         }
+            //         else
+            //         {
+            //             throw;
+            //         }
+            //     }
+            //     return RedirectToAction(nameof(Index));
+            // }
+            // return View(color);
+            return RedirectToAction(nameof(Index)); // Always redirect since table was removed
         }
 
         // GET: Admin/Color/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var color = await _dataContext.Colors.FindAsync(id);
+            // var color = await _dataContext.Colors
+            //     .FirstOrDefaultAsync(m => m.Id == id);
+            // if (color == null)
+            // {
+            //     return NotFound();
+            // }
 
-            if (color == null)
-            {
-                return NotFound();
-            }
+            // return View(color);
+            return NotFound(); // Always return not found since table was removed
+        }
 
-            // Kiểm tra xem màu này có đang được sử dụng không
-            var productColors = await _dataContext.ProductColors.CountAsync(pc => pc.ColorId == id);
+        // POST: Admin/Color/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            // var color = await _dataContext.Colors.FindAsync(id);
+            // if (color != null)
+            // {
+            //     _dataContext.Colors.Remove(color);
+            // }
 
-            if (productColors > 0)
-            {
-                TempData["error"] = "Không thể xóa màu sắc này vì đang được sử dụng cho " + productColors + " sản phẩm";
-                return RedirectToAction(nameof(Index));
-            }
-
-            _dataContext.Colors.Remove(color);
-            await _dataContext.SaveChangesAsync();
-            TempData["success"] = "Xóa màu sắc thành công";
-
-            return RedirectToAction(nameof(Index));
+            // await _dataContext.SaveChangesAsync();
+            return RedirectToAction(nameof(Index)); // Always redirect since table was removed
         }
 
         private bool ColorExists(int id)
         {
-            return _dataContext.Colors.Any(e => e.Id == id);
+            // return _dataContext.Colors.Any(e => e.Id == id);
+            return false; // Always return false since table was removed
         }
     }
 }

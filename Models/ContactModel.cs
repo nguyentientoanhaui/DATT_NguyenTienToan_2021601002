@@ -19,9 +19,14 @@ namespace Shopping_Demo.Models
         public string Description { get; set; }
 
         public string LogoImage { get; set; }
+        // public string? UserId { get; set; } // DISABLED
 
         [NotMapped]
         [FileExtension]
         public IFormFile? ImageUpload { get; set; }
+
+        // Navigation Properties - DISABLED
+        // [ForeignKey("UserId")]
+        // public virtual AppUserModel? User { get; set; }
     }
 }

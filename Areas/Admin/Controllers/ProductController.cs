@@ -18,15 +18,36 @@ namespace Shopping_Demo.Areas.Admin.Controllers
             _dataContext = context;
             _webHostEnvironment = webHostEnvironment;
         }
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string search = "")
         {
-            var query = _dataContext.Products
-                .OrderByDescending(p => p.Id)
-                .Include(p => p.ProductColors).ThenInclude(pc => pc.Color)
-                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+            IQueryable<ProductModel> query = _dataContext.Products
+                // .Include(p => p.ProductColors).ThenInclude(pc => pc.Color) // Disabled - table removed
+                // .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size) // Disabled - table removed
                 .Include(p => p.ProductImages)
                 .Include(p => p.Category)
                 .Include(p => p.Brand);
+
+            // Apply search filter if search term is provided
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                query = query.Where(p => 
+                    p.Name.ToLower().Contains(search) ||
+                    p.Model.ToLower().Contains(search) ||
+                    p.Brand.Name.ToLower().Contains(search) ||
+                    p.Category.Name.ToLower().Contains(search) ||
+                    p.Condition.ToLower().Contains(search) ||
+                    p.Gender.ToLower().Contains(search) ||
+                    p.CaseSize.ToLower().Contains(search) ||
+                    p.CaseMaterial.ToLower().Contains(search) ||
+                    p.DialColor.ToLower().Contains(search) ||
+                    p.MovementType.ToLower().Contains(search) ||
+                    p.BraceletMaterial.ToLower().Contains(search) ||
+                    p.Description.ToLower().Contains(search)
+                );
+            }
+
+            query = query.OrderByDescending(p => p.Id);
 
             var totalItems = await query.CountAsync();
             var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
@@ -45,6 +66,7 @@ namespace Shopping_Demo.Areas.Admin.Controllers
             ViewBag.PageSize = pageSize;
             ViewBag.HasPreviousPage = page > 1;
             ViewBag.HasNextPage = page < totalPages;
+            ViewBag.SearchTerm = search;
 
             return View(products);
         }
@@ -232,33 +254,33 @@ namespace Shopping_Demo.Areas.Admin.Controllers
                     _dataContext.ProductImages.Add(defaultImage);
                 }
 
-                // Xử lý màu sắc
-                if (product.SelectedColors != null && product.SelectedColors.Count > 0)
-                {
-                    foreach (var colorId in product.SelectedColors)
-                    {
-                        ProductColorModel productColor = new ProductColorModel
-                        {
-                            ProductId = product.Id,
-                            ColorId = colorId
-                        };
-                        _dataContext.ProductColors.Add(productColor);
-                    }
-                }
+                // Xử lý màu sắc - DISABLED - table removed
+                // if (product.SelectedColors != null && product.SelectedColors.Count > 0)
+                // {
+                //     foreach (var colorId in product.SelectedColors)
+                //     {
+                //         ProductColorModel productColor = new ProductColorModel
+                //         {
+                //             ProductId = product.Id,
+                //             ColorId = colorId
+                //         };
+                //         // _dataContext.ProductColors.Add(productColor); // Disabled - table removed
+                //     }
+                // }
 
-                // Xử lý kích cỡ
-                if (product.SelectedSizes != null && product.SelectedSizes.Count > 0)
-                {
-                    foreach (var sizeId in product.SelectedSizes)
-                    {
-                        ProductSizeModel productSize = new ProductSizeModel
-                        {
-                            ProductId = product.Id,
-                            SizeId = sizeId
-                        };
-                        _dataContext.ProductSizes.Add(productSize);
-                    }
-                }
+                // Xử lý kích cỡ - DISABLED - table removed
+                // if (product.SelectedSizes != null && product.SelectedSizes.Count > 0)
+                // {
+                //     foreach (var sizeId in product.SelectedSizes)
+                //     {
+                //         ProductSizeModel productSize = new ProductSizeModel
+                //         {
+                //             ProductId = product.Id,
+                //             SizeId = sizeId
+                //         };
+                //         // _dataContext.ProductSizes.Add(productSize); // Disabled - table removed
+                //     }
+                // }
 
                 await _dataContext.SaveChangesAsync();
                 TempData["success"] = "Thêm sản phẩm thành công";
@@ -314,8 +336,8 @@ namespace Shopping_Demo.Areas.Admin.Controllers
         public async Task<IActionResult> Details(int Id)
         {
             ProductModel product = await _dataContext.Products
-                .Include(p => p.ProductColors).ThenInclude(pc => pc.Color)
-                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+                // .Include(p => p.ProductColors).ThenInclude(pc => pc.Color) // Disabled - table removed
+                // .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size) // Disabled - table removed
                 .Include(p => p.ProductImages)
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
@@ -332,8 +354,8 @@ namespace Shopping_Demo.Areas.Admin.Controllers
         public async Task<IActionResult> Edit(int Id)
         {
             ProductModel product = await _dataContext.Products
-                .Include(p => p.ProductColors).ThenInclude(pc => pc.Color)
-                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+                // .Include(p => p.ProductColors).ThenInclude(pc => pc.Color) // Disabled - table removed
+                // .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size) // Disabled - table removed
                 .Include(p => p.ProductImages)
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
@@ -369,8 +391,8 @@ namespace Shopping_Demo.Areas.Admin.Controllers
             {
                 // Get existing product with related data
                 var existingProduct = await _dataContext.Products
-                    .Include(p => p.ProductColors)
-                    .Include(p => p.ProductSizes)
+                    // .Include(p => p.ProductColors) // Disabled - table removed
+                    // .Include(p => p.ProductSizes) // Disabled - table removed
                     .Include(p => p.ProductImages)
                     .FirstOrDefaultAsync(p => p.Id == product.Id);
 
@@ -706,37 +728,37 @@ namespace Shopping_Demo.Areas.Admin.Controllers
 
         private async Task ProcessColorsAndSizes(ProductModel existingProduct, ProductModel product)
         {
-            // Update colors
-            if (product.SelectedColors != null)
-            {
-                _dataContext.ProductColors.RemoveRange(existingProduct.ProductColors);
+            // Update colors - DISABLED - table removed
+            // if (product.SelectedColors != null)
+            // {
+            //     // _dataContext.ProductColors.RemoveRange(existingProduct.ProductColors); // Disabled - table removed
 
-                foreach (var colorId in product.SelectedColors)
-                {
-                    ProductColorModel productColor = new ProductColorModel
-                    {
-                        ProductId = product.Id,
-                        ColorId = colorId
-                    };
-                    _dataContext.ProductColors.Add(productColor);
-                }
-            }
+            //     foreach (var colorId in product.SelectedColors)
+            //     {
+            //         ProductColorModel productColor = new ProductColorModel
+            //         {
+            //             ProductId = product.Id,
+            //             ColorId = colorId
+            //         };
+            //         // _dataContext.ProductColors.Add(productColor); // Disabled - table removed
+            //     }
+            // }
 
-            // Update sizes
-            if (product.SelectedSizes != null)
-            {
-                _dataContext.ProductSizes.RemoveRange(existingProduct.ProductSizes);
+            // Update sizes - DISABLED - table removed
+            // if (product.SelectedSizes != null)
+            // {
+            //     // _dataContext.ProductSizes.RemoveRange(existingProduct.ProductSizes); // Disabled - table removed
 
-                foreach (var sizeId in product.SelectedSizes)
-                {
-                    ProductSizeModel productSize = new ProductSizeModel
-                    {
-                        ProductId = product.Id,
-                        SizeId = sizeId
-                    };
-                    _dataContext.ProductSizes.Add(productSize);
-                }
-            }
+            //     foreach (var sizeId in product.SelectedSizes)
+            //     {
+            //         ProductSizeModel productSize = new ProductSizeModel
+            //         {
+            //             ProductId = product.Id,
+            //             SizeId = sizeId
+            //         };
+            //         // _dataContext.ProductSizes.Add(productSize); // Disabled - table removed
+            //     }
+            // }
 
             await _dataContext.SaveChangesAsync();
         }

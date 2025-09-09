@@ -1,0 +1,163 @@
+@model IEnumerable<Shopping_Demo.Models.ProductReviewModel>
+@{
+    ViewData["Title"] = "Quản lý đánh giá sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Quản lý đánh giá sản phẩm</h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            @TempData["success"]
+                        </div>
+                    }
+
+                    @if (TempData["error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                            @TempData["error"]
+                        </div>
+                    }
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Người dùng</th>
+                                    <th>Đánh giá</th>
+                                    <th>Bình luận</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var review in Model)
+                                {
+                                    <tr>
+                                        <td>@review.Id</td>
+                                        <td>
+                                            @if (review.Product != null)
+                                            {
+                                                <a href="@Url.Action("Details", "Product", new { id = review.ProductId })" target="_blank">
+                                                    @review.Product.Name
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sản phẩm đã bị xóa</span>
+                                            }
+                                        </td>
+                                        <td>@review.UserName</td>
+                                        <td>
+                                            <div class="rating">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= review.Rating)
+                                                    {
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="far fa-star text-muted"></i>
+                                                    }
+                                                }
+                                                <span class="ml-1">(@review.Rating/5)</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(review.Comment))
+                                            {
+                                                <span title="@review.Comment">
+                                                    @(review.Comment.Length > 50 ? review.Comment.Substring(0, 50) + "..." : review.Comment)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Không có bình luận</span>
+                                            }
+                                        </td>
+                                        <td>@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="@Url.Action("Details", new { id = review.Id })" 
+                                                   class="btn btn-sm btn-info" title="Xem chi tiết">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <form asp-action="Delete" method="post" style="display: inline;">
+                                                    <input type="hidden" name="id" value="@review.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')" 
+                                                            title="Xóa">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (ViewBag.TotalPages > 1)
+                    {
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                @if (ViewBag.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1 })">Trước</a>
+                                    </li>
+                                }
+
+                                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                                    </li>
+                                }
+
+                                @if (ViewBag.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1 })">Sau</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+
+                    <div class="text-center">
+                        <p class="text-muted">
+                            Hiển thị @((ViewBag.CurrentPage - 1) * ViewBag.PageSize + 1) - 
+                            @Math.Min(ViewBag.CurrentPage * ViewBag.PageSize, ViewBag.TotalItems) 
+                            trong tổng số @ViewBag.TotalItems đánh giá
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+        });
+    </script>
+}

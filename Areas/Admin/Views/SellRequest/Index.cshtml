@@ -1,0 +1,681 @@
+@model IPagedList<SellRequestModel>
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@using Shopping_Demo.Models
+
+@{
+    ViewData["Title"] = "Quản Lý Đơn Thu Mua";
+    var statusOptions = ViewBag.StatusOptions as List<dynamic>;
+    var currentStatus = ViewBag.Status as string;
+    var searchTerm = ViewBag.Search as string;
+}
+
+<style>
+    .simple-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #ffffff;
+        min-height: 100vh;
+    }
+    
+    .simple-header {
+        border-bottom: 2px solid #000000;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .simple-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #000000;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+    
+    .simple-subtitle {
+        color: #666666;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    .simple-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 0;
+        margin-bottom: 20px;
+        box-shadow: none;
+    }
+    
+    .simple-card-header {
+        background: #f8f8f8;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 15px 20px;
+        font-weight: 600;
+        color: #000000;
+        font-size: 16px;
+    }
+    
+    .simple-card-body {
+        padding: 20px;
+    }
+    
+    .simple-form-group {
+        margin-bottom: 20px;
+    }
+    
+    .simple-label {
+        display: block;
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .simple-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #d0d0d0;
+        border-radius: 0;
+        font-size: 14px;
+        background: #ffffff;
+        color: #000000;
+        transition: border-color 0.2s ease;
+    }
+    
+    .simple-input:focus {
+        outline: none;
+        border-color: #000000;
+        box-shadow: none;
+    }
+    
+    .simple-select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #d0d0d0;
+        border-radius: 0;
+        font-size: 14px;
+        background: #ffffff;
+        color: #000000;
+        cursor: pointer;
+    }
+    
+    .simple-btn {
+        padding: 12px 24px;
+        border: 1px solid #000000;
+        background: #000000;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .simple-btn:hover {
+        background: #ffffff;
+        color: #000000;
+        text-decoration: none;
+    }
+    
+    .simple-btn-secondary {
+        background: #ffffff;
+        color: #000000;
+        border: 1px solid #d0d0d0;
+    }
+    
+    .simple-btn-secondary:hover {
+        background: #f8f8f8;
+        color: #000000;
+    }
+    
+    .simple-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+    
+    .simple-table th {
+        background: #f8f8f8;
+        color: #000000;
+        font-weight: 600;
+        padding: 15px 12px;
+        text-align: left;
+        border-bottom: 2px solid #000000;
+        font-size: 14px;
+    }
+    
+    .simple-table td {
+        padding: 15px 12px;
+        border-bottom: 1px solid #e0e0e0;
+        color: #333333;
+        font-size: 14px;
+        vertical-align: top;
+    }
+    
+    .simple-table tr:hover {
+        background: #f8f8f8;
+    }
+    
+    .simple-badge {
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .badge-pending { background: #f0f0f0; color: #000000; }
+    .badge-reviewed { background: #e0e0e0; color: #000000; }
+    .badge-contacted { background: #d0d0d0; color: #000000; }
+    .badge-agreed { background: #000000; color: #ffffff; }
+    .badge-completed { background: #000000; color: #ffffff; }
+    .badge-rejected { background: #666666; color: #ffffff; }
+    .badge-cancelled { background: #999999; color: #ffffff; }
+    
+    .simple-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .simple-action-btn {
+        padding: 6px 12px;
+        border: 1px solid #d0d0d0;
+        background: #ffffff;
+        color: #000000;
+        font-size: 12px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .simple-action-btn:hover {
+        background: #000000;
+        color: #ffffff;
+        text-decoration: none;
+    }
+    
+    .simple-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+        gap: 10px;
+    }
+    
+    .simple-pagination a {
+        padding: 8px 12px;
+        border: 1px solid #d0d0d0;
+        color: #000000;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .simple-pagination a:hover {
+        background: #000000;
+        color: #ffffff;
+    }
+    
+    .simple-pagination .current {
+        padding: 8px 12px;
+        background: #000000;
+        color: #ffffff;
+        border: 1px solid #000000;
+    }
+    
+    .simple-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .simple-stat-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .simple-stat-number {
+        font-size: 24px;
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 5px;
+    }
+    
+    .simple-stat-label {
+        font-size: 12px;
+        color: #666666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .simple-empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666666;
+    }
+    
+    .simple-empty-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #d0d0d0;
+    }
+    
+    .simple-empty-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #000000;
+    }
+    
+    .simple-empty-text {
+        font-size: 14px;
+        color: #666666;
+    }
+    
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .simple-container {
+            padding: 15px;
+        }
+        
+        .simple-title {
+            font-size: 24px;
+        }
+        
+        .simple-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .simple-table {
+            font-size: 12px;
+        }
+        
+        .simple-table th,
+        .simple-table td {
+            padding: 10px 8px;
+        }
+        
+        .simple-actions {
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .simple-action-btn {
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+        
+        form[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+            gap: 15px !important;
+        }
+        
+        #quickStatusModal > div {
+            width: 95% !important;
+            margin: 20px !important;
+        }
+    }
+    
+    @@media (max-width: 480px) {
+        .simple-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .simple-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .simple-pagination {
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+    }
+</style>
+
+<div class="simple-container">
+    <!-- Page Header -->
+    <div class="simple-header">
+        <h1 class="simple-title">Quản Lý Đơn Thu Mua</h1>
+        <p class="simple-subtitle">Quản lý và xử lý các yêu cầu thu mua đồng hồ từ khách hàng</p>
+        <div style="margin-top: 20px;">
+            <button class="simple-btn simple-btn-secondary" onclick="loadStatistics()">
+                Thống Kê
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="simple-stats" id="statisticsCards" style="display: none;">
+        <div class="simple-stat-card">
+            <div class="simple-stat-number" id="totalRequests">0</div>
+            <div class="simple-stat-label">Tổng Đơn</div>
+        </div>
+        <div class="simple-stat-card">
+            <div class="simple-stat-number" id="pendingRequests">0</div>
+            <div class="simple-stat-label">Chờ Xử Lý</div>
+        </div>
+        <div class="simple-stat-card">
+            <div class="simple-stat-number" id="completedRequests">0</div>
+            <div class="simple-stat-label">Hoàn Thành</div>
+        </div>
+        <div class="simple-stat-card">
+            <div class="simple-stat-number" id="thisMonthRequests">0</div>
+            <div class="simple-stat-label">Tháng Này</div>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="simple-card">
+        <div class="simple-card-header">Bộ Lọc & Tìm Kiếm</div>
+        <div class="simple-card-body">
+            <form method="get" style="display: grid; grid-template-columns: 1fr 2fr auto; gap: 20px; align-items: end;">
+                <div class="simple-form-group">
+                    <label for="status" class="simple-label">Trạng Thái</label>
+                    <select name="status" id="status" class="simple-select">
+                        <option value="">Tất cả trạng thái</option>
+                        @if (statusOptions != null)
+                        {
+                            @foreach (var option in statusOptions)
+                            {
+                                <option value="@option.Value" selected="@(currentStatus == option.Value)">
+                                    @option.Text
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="simple-form-group">
+                    <label for="search" class="simple-label">Tìm Kiếm</label>
+                    <input type="text" name="search" id="search" class="simple-input" 
+                           placeholder="Tìm theo tên, email, SĐT, sản phẩm..." value="@searchTerm">
+                </div>
+                <div class="simple-form-group">
+                    <button type="submit" class="simple-btn">
+                        Tìm Kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="simple-card">
+        <div class="simple-card-header">
+            Danh Sách Đơn Thu Mua (@Model.TotalItemCount đơn)
+        </div>
+        <div class="simple-card-body">
+            @if (Model.Any())
+            {
+                <table class="simple-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Khách Hàng</th>
+                            <th>Sản Phẩm</th>
+                            <th>Thông Tin Đồng Hồ</th>
+                            <th>Giá Mong Muốn</th>
+                            <th>Trạng Thái</th>
+                            <th>Ngày Tạo</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><strong>#@item.Id</strong></td>
+                                <td>
+                                    <div>
+                                        <strong>@item.FullName</strong><br>
+                                        <small style="color: #666666;">@item.Email</small><br>
+                                        <small style="color: #666666;">@item.PhoneNumber</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.Product != null)
+                                    {
+                                        <div>
+                                            <strong>@item.Product.Name</strong><br>
+                                            <small style="color: #666666;">@item.Product.Brand?.Name</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #999999;">Sản phẩm không tồn tại</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div style="max-width: 200px;">
+                                        <small>@item.WatchInfo</small><br>
+                                        @if (!string.IsNullOrEmpty(item.Condition))
+                                        {
+                                            <span class="simple-badge badge-reviewed">@item.Condition</span>
+                                        }
+                                        @if (item.Year.HasValue)
+                                        {
+                                            <span class="simple-badge badge-pending">@item.Year</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.ExpectedPrice.HasValue)
+                                    {
+                                        <strong style="color: #000000;">
+                                            @item.ExpectedPrice.Value.ToString("N0") VNĐ
+                                        </strong>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #999999;">Chưa có</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="simple-badge @GetStatusBadgeClass(item.Status)">
+                                        @GetStatusDisplayName(item.Status)
+                                    </span>
+                                </td>
+                                <td>
+                                    <small>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    <div class="simple-actions">
+                                        <a href="@Url.Action("Details", new { id = item.Id })" 
+                                           class="simple-action-btn" title="Xem chi tiết">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        </a>
+                                        <a href="@Url.Action("Edit", new { id = item.Id })" 
+                                           class="simple-action-btn" title="Chỉnh sửa">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                            </svg>
+                                        </a>
+                                        <a href="@Url.Action("Contact", new { id = item.Id })" 
+                                           class="simple-action-btn" title="Liên hệ khách hàng">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                                <polyline points="22,6 12,13 2,6"></polyline>
+                                            </svg>
+                                        </a>
+                                        <a href="@Url.Action("Reject", new { id = item.Id })" 
+                                           class="simple-action-btn" title="Từ chối đơn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                    <div style="color: #666666; font-size: 14px;">
+                        Hiển thị @Model.FirstItemOnPage đến @Model.LastItemOnPage trong tổng số @Model.TotalItemCount đơn
+                    </div>
+                    <div class="simple-pagination">
+                        @Html.PagedListPager(Model, page => Url.Action("Index", new { page, status = currentStatus, search = searchTerm }),
+                            new PagedListRenderOptions
+                            {
+                                LiElementClasses = new string[] { "" },
+                                PageClasses = new string[] { "" },
+                                UlElementClasses = new string[] { "simple-pagination" },
+                                DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                                DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                                DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                                DisplayLinkToNextPage = PagedListDisplayMode.Always
+                            })
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="simple-empty">
+                    <div class="simple-empty-icon">📋</div>
+                    <div class="simple-empty-title">Không có đơn thu mua nào</div>
+                    <div class="simple-empty-text">Chưa có đơn thu mua nào được tạo hoặc không tìm thấy kết quả phù hợp.</div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Quick Status Update Modal -->
+<div id="quickStatusModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ffffff; width: 90%; max-width: 500px; border: 1px solid #e0e0e0;">
+        <div style="padding: 20px; border-bottom: 1px solid #e0e0e0;">
+            <h3 style="margin: 0; color: #000000; font-size: 18px;">Cập Nhật Trạng Thái Nhanh</h3>
+        </div>
+        <div style="padding: 20px;">
+            <form id="quickStatusForm">
+                <input type="hidden" id="requestId" name="id">
+                <input type="hidden" id="newStatus" name="status">
+                
+                <div class="simple-form-group">
+                    <label for="adminResponse" class="simple-label">Phản hồi từ admin</label>
+                    <textarea id="adminResponse" name="adminResponse" class="simple-input" rows="3" 
+                              placeholder="Nhập phản hồi cho khách hàng..."></textarea>
+                </div>
+                
+                <div class="simple-form-group">
+                    <label for="suggestedPrice" class="simple-label">Giá đề xuất (VNĐ)</label>
+                    <input type="number" id="suggestedPrice" name="suggestedPrice" class="simple-input" 
+                           placeholder="Nhập giá đề xuất...">
+                </div>
+            </form>
+        </div>
+        <div style="padding: 20px; border-top: 1px solid #e0e0e0; display: flex; gap: 10px; justify-content: flex-end;">
+            <button type="button" class="simple-btn simple-btn-secondary" onclick="closeModal()">Hủy</button>
+            <button type="button" class="simple-btn" onclick="submitQuickUpdate()">Cập Nhật</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadStatistics() {
+            fetch('@Url.Action("Statistics", "SellRequest")')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalRequests').textContent = data.total;
+                    document.getElementById('pendingRequests').textContent = data.pending;
+                    document.getElementById('completedRequests').textContent = data.completed;
+                    document.getElementById('thisMonthRequests').textContent = data.thisMonth;
+                    document.getElementById('statisticsCards').style.display = 'grid';
+                })
+                .catch(error => console.error('Error loading statistics:', error));
+        }
+
+        function quickUpdateStatus(requestId, status) {
+            document.getElementById('requestId').value = requestId;
+            document.getElementById('newStatus').value = status;
+            document.getElementById('quickStatusModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('quickStatusModal').style.display = 'none';
+        }
+
+        function submitQuickUpdate() {
+            const formData = new FormData(document.getElementById('quickStatusForm'));
+            const data = Object.fromEntries(formData);
+            
+            fetch('@Url.Action("UpdateStatus", "SellRequest")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật trạng thái');
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('quickStatusModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+}
+
+@functions {
+    string GetStatusBadgeClass(SellRequestStatus status)
+    {
+        return status switch
+        {
+            SellRequestStatus.Pending => "badge-pending",
+            SellRequestStatus.Reviewed => "badge-reviewed",
+            SellRequestStatus.Contacted => "badge-contacted",
+            SellRequestStatus.Agreed => "badge-agreed",
+            SellRequestStatus.Completed => "badge-completed",
+            SellRequestStatus.Rejected => "badge-rejected",
+            SellRequestStatus.Cancelled => "badge-cancelled",
+            _ => "badge-pending"
+        };
+    }
+
+    string GetStatusDisplayName(SellRequestStatus status)
+    {
+        return status switch
+        {
+            SellRequestStatus.Pending => "Chờ xử lý",
+            SellRequestStatus.Reviewed => "Đã xem",
+            SellRequestStatus.Contacted => "Đã liên hệ",
+            SellRequestStatus.Agreed => "Đã thỏa thuận",
+            SellRequestStatus.Completed => "Đã hoàn thành",
+            SellRequestStatus.Rejected => "Từ chối",
+            SellRequestStatus.Cancelled => "Hủy",
+            _ => status.ToString()
+        };
+    }
+}

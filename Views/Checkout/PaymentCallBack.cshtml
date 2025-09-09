@@ -1,4 +1,4 @@
-﻿@using Shopping_Demo.Models.Momo
+﻿@using Shopping_Demo.Models
 @using System.Globalization
 @model MomoExecuteResponseModel
 
@@ -73,7 +73,9 @@
             <p><strong>Thanh toán MoMo thành công với:</strong></p>
             <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
             <p><strong>Thông tin đơn hàng:</strong> @Model.OrderInfo</p>
-            <p><strong>Tổng tiền:</strong> @(long.TryParse(Model.Amount, out long amount) ? amount.ToString("N0", CultureInfo.InvariantCulture) : "Invalid Amount") VNĐ</p>            
+            <p><strong>Tổng tiền:</strong> @Model.Amount VNĐ</p>
+            <p><strong>Tên khách hàng:</strong> @Model.FullName</p>
+            <p><strong>Thời gian thanh toán:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")</p>
             <a asp-controller="Account" asp-action="History" class="btn btn-primary">Xem lịch sử đơn hàng</a>
         </div>
     </div>

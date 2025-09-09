@@ -29,6 +29,37 @@
         letter-spacing: -0.5px;
     }
 
+    .search-results-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background: #e3f2fd;
+        border: 1px solid #bbdefb;
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+
+    .search-term {
+        color: #1976d2;
+        font-weight: 500;
+    }
+
+    .clear-search {
+        color: #1976d2;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .clear-search:hover {
+        background: #bbdefb;
+        color: #0d47a1;
+    }
+
     .header-actions {
         display: flex;
         align-items: center;
@@ -62,6 +93,11 @@
         position: relative;
         flex: 1;
         max-width: 400px;
+    }
+
+    .search-form {
+        position: relative;
+        width: 100%;
     }
 
     .search-input {
@@ -467,14 +503,25 @@
 <div class="modern-container">
     <div class="page-header">
         <h1 class="page-title">Danh sách đồng hồ cao cấp</h1>
+        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+        {
+            <div class="search-results-info">
+                <span class="search-term">Kết quả tìm kiếm cho: "<strong>@ViewBag.SearchTerm</strong>"</span>
+                <a href="@Url.Action("Index")" class="clear-search">Xóa bộ lọc</a>
+            </div>
+        }
         <div class="header-actions">
             <a asp-action="Create" class="btn-primary">
                 <i class="fas fa-plus"></i>
                 Thêm đồng hồ mới
             </a>
             <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Tìm kiếm đồng hồ..." />
+                <form method="get" action="@Url.Action("Index")" class="search-form">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" name="search" class="search-input" placeholder="Tìm kiếm đồng hồ..." value="@ViewBag.SearchTerm" />
+                    <input type="hidden" name="page" value="1" />
+                    <input type="hidden" name="pageSize" value="@ViewBag.PageSize" />
+                </form>
             </div>
         </div>
     </div>
@@ -648,7 +695,7 @@
                 <li class="page-item @(ViewBag.HasPreviousPage ? "" : "disabled")">
                     @if (ViewBag.HasPreviousPage)
                     {
-                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, pageSize = ViewBag.PageSize })">
+                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, pageSize = ViewBag.PageSize, search = ViewBag.SearchTerm })">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                     }
@@ -669,7 +716,7 @@
                     if (startPage > 1)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="@Url.Action("Index", new { page = 1, pageSize = ViewBag.PageSize })">1</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = 1, pageSize = ViewBag.PageSize, search = ViewBag.SearchTerm })">1</a>
                         </li>
                         if (startPage > 2)
                         {
@@ -688,7 +735,7 @@
                             }
                             else
                             {
-                                <a class="page-link" href="@Url.Action("Index", new { page = i, pageSize = ViewBag.PageSize })">@i</a>
+                                <a class="page-link" href="@Url.Action("Index", new { page = i, pageSize = ViewBag.PageSize, search = ViewBag.SearchTerm })">@i</a>
                             }
                         </li>
                     }
@@ -703,7 +750,7 @@
                             </li>
                         }
                         <li class="page-item">
-                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.TotalPages, pageSize = ViewBag.PageSize })">@ViewBag.TotalPages</a>
+                            <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.TotalPages, pageSize = ViewBag.PageSize, search = ViewBag.SearchTerm })">@ViewBag.TotalPages</a>
                         </li>
                     }
                 }
@@ -712,7 +759,7 @@
                 <li class="page-item @(ViewBag.HasNextPage ? "" : "disabled")">
                     @if (ViewBag.HasNextPage)
                     {
-                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, pageSize = ViewBag.PageSize })">
+                        <a class="page-link" href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, pageSize = ViewBag.PageSize, search = ViewBag.SearchTerm })">
                             <i class="fas fa-chevron-right"></i>
                         </a>
                     }
@@ -770,19 +817,29 @@
     // Search functionality
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.querySelector('.search-input');
-        if (searchInput) {
+        const searchForm = document.querySelector('.search-form');
+        
+        if (searchInput && searchForm) {
+            let searchTimeout;
+            
+            // Real-time search with debouncing
             searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                const tableRows = document.querySelectorAll('tbody tr');
+                clearTimeout(searchTimeout);
+                const searchTerm = this.value.trim();
                 
-                tableRows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    if (text.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
+                if (searchTerm.length >= 2 || searchTerm.length === 0) {
+                    searchTimeout = setTimeout(() => {
+                        searchForm.submit();
+                    }, 500); // Wait 500ms after user stops typing
+                }
+            });
+            
+            // Also allow Enter key for immediate search
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    clearTimeout(searchTimeout);
+                    searchForm.submit();
+                }
             });
         }
     });

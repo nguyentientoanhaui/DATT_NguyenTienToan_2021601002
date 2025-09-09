@@ -1,55 +1,300 @@
 ﻿@model CategoryModel
 @{
-    ViewData["title"] = "Chỉnh sửa danh mục";
+    ViewData["Title"] = "Chỉnh Sửa Danh Mục";
 }
-<h4>Chỉnh sửa danh mục</h4>
-<div class="col-md-9">
-    <form asp-action="Edit" enctype="multipart/form-data">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-            <label>Tên</label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger" />
+
+<div class="category-edit-container">
+    <div class="edit-header">
+        <div class="header-content">
+            <h2>Chỉnh Sửa Danh Mục</h2>
+            <p>Cập nhật thông tin danh mục sản phẩm</p>
         </div>
-        <div class="form-group">
-            <label>Mô tả</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-            <span asp-validation-for="Description" class="text-danger" />
+        <a class="btn-back" asp-action="Index">
+            <i class="fas fa-arrow-left"></i>
+            Quay Lại
+        </a>
+    </div>
+
+    <form asp-action="Edit" enctype="multipart/form-data" class="edit-form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+        
+        <div class="form-section">
+            <h3>Thông Tin Cơ Bản</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Name">Tên Danh Mục</label>
+                    <input asp-for="Name" class="form-input" placeholder="Nhập tên danh mục" />
+                    <span asp-validation-for="Name" class="error-message"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Status">Trạng Thái</label>
+                    <select asp-for="Status" class="form-select">
+                        <option value="1">Hiển thị</option>
+                        <option value="0">Ẩn</option>
+                    </select>
+                    <span asp-validation-for="Status" class="error-message"></span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="Description">Mô Tả</label>
+                <textarea asp-for="Description" class="form-textarea" rows="4" placeholder="Nhập mô tả danh mục"></textarea>
+                <span asp-validation-for="Description" class="error-message"></span>
+            </div>
         </div>
-        <div class="form-group">
-            <label>Loại danh mục</label>
-            <select id="categoryType" class="form-control">
-                <option value="main">Danh mục chính</option>
-                <option value="sub">Danh mục phụ</option>
-            </select>
+
+        <div class="form-section">
+            <h3>Cấu Hình Danh Mục</h3>
+            <div class="form-group">
+                <label>Loại Danh Mục</label>
+                <select id="categoryType" class="form-select">
+                    <option value="main">Danh mục chính</option>
+                    <option value="sub">Danh mục phụ</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="parentCategoryGroup" style="display:none;">
+                <label asp-for="ParentId">Danh Mục Chính</label>
+                <select asp-for="ParentId" class="form-select" asp-items="ViewBag.ParentCategories">
+                    <option value="">--Chọn danh mục chính--</option>
+                </select>
+                <span asp-validation-for="ParentId" class="error-message"></span>
+            </div>
         </div>
-        <div class="form-group" id="parentCategoryGroup" style="display:none;">
-            <label>Danh mục chính</label>
-            <select asp-for="ParentId" class="form-control" asp-items="ViewBag.ParentCategories">
-                <option value="">--Chọn danh mục chính--</option>
-            </select>
-            <span asp-validation-for="ParentId" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>Trạng thái</label>
-            <select asp-for="Status" class="form-control">
-                <option value="1">Hiển thị</option>
-                <option value="0">Ẩn</option>
-            </select>
-            <span asp-validation-for="Status" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary">Lưu</button>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-save">
+                <i class="fas fa-save"></i>
+                Lưu Thay Đổi
+            </button>
+            <a asp-action="Index" class="btn-cancel">
+                <i class="fas fa-times"></i>
+                Hủy
+            </a>
         </div>
     </form>
-    <a asp-action="Index">Trở lại danh sách</a>
 </div>
+<style>
+.category-edit-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-content h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+
+.header-content p {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+    background: #5a6268;
+    color: #fff;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.form-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 15px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row:last-child {
+    margin-bottom: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.form-input, .form-select, .form-textarea {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.validation-summary {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px 15px;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    font-size: 12px;
+    color: #dc3545;
+    margin-top: 3px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-save, .btn-cancel {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-save {
+    background: #000;
+    color: #fff;
+}
+
+.btn-save:hover {
+    background: #333;
+    color: #fff;
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: #fff;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+    color: #fff;
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .category-edit-container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .edit-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .btn-back {
+        justify-content: center;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-save, .btn-cancel {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
         $(document).ready(function() {
+            // Set initial category type based on current data
+            var currentLevel = @Model.Level;
+            if (currentLevel === 1) {
+                $("#categoryType").val("main");
+            } else {
+                $("#categoryType").val("sub");
+                $("#parentCategoryGroup").show();
+            }
+            
             $("#categoryType").change(function() {
                 if ($(this).val() === "sub") {
                     $("#parentCategoryGroup").show();

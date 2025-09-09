@@ -270,6 +270,14 @@
                         <i class="fas fa-check-circle"></i>
                         Đã giao (@Model.Count(o => o.Status == 0))
                     </button>
+                    <button class="tab-button" onclick="showTab('returning')">
+                        <i class="fas fa-undo"></i>
+                        Đang hoàn (@Model.Count(o => o.Status == 5))
+                    </button>
+                    <button class="tab-button" onclick="showTab('returned')">
+                        <i class="fas fa-check-circle"></i>
+                        Hoàn thành (@Model.Count(o => o.Status == 6))
+                    </button>
                     <button class="tab-button" onclick="showTab('cancelled')">
                         <i class="fas fa-times-circle"></i>
                         Đã hủy (@Model.Count(o => o.Status == 3))
@@ -295,6 +303,22 @@
                 <!-- Delivered Orders -->
                 <div id="delivered" class="tab-content">
                     @foreach (var item in Model.Where(o => o.Status == 0))
+                    {
+                        @Html.Partial("_OrderCardPartial", item)
+                    }
+                </div>
+
+                <!-- Returning Orders -->
+                <div id="returning" class="tab-content">
+                    @foreach (var item in Model.Where(o => o.Status == 5))
+                    {
+                        @Html.Partial("_OrderCardPartial", item)
+                    }
+                </div>
+
+                <!-- Returned Orders -->
+                <div id="returned" class="tab-content">
+                    @foreach (var item in Model.Where(o => o.Status == 6))
                     {
                         @Html.Partial("_OrderCardPartial", item)
                     }

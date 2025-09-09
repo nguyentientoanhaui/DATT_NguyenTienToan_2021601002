@@ -29,6 +29,8 @@
     <link rel="stylesheet" href="~/css/morris.css" />
     <link rel="stylesheet" href="~/css/jquery-ui.css" />
 
+    @await RenderSectionAsync("Styles", required: false)
+
     <style>
         :root {
             --primary-black: #000000;
@@ -262,6 +264,12 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" asp-controller="SellRequest" asp-action="Index">
+                    <i class="fas fa-fw fa-hand-holding-usd"></i>
+                    <span>Đơn thu mua</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" asp-controller="User" asp-action="Index">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Khách hàng</span>
@@ -274,21 +282,15 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" asp-controller="Coupon" asp-action="Index">
-                    <i class="fas fa-fw fa-ticket-alt"></i>
-                    <span>Phiếu giảm giá</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Slider" asp-action="Index">
-                    <i class="fas fa-fw fa-images"></i>
-                    <span>Banner</span>
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link" asp-controller="Dashboard" asp-action="SalesStats">
                     <i class="fas fa-fw fa-chart-line"></i>
-                    <span>Thống kê</span>
+                    <span>Thống kê Đồng hồ</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Contact" asp-action="Index">
+                    <i class="fas fa-fw fa-address-book"></i>
+                    <span>Thông tin liên hệ</span>
                 </a>
             </li>
 

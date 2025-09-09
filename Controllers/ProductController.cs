@@ -44,9 +44,9 @@ namespace Shopping_Demo.Controllers
                 .Where(p => p.IsActive)
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
-                .Include(p => p.ProductImages)
-                .Include(p => p.ProductColors).ThenInclude(pc => pc.Color)
-                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size);
+                .Include(p => p.ProductImages);
+                // .Include(p => p.ProductColors).ThenInclude(pc => pc.Color) // Disabled - table removed
+                // .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size); // Disabled - table removed
             
             // Apply filters
             if (models != null && models.Any())
@@ -199,12 +199,12 @@ namespace Shopping_Demo.Controllers
                 .Where(p => p.IsActive)
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
-                .Include(p => p.ProductColors).ThenInclude(pc => pc.Color)
+                // .Include(p => p.ProductColors).ThenInclude(pc => pc.Color) // Disabled - table removed
                 .ToListAsync();
             
             // Debug: Check if data is loaded
             System.Diagnostics.Debug.WriteLine($"AllProducts loaded: {allProducts.Count}");
-            System.Diagnostics.Debug.WriteLine($"Products with ProductColors: {allProducts.Count(p => p.ProductColors != null)}");
+            // System.Diagnostics.Debug.WriteLine($"Products with ProductColors: {allProducts.Count(p => p.ProductColors != null)}"); // Disabled - table removed
             System.Diagnostics.Debug.WriteLine($"Products with CaseSize: {allProducts.Count(p => !string.IsNullOrEmpty(p.CaseSize))}");
             
             // Filter counts
@@ -422,8 +422,8 @@ namespace Shopping_Demo.Controllers
             // var currentUserId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
             // var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
             var productById = await _dataContext.Products
-                .Include(p => p.ProductColors).ThenInclude(pc => pc.Color)
-                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+                // .Include(p => p.ProductColors).ThenInclude(pc => pc.Color) // Disabled - table removed
+                // .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size) // Disabled - table removed
                 .Include(p => p.ProductImages)
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
@@ -802,9 +802,9 @@ namespace Shopping_Demo.Controllers
             IQueryable<ProductModel> query = searchQuery
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
-                .Include(p => p.ProductImages)
-                .Include(p => p.ProductColors).ThenInclude(pc => pc.Color)
-                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size);
+                .Include(p => p.ProductImages);
+                // .Include(p => p.ProductColors).ThenInclude(pc => pc.Color) // Disabled - table removed
+                // .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size); // Disabled - table removed
 
             // Apply filters
             if (models != null && models.Any())
@@ -869,8 +869,8 @@ namespace Shopping_Demo.Controllers
             var allSearchProducts = await searchQuery
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
-                .Include(p => p.ProductColors).ThenInclude(pc => pc.Color)
-                .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size)
+                // .Include(p => p.ProductColors).ThenInclude(pc => pc.Color) // Disabled - table removed
+                // .Include(p => p.ProductSizes).ThenInclude(ps => ps.Size) // Disabled - table removed
                 .ToListAsync();
 
             // Filter counts
@@ -1003,14 +1003,15 @@ namespace Shopping_Demo.Controllers
             var userSessionId = HttpContext.Session.Id;
             var userCurrentId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
 
-            // Lấy lịch sử tìm kiếm gần đây
-            var recentlySearched = await _dataContext.SearchHistories
-                .Where(sh => (userCurrentId != null && sh.UserId == userCurrentId) ||
-                            (userCurrentId == null && sh.SessionId == userSessionId))
-                .OrderByDescending(sh => sh.SearchedAt)
-                .Take(5)
-                .Select(sh => new { term = sh.SearchTerm })
-                .ToListAsync();
+            // Lấy lịch sử tìm kiếm gần đây - Disabled since SearchHistories table was removed
+            // var recentlySearched = await _dataContext.SearchHistories
+            //     .Where(sh => (userCurrentId != null && sh.UserId == userCurrentId) ||
+            //                 (userCurrentId == null && sh.SessionId == userSessionId))
+            //     .OrderByDescending(sh => sh.SearchedAt)
+            //     .Take(5)
+            //     .Select(sh => new { term = sh.SearchTerm })
+            //     .ToListAsync();
+            var recentlySearched = new List<object>(); // Empty list since table was removed
 
             // Lấy gợi ý dựa trên model sản phẩm
             var topSuggestions = new List<object>();
@@ -1166,13 +1167,13 @@ namespace Shopping_Demo.Controllers
                 var sessionId = HttpContext.Session.Id;
                 var currentUserId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
 
-                var historiesToDelete = await _dataContext.SearchHistories
-                    .Where(sh => (currentUserId != null && sh.UserId == currentUserId) ||
-                                (currentUserId == null && sh.SessionId == sessionId))
-                    .ToListAsync();
+                // var historiesToDelete = await _dataContext.SearchHistories
+                //     .Where(sh => (currentUserId != null && sh.UserId == currentUserId) ||
+                //                 (currentUserId == null && sh.SessionId == sessionId))
+                //     .ToListAsync();
 
-                _dataContext.SearchHistories.RemoveRange(historiesToDelete);
-                await _dataContext.SaveChangesAsync();
+                // _dataContext.SearchHistories.RemoveRange(historiesToDelete);
+                // await _dataContext.SaveChangesAsync();
 
                 return Json(new { success = true });
             }
@@ -1190,17 +1191,17 @@ namespace Shopping_Demo.Controllers
                 var sessionId = HttpContext.Session.Id;
                 var currentUserId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
 
-                var historyToDelete = await _dataContext.SearchHistories
-                    .FirstOrDefaultAsync(sh => 
-                        sh.SearchTerm.ToLower() == searchTerm.ToLower() &&
-                        ((currentUserId != null && sh.UserId == currentUserId) ||
-                         (currentUserId == null && sh.SessionId == sessionId)));
+                // var historyToDelete = await _dataContext.SearchHistories
+                //     .FirstOrDefaultAsync(sh => 
+                //         sh.SearchTerm.ToLower() == searchTerm.ToLower() &&
+                //         ((currentUserId != null && sh.UserId == currentUserId) ||
+                //          (currentUserId == null && sh.SessionId == sessionId)));
 
-                if (historyToDelete != null)
-                {
-                    _dataContext.SearchHistories.Remove(historyToDelete);
-                    await _dataContext.SaveChangesAsync();
-                }
+                // if (historyToDelete != null)
+                // {
+                //     _dataContext.SearchHistories.Remove(historyToDelete);
+                //     await _dataContext.SaveChangesAsync();
+                // }
 
                 return Json(new { success = true });
             }
@@ -1891,35 +1892,35 @@ namespace Shopping_Demo.Controllers
                 var sessionId = HttpContext.Session.Id;
                 var currentUserId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
 
-                // Kiểm tra xem đã có lịch sử tìm kiếm này chưa
-                var existingHistory = await _dataContext.SearchHistories
-                    .FirstOrDefaultAsync(sh => 
-                        sh.SearchTerm.ToLower() == searchTerm.ToLower() &&
-                        ((currentUserId != null && sh.UserId == currentUserId) ||
-                         (currentUserId == null && sh.SessionId == sessionId)));
+                // Kiểm tra xem đã có lịch sử tìm kiếm này chưa - Disabled since SearchHistories table was removed
+                // var existingHistory = await _dataContext.SearchHistories
+                //     .FirstOrDefaultAsync(sh => 
+                //         sh.SearchTerm.ToLower() == searchTerm.ToLower() &&
+                //         ((currentUserId != null && sh.UserId == currentUserId) ||
+                //          (currentUserId == null && sh.SessionId == sessionId)));
 
-                if (existingHistory != null)
-                {
-                    // Cập nhật thời gian tìm kiếm và tăng số lần tìm kiếm
-                    existingHistory.SearchedAt = DateTime.Now;
-                    existingHistory.SearchCount++;
-                    _dataContext.SearchHistories.Update(existingHistory);
-                }
-                else
-                {
-                    // Tạo lịch sử tìm kiếm mới
-                    var newHistory = new SearchHistoryModel
-                    {
-                        SearchTerm = searchTerm,
-                        SessionId = currentUserId == null ? sessionId : null,
-                        UserId = currentUserId,
-                        SearchedAt = DateTime.Now,
-                        SearchCount = 1
-                    };
-                    _dataContext.SearchHistories.Add(newHistory);
-                }
+                // if (existingHistory != null)
+                // {
+                //     // Cập nhật thời gian tìm kiếm và tăng số lần tìm kiếm
+                //     existingHistory.SearchedAt = DateTime.Now;
+                //     existingHistory.SearchCount++;
+                //     _dataContext.SearchHistories.Update(existingHistory);
+                // }
+                // else
+                // {
+                //     // Tạo lịch sử tìm kiếm mới
+                //     var newHistory = new SearchHistoryModel
+                //     {
+                //         SearchTerm = searchTerm,
+                //         SessionId = currentUserId == null ? sessionId : null,
+                //         UserId = currentUserId,
+                //         SearchedAt = DateTime.Now,
+                //         SearchCount = 1
+                //     };
+                //     _dataContext.SearchHistories.Add(newHistory);
+                // }
 
-                await _dataContext.SaveChangesAsync();
+                // await _dataContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {

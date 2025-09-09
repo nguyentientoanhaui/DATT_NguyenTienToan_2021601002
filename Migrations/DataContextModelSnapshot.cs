@@ -251,21 +251,28 @@ namespace Shopping_Demo.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands", (string)null);
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[Slug] IS NOT NULL");
+
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.CartItemModel", b =>
@@ -280,13 +287,16 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ColorId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("ColorName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Image")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -295,22 +305,27 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ProductName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<string>("SizeId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("SizeName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CartId");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.CartModel", b =>
@@ -334,7 +349,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Carts", (string)null);
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.CategoryModel", b =>
@@ -347,20 +362,23 @@ namespace Shopping_Demo.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("Level")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -369,7 +387,11 @@ namespace Shopping_Demo.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("Categories", (string)null);
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[Slug] IS NOT NULL");
+
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ColorModel", b =>
@@ -390,7 +412,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Colors", (string)null);
+                    b.ToTable("ColorModel");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.CompareModel", b =>
@@ -405,13 +427,15 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Compares", (string)null);
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Compares");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ContactModel", b =>
@@ -440,7 +464,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Name");
 
-                    b.ToTable("Contact", (string)null);
+                    b.ToTable("Contact");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.CouponModel", b =>
@@ -482,7 +506,7 @@ namespace Shopping_Demo.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Coupons", (string)null);
+                    b.ToTable("Coupons");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.MomoInfoModel", b =>
@@ -513,7 +537,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MomoInfos", (string)null);
+                    b.ToTable("MomoInfos");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.OrderDetails", b =>
@@ -551,7 +575,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderDetails", (string)null);
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.OrderModel", b =>
@@ -575,6 +599,7 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("DiscountAmount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("OrderCode")
@@ -591,6 +616,7 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ShippingCost")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ShippingDistrict")
@@ -612,9 +638,16 @@ namespace Shopping_Demo.Migrations
 
                     b.HasIndex("CouponId");
 
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("OrderCode")
+                        .IsUnique();
+
+                    b.HasIndex("Status");
+
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.PaymentModel", b =>
@@ -683,7 +716,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ProductColorModel", b =>
@@ -706,7 +739,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductColors", (string)null);
+                    b.ToTable("ProductColorModel");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ProductImageModel", b =>
@@ -721,10 +754,12 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ImageName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("bit");
@@ -734,11 +769,9 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ColorId");
-
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages", (string)null);
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ProductModel", b =>
@@ -768,6 +801,7 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("CapitalPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CaseMaterial")
@@ -802,7 +836,8 @@ namespace Shopping_Demo.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("DialColor")
                         .HasColumnType("nvarchar(max)");
@@ -833,9 +868,11 @@ namespace Shopping_Demo.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
@@ -848,7 +885,8 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Slug")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Sold")
                         .HasColumnType("int");
@@ -867,11 +905,19 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandId");
-
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products", (string)null);
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[Slug] IS NOT NULL");
+
+                    b.HasIndex("BrandId", "CategoryId");
+
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ProductQuantityModel", b =>
@@ -898,7 +944,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasIndex("ProductModelId");
 
-                    b.ToTable("ProductQuantities", (string)null);
+                    b.ToTable("ProductQuantities");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ProductReviewModel", b =>
@@ -932,15 +978,18 @@ namespace Shopping_Demo.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedDate");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductReviews", (string)null);
+                    b.ToTable("ProductReviews");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ProductSizeModel", b =>
@@ -963,36 +1012,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasIndex("SizeId");
 
-                    b.ToTable("ProductSizes", (string)null);
-                });
-
-            modelBuilder.Entity("Shopping_Demo.Models.SearchHistoryModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("SearchCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SearchTerm")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("SearchedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("SessionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SearchHistories", (string)null);
+                    b.ToTable("ProductSizeModel");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.SellRequestModel", b =>
@@ -1004,34 +1024,41 @@ namespace Shopping_Demo.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AdminResponse")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Condition")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<decimal?>("ExpectedPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -1049,20 +1076,27 @@ namespace Shopping_Demo.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("WatchInfo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int?>("Year")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("ProductId");
 
-                    b.ToTable("SellRequests", (string)null);
+                    b.HasIndex("Status");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SellRequests");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.ShippingModel", b =>
@@ -1087,7 +1121,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Shippings", (string)null);
+                    b.ToTable("Shippings");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.SizeModel", b =>
@@ -1104,34 +1138,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sizes", (string)null);
-                });
-
-            modelBuilder.Entity("Shopping_Demo.Models.SliderModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Image")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sliders", (string)null);
+                    b.ToTable("SizeModel");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.StatisticalModel", b =>
@@ -1159,45 +1166,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Statisticals", (string)null);
-                });
-
-            modelBuilder.Entity("Shopping_Demo.Models.UserBehaviorModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ActionType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SessionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserAgent")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserBehaviors", (string)null);
+                    b.ToTable("Statisticals");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.WishlistModel", b =>
@@ -1220,7 +1189,7 @@ namespace Shopping_Demo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WishLists", (string)null);
+                    b.ToTable("WishLists");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1278,9 +1247,18 @@ namespace Shopping_Demo.Migrations
                 {
                     b.HasOne("Shopping_Demo.Models.CartModel", "Cart")
                         .WithMany("CartItems")
-                        .HasForeignKey("CartId");
+                        .HasForeignKey("CartId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Shopping_Demo.Models.ProductModel", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Cart");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.CartModel", b =>
@@ -1309,7 +1287,14 @@ namespace Shopping_Demo.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Shopping_Demo.Models.AppUserModel", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.OrderDetails", b =>
@@ -1317,7 +1302,8 @@ namespace Shopping_Demo.Migrations
                     b.HasOne("Shopping_Demo.Models.OrderModel", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderCode")
-                        .HasPrincipalKey("OrderCode");
+                        .HasPrincipalKey("OrderCode")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Shopping_Demo.Models.ProductModel", "Product")
                         .WithMany()
@@ -1366,17 +1352,11 @@ namespace Shopping_Demo.Migrations
 
             modelBuilder.Entity("Shopping_Demo.Models.ProductImageModel", b =>
                 {
-                    b.HasOne("Shopping_Demo.Models.ColorModel", "Color")
-                        .WithMany()
-                        .HasForeignKey("ColorId");
-
                     b.HasOne("Shopping_Demo.Models.ProductModel", "Product")
                         .WithMany("ProductImages")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Color");
 
                     b.Navigation("Product");
                 });
@@ -1384,15 +1364,15 @@ namespace Shopping_Demo.Migrations
             modelBuilder.Entity("Shopping_Demo.Models.ProductModel", b =>
                 {
                     b.HasOne("Shopping_Demo.Models.BrandModel", "Brand")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("BrandId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Shopping_Demo.Models.CategoryModel", "Category")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Brand");
@@ -1411,7 +1391,8 @@ namespace Shopping_Demo.Migrations
                 {
                     b.HasOne("Shopping_Demo.Models.OrderModel", "Order")
                         .WithMany()
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Shopping_Demo.Models.ProductModel", "Product")
                         .WithMany("ProductReviews")
@@ -1448,27 +1429,10 @@ namespace Shopping_Demo.Migrations
                     b.HasOne("Shopping_Demo.Models.ProductModel", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Shopping_Demo.Models.UserBehaviorModel", b =>
-                {
-                    b.HasOne("Shopping_Demo.Models.ProductModel", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Shopping_Demo.Models.AppUserModel", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.WishlistModel", b =>
@@ -1481,11 +1445,17 @@ namespace Shopping_Demo.Migrations
 
                     b.HasOne("Shopping_Demo.Models.AppUserModel", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Product");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Shopping_Demo.Models.BrandModel", b =>
+                {
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.CartModel", b =>
@@ -1496,6 +1466,8 @@ namespace Shopping_Demo.Migrations
             modelBuilder.Entity("Shopping_Demo.Models.CategoryModel", b =>
                 {
                     b.Navigation("ChildCategories");
+
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("Shopping_Demo.Models.CouponModel", b =>

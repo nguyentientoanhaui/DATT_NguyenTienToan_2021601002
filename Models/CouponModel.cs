@@ -22,6 +22,11 @@ namespace Shopping_Demo.Models
         public DateTime DateStart { get; set; }
         public DateTime DateExpired { get; set; }
         public virtual ICollection<OrderModel> Orders { get; set; }
+
+        public CouponModel()
+        {
+            Orders = new List<OrderModel>();
+        }
     }
 
     public enum DiscountType

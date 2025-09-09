@@ -13,7 +13,7 @@ namespace Shopping_Demo.Migrations
 {
     [DbContext(typeof(DataContext))]
     [Migration("20250415094835_update")]
-    partial class update
+    partial class Update
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -1,0 +1,78 @@
+@model Shopping_Demo.Models.PaymentModel
+@{
+    ViewData["Title"] = "Kết quả thanh toán";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-check-circle"></i>
+                        Thanh toán thành công
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (Model != null)
+                    {
+                        <div class="alert alert-success">
+                            <h5>Cảm ơn bạn đã thanh toán!</h5>
+                            <p>Đơn hàng của bạn đã được xử lý thành công.</p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Thông tin đơn hàng:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Mã đơn hàng:</strong> @Model.OrderId</li>
+                                    <li><strong>Số tiền:</strong> @Model.TotalAmount.ToString("#,##0")₫</li>
+                                    <li><strong>Phương thức:</strong> @Model.PaymentMethod</li>
+                                    <li><strong>Trạng thái:</strong> 
+                                        <span class="badge bg-success">@Model.Status</span>
+                                    </li>
+                                    <li><strong>Thời gian:</strong> @Model.CompletedAt?.ToString("dd/MM/yyyy HH:mm")</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Thông tin giao hàng:</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Email:</strong> @Model.CustomerEmail</li>
+                                    <li><strong>Số điện thoại:</strong> @Model.CustomerPhone</li>
+                                    <li><strong>Địa chỉ:</strong> @Model.ShippingAddress</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>Bước tiếp theo:</h6>
+                            <ol>
+                                <li>Chúng tôi sẽ gửi email xác nhận đến @Model.CustomerEmail</li>
+                                <li>Đơn hàng sẽ được xử lý trong vòng 24 giờ</li>
+                                <li>Bạn sẽ nhận được thông báo khi đơn hàng được giao</li>
+                            </ol>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <h5>Không tìm thấy thông tin đơn hàng</h5>
+                            <p>Vui lòng liên hệ hỗ trợ để được hỗ trợ.</p>
+                        </div>
+                    }
+
+                    <div class="mt-4 text-center">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                            <i class="fas fa-home"></i>
+                            Về trang chủ
+                        </a>
+                        <a href="@Url.Action("Index", "Account")" class="btn btn-outline-primary">
+                            <i class="fas fa-user"></i>
+                            Tài khoản của tôi
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

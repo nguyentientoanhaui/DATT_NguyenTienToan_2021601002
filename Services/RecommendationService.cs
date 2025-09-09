@@ -34,20 +34,21 @@ namespace Shopping_Demo.Services
                 Timestamp = DateTime.Now
             };
 
-            _context.UserBehaviors.Add(behavior);
-            await _context.SaveChangesAsync();
+            // _context.UserBehaviors.Add(behavior); // Disabled - table removed
+            // await _context.SaveChangesAsync();
         }
 
         public async Task<List<ProductModel>> GetPersonalizedRecommendations(string? sessionId, string? userId, int limit = 8)
         {
-            // Lấy danh sách sản phẩm user đã xem
-            var viewedProducts = await _context.UserBehaviors
-                .Where(ub => (ub.SessionId == sessionId || ub.UserId == userId) && ub.ActionType == "View")
-                .GroupBy(ub => ub.ProductId)
-                .Select(g => new { ProductId = g.Key, ViewCount = g.Count() })
-                .OrderByDescending(x => x.ViewCount)
-                .Take(10)
-                .ToListAsync();
+            // Lấy danh sách sản phẩm user đã xem - Disabled since UserBehaviors table was removed
+            // var viewedProducts = await _context.UserBehaviors
+            //     .Where(ub => (ub.SessionId == sessionId || ub.UserId == userId) && ub.ActionType == "View")
+            //     .GroupBy(ub => ub.ProductId)
+            //     .Select(g => new { ProductId = g.Key, ViewCount = g.Count() })
+            //     .OrderByDescending(x => x.ViewCount)
+            //     .Take(10)
+            //     .ToListAsync();
+            var viewedProducts = new List<object>(); // Empty list since table was removed
 
             if (!viewedProducts.Any())
             {
@@ -55,8 +56,9 @@ namespace Shopping_Demo.Services
                 return await GetPopularProducts(limit);
             }
 
-            // Lấy categories và brands từ sản phẩm đã xem
-            var viewedProductIds = viewedProducts.Select(x => x.ProductId).ToList();
+            // Lấy categories và brands từ sản phẩm đã xem - Disabled since UserBehaviors table was removed
+            // var viewedProductIds = viewedProducts.Select(x => x.ProductId).ToList();
+            var viewedProductIds = new List<int>(); // Empty list since table was removed
             var userPreferences = await _context.Products
                 .Where(p => viewedProductIds.Contains(p.Id))
                 .GroupBy(p => new { p.CategoryId, p.BrandId })
@@ -96,25 +98,20 @@ namespace Shopping_Demo.Services
 
         public async Task<List<ProductModel>> GetRecentlyViewedProducts(string? sessionId, string? userId, int limit = 8)
         {
-            var recentViews = await _context.UserBehaviors
-                .Where(ub => (ub.SessionId == sessionId || ub.UserId == userId) && ub.ActionType == "View")
-                .OrderByDescending(ub => ub.Timestamp)
-                .GroupBy(ub => ub.ProductId)
-                .Select(g => g.First())
-                .Take(limit)
-                .Select(ub => ub.ProductId)
-                .ToListAsync();
+            // var recentViews = await _context.UserBehaviors
+            //     .Where(ub => (ub.SessionId == sessionId || ub.UserId == userId) && ub.ActionType == "View")
+            //     .OrderByDescending(ub => ub.Timestamp)
+            //     .GroupBy(ub => ub.ProductId)
+            //     .Select(g => g.First())
+            //     .Take(limit)
+            //     .Select(ub => ub.ProductId)
+            //     .ToListAsync();
 
-            if (!recentViews.Any())
-                return new List<ProductModel>();
+            // if (!recentViews.Any())
+            //     return new List<ProductModel>();
 
-            return await _context.Products
-                .Where(p => recentViews.Contains(p.Id) && p.IsActive)
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .Include(p => p.ProductImages)
-                .OrderBy(p => recentViews.IndexOf(p.Id))
-                .ToListAsync();
+            // return await _context.Products
+            return new List<ProductModel>(); // Return empty list since UserBehaviors table was removed
         }
 
         public async Task<List<ProductModel>> GetSimilarProducts(int productId, int limit = 8)
@@ -139,15 +136,16 @@ namespace Shopping_Demo.Services
 
         private async Task<List<ProductModel>> GetPopularProducts(int limit)
         {
-            // Sản phẩm có nhiều lượt xem nhất
-            var popularProductIds = await _context.UserBehaviors
-                .Where(ub => ub.ActionType == "View")
-                .GroupBy(ub => ub.ProductId)
-                .Select(g => new { ProductId = g.Key, ViewCount = g.Count() })
-                .OrderByDescending(x => x.ViewCount)
-                .Take(limit)
-                .Select(x => x.ProductId)
-                .ToListAsync();
+            // Sản phẩm có nhiều lượt xem nhất - Disabled since UserBehaviors table was removed
+            // var popularProductIds = await _context.UserBehaviors
+            //     .Where(ub => ub.ActionType == "View")
+            //     .GroupBy(ub => ub.ProductId)
+            //     .Select(g => new { ProductId = g.Key, ViewCount = g.Count() })
+            //     .OrderByDescending(x => x.ViewCount)
+            //     .Take(limit)
+            //     .Select(x => x.ProductId)
+            //     .ToListAsync();
+            var popularProductIds = new List<int>(); // Empty list since table was removed
 
             if (!popularProductIds.Any())
             {

@@ -213,6 +213,23 @@
     display: inline-block;
 }
 
+.vnpay-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-block;
+    border: 1px solid #bbdefb;
+}
+
+.vnpay-icon {
+    font-size: 16px;
+    margin-left: 5px;
+}
+
 .card-icons,
 .cash-icon {
     display: flex;

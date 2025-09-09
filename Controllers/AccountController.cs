@@ -69,6 +69,7 @@ namespace Shopping_Demo.Controllers
             userById.FullName = user.FullName;
             userById.Address = user.Address;
             userById.Gender = user.Gender;
+            userById.Age = user.Age; // THÊM DÒNG NÀY ĐỂ CẬP NHẬT TUỔI
 
             _dataContext.Update(userById);
             await _dataContext.SaveChangesAsync();

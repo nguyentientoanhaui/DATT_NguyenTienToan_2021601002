@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shopping_Demo.Models
 {
@@ -34,7 +35,7 @@ namespace Shopping_Demo.Models
         
         public DateTime? CompletedAt { get; set; }
         
-        public string PaymentGateway { get; set; } // vnpay, momo, manual
+        public string PaymentGateway { get; set; } // momo, manual
         
         public string PaymentUrl { get; set; } // URL để redirect đến gateway
         
@@ -43,6 +44,10 @@ namespace Shopping_Demo.Models
         public string IpAddress { get; set; }
         
         public string UserAgent { get; set; }
+
+        // Navigation Properties
+        [ForeignKey("OrderId")]
+        public virtual OrderModel Order { get; set; }
     }
 }
 

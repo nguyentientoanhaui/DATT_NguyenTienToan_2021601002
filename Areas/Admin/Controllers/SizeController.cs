@@ -17,24 +17,27 @@ namespace Shopping_Demo.Areas.Admin.Controllers
             _dataContext = context;
         }
 
+        // DISABLED: This controller is disabled because the Sizes table was removed from the database
+        // All methods return empty results or NotFound to prevent errors
+
         // GET: Admin/Size
         public async Task<IActionResult> Index()
         {
-            var sizes = await _dataContext.Sizes.OrderBy(s => s.Name).ToListAsync();
+            // var sizes = await _dataContext.Sizes.OrderBy(s => s.Name).ToListAsync();
+            var sizes = new List<SizeModel>(); // Empty list since table was removed
             return View(sizes);
         }
 
         // GET: Admin/Size/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var size = await _dataContext.Sizes.FirstOrDefaultAsync(s => s.Id == id);
-
-            if (size == null)
-            {
-                return NotFound();
-            }
-
-            return View(size);
+            // var size = await _dataContext.Sizes.FirstOrDefaultAsync(s => s.Id == id);
+            // if (size == null)
+            // {
+            //     return NotFound();
+            // }
+            // return View(size);
+            return NotFound(); // Always return not found since table was removed
         }
 
         // GET: Admin/Size/Create
@@ -48,35 +51,26 @@ namespace Shopping_Demo.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(SizeModel size)
         {
-            if (ModelState.IsValid)
-            {
-                // Kiểm tra tên kích cỡ đã tồn tại chưa
-                var existingSize = await _dataContext.Sizes.FirstOrDefaultAsync(s => s.Name == size.Name);
-                if (existingSize != null)
-                {
-                    ModelState.AddModelError("Name", "Tên kích cỡ này đã tồn tại");
-                    return View(size);
-                }
-
-                _dataContext.Add(size);
-                await _dataContext.SaveChangesAsync();
-                TempData["success"] = "Thêm kích cỡ thành công";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(size);
+            // if (ModelState.IsValid)
+            // {
+            //     _dataContext.Add(size);
+            //     await _dataContext.SaveChangesAsync();
+            //     return RedirectToAction(nameof(Index));
+            // }
+            // return View(size);
+            return RedirectToAction(nameof(Index)); // Always redirect since table was removed
         }
 
         // GET: Admin/Size/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var size = await _dataContext.Sizes.FindAsync(id);
-
-            if (size == null)
-            {
-                return NotFound();
-            }
-
-            return View(size);
+            // var size = await _dataContext.Sizes.FindAsync(id);
+            // if (size == null)
+            // {
+            //     return NotFound();
+            // }
+            // return View(size);
+            return NotFound(); // Always return not found since table was removed
         }
 
         // POST: Admin/Size/Edit/5
@@ -84,74 +78,68 @@ namespace Shopping_Demo.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, SizeModel size)
         {
-            if (id != size.Id)
-            {
-                return NotFound();
-            }
+            // if (id != size.Id)
+            // {
+            //     return NotFound();
+            // }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    // Kiểm tra tên kích cỡ đã tồn tại chưa (ngoại trừ kích cỡ hiện tại)
-                    var existingSize = await _dataContext.Sizes
-                        .FirstOrDefaultAsync(s => s.Name == size.Name && s.Id != id);
-
-                    if (existingSize != null)
-                    {
-                        ModelState.AddModelError("Name", "Tên kích cỡ này đã tồn tại");
-                        return View(size);
-                    }
-
-                    _dataContext.Update(size);
-                    await _dataContext.SaveChangesAsync();
-                    TempData["success"] = "Cập nhật kích cỡ thành công";
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SizeExists(size.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(size);
+            // if (ModelState.IsValid)
+            // {
+            //     try
+            //     {
+            //         _dataContext.Update(size);
+            //         await _dataContext.SaveChangesAsync();
+            //     }
+            //     catch (DbUpdateConcurrencyException)
+            //     {
+            //         if (!SizeExists(size.Id))
+            //         {
+            //             return NotFound();
+            //         }
+            //         else
+            //         {
+            //             throw;
+            //         }
+            //     }
+            //     return RedirectToAction(nameof(Index));
+            // }
+            // return View(size);
+            return RedirectToAction(nameof(Index)); // Always redirect since table was removed
         }
 
         // GET: Admin/Size/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var size = await _dataContext.Sizes.FindAsync(id);
+            // var size = await _dataContext.Sizes
+            //     .FirstOrDefaultAsync(m => m.Id == id);
+            // if (size == null)
+            // {
+            //     return NotFound();
+            // }
 
-            if (size == null)
-            {
-                return NotFound();
-            }
+            // return View(size);
+            return NotFound(); // Always return not found since table was removed
+        }
 
-            // Kiểm tra xem kích cỡ này có đang được sử dụng không
-            var productSizes = await _dataContext.ProductSizes.CountAsync(ps => ps.SizeId == id);
+        // POST: Admin/Size/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            // var size = await _dataContext.Sizes.FindAsync(id);
+            // if (size != null)
+            // {
+            //     _dataContext.Sizes.Remove(size);
+            // }
 
-            if (productSizes > 0)
-            {
-                TempData["error"] = "Không thể xóa kích cỡ này vì đang được sử dụng cho " + productSizes + " sản phẩm";
-                return RedirectToAction(nameof(Index));
-            }
-
-            _dataContext.Sizes.Remove(size);
-            await _dataContext.SaveChangesAsync();
-            TempData["success"] = "Xóa kích cỡ thành công";
-
-            return RedirectToAction(nameof(Index));
+            // await _dataContext.SaveChangesAsync();
+            return RedirectToAction(nameof(Index)); // Always redirect since table was removed
         }
 
         private bool SizeExists(int id)
         {
-            return _dataContext.Sizes.Any(e => e.Id == id);
+            // return _dataContext.Sizes.Any(e => e.Id == id);
+            return false; // Always return false since table was removed
         }
     }
 }

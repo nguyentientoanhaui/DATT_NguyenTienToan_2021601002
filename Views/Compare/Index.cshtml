@@ -3,252 +3,262 @@
     ViewData["Title"] = "So sánh sản phẩm";
 }
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">
-                        <i class="fas fa-balance-scale me-2"></i>
-                        So sánh sản phẩm
-                    </h4>
-                    @if (Model.Any())
-                    {
-                        <button id="clearCompareBtn" class="btn btn-outline-danger">
-                            <i class="fas fa-trash me-2"></i>
-                            Xóa tất cả
-                        </button>
-                    }
-                </div>
-                <div class="card-body">
-                    @if (!Model.Any())
-                    {
-                        <div class="text-center py-5">
-                            <i class="fas fa-balance-scale fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Chưa có sản phẩm nào để so sánh</h5>
-                            <p class="text-muted">Hãy thêm sản phẩm vào danh sách so sánh để bắt đầu</p>
-                            <a href="/" class="btn btn-primary">
-                                <i class="fas fa-shopping-bag me-2"></i>
-                                Mua sắm ngay
-                            </a>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-bordered compare-table">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th class="text-center" style="width: 200px;">Thông tin</th>
-                                        @foreach (var product in Model)
-                                        {
-                                            <th class="text-center" style="width: 250px;">
-                                                <div class="position-relative">
-                                                    <button class="btn btn-sm btn-outline-danger position-absolute top-0 end-0" 
-                                                            onclick="removeFromCompare(@product.Id)" 
-                                                            title="Xóa khỏi so sánh">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                    <div class="product-compare-header">
-                                                        <img src="@product.Image" alt="@product.Name" class="img-fluid mb-2" style="max-height: 100px;">
-                                                        <h6 class="mb-1">@product.Name</h6>
-                                                        <span class="badge bg-primary">@product.Brand?.Name</span>
-                                                    </div>
-                                                </div>
-                                            </th>
-                                        }
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Hình ảnh -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Hình ảnh</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td class="text-center">
-                                                <img src="@product.Image" alt="@product.Name" class="img-fluid" style="max-height: 150px;">
-                                            </td>
-                                        }
-                                    </tr>
-
-                                    <!-- Tên sản phẩm -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Tên sản phẩm</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@product.Name</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Thương hiệu -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Thương hiệu</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@product.Brand?.Name</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Danh mục -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Danh mục</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@product.Category?.Name</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Giá -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Giá</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td class="text-danger fw-bold">@product.Price.ToString("N0") ₫</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Số lượng -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Số lượng</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@product.Quantity</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Đã bán -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Đã bán</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@product.Sold</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Chất liệu vỏ -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Chất liệu vỏ</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.CaseMaterial) ? "N/A" : product.CaseMaterial)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Kích thước vỏ -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Kích thước vỏ</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.CaseSize) ? "N/A" : product.CaseSize)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Chất liệu dây -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Chất liệu dây</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.BraceletMaterial) ? "N/A" : product.BraceletMaterial)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Loại dây -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Loại dây</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.BraceletType) ? "N/A" : product.BraceletType)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Chất liệu viền -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Chất liệu viền</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.BezelMaterial) ? "N/A" : product.BezelMaterial)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Loại máy -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Loại máy</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.MovementType) ? "N/A" : product.MovementType)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Calibre -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Calibre</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.Calibre) ? "N/A" : product.Calibre)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Mặt số -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Mặt số</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.DialColor) ? "N/A" : product.DialColor)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Màu sắc -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Màu sắc</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.Gender) ? "N/A" : product.Gender)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Năm sản xuất -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Năm sản xuất</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(product.Year?.ToString() ?? "N/A")</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Bảo hành -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Bảo hành</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td>@(string.IsNullOrEmpty(product.WarrantyInfo) ? "N/A" : product.WarrantyInfo)</td>
-                                        }
-                                    </tr>
-
-                                    <!-- Hành động -->
-                                    <tr>
-                                        <td class="fw-bold bg-light">Hành động</td>
-                                        @foreach (var product in Model)
-                                        {
-                                            <td class="text-center">
-                                                <a href="/Product/Detail/@product.Id" class="btn btn-sm btn-primary mb-2">
-                                                    <i class="fas fa-eye me-1"></i>
-                                                    Xem chi tiết
-                                                </a>
-                                                <button class="btn btn-sm btn-success mb-2" onclick="addToCart(@product.Id)">
-                                                    <i class="fas fa-cart-plus me-1"></i>
-                                                    Thêm vào giỏ
-                                                </button>
-                                            </td>
-                                        }
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                </div>
-            </div>
+<div class="compare-container">
+    <div class="compare-header">
+        <div class="compare-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3h18v18H3zM9 9h6v6H9z"/>
+                <path d="M9 3v6M15 3v6M9 15v6M15 15v6"/>
+            </svg>
+            <h1>So sánh sản phẩm</h1>
         </div>
+        @if (Model.Any())
+        {
+            <button id="clearCompareBtn" class="clear-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3,6 5,6 21,6"/>
+                    <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                </svg>
+                Xóa tất cả
+            </button>
+        }
     </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M3 3h18v18H3zM9 9h6v6H9z"/>
+                    <path d="M9 3v6M15 3v6M9 15v6M15 15v6"/>
+                </svg>
+            </div>
+            <h2>Chưa có sản phẩm nào để so sánh</h2>
+            <p>Hãy thêm sản phẩm vào danh sách so sánh để bắt đầu</p>
+            <a href="/" class="shop-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h6"/>
+                </svg>
+                Mua sắm ngay
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="compare-table-container">
+            <table class="compare-table">
+                <thead>
+                    <tr>
+                        <th class="info-header">Thông tin</th>
+                        @foreach (var product in Model)
+                        {
+                            <th class="product-header">
+                                <button class="remove-btn" onclick="removeFromCompare(@product.Id)" title="Xóa khỏi so sánh">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                    </svg>
+                                </button>
+                                <div class="product-info">
+                                    <img src="@product.Image" alt="@product.Name" class="product-image">
+                                    <h3 class="product-name">@product.Name</h3>
+                                    <span class="product-brand">@product.Brand?.Name</span>
+                                </div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Hình ảnh -->
+                    <tr class="compare-row">
+                        <td class="row-label">Hình ảnh</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">
+                                <img src="@product.Image" alt="@product.Name" class="detail-image">
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Tên sản phẩm -->
+                    <tr class="compare-row">
+                        <td class="row-label">Tên sản phẩm</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@product.Name</td>
+                        }
+                    </tr>
+
+                    <!-- Thương hiệu -->
+                    <tr class="compare-row">
+                        <td class="row-label">Thương hiệu</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@product.Brand?.Name</td>
+                        }
+                    </tr>
+
+                    <!-- Danh mục -->
+                    <tr class="compare-row">
+                        <td class="row-label">Danh mục</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@product.Category?.Name</td>
+                        }
+                    </tr>
+
+                    <!-- Giá -->
+                    <tr class="compare-row price-row">
+                        <td class="row-label">Giá</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data price">@product.Price.ToString("N0") ₫</td>
+                        }
+                    </tr>
+
+                    <!-- Số lượng -->
+                    <tr class="compare-row">
+                        <td class="row-label">Số lượng</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@product.Quantity</td>
+                        }
+                    </tr>
+
+                    <!-- Đã bán -->
+                    <tr class="compare-row">
+                        <td class="row-label">Đã bán</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@product.Sold</td>
+                        }
+                    </tr>
+
+                    <!-- Chất liệu vỏ -->
+                    <tr class="compare-row">
+                        <td class="row-label">Chất liệu vỏ</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.CaseMaterial) ? "N/A" : product.CaseMaterial)</td>
+                        }
+                    </tr>
+
+                    <!-- Kích thước vỏ -->
+                    <tr class="compare-row">
+                        <td class="row-label">Kích thước vỏ</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.CaseSize) ? "N/A" : product.CaseSize)</td>
+                        }
+                    </tr>
+
+                    <!-- Chất liệu dây -->
+                    <tr class="compare-row">
+                        <td class="row-label">Chất liệu dây</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.BraceletMaterial) ? "N/A" : product.BraceletMaterial)</td>
+                        }
+                    </tr>
+
+                    <!-- Loại dây -->
+                    <tr class="compare-row">
+                        <td class="row-label">Loại dây</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.BraceletType) ? "N/A" : product.BraceletType)</td>
+                        }
+                    </tr>
+
+                    <!-- Chất liệu viền -->
+                    <tr class="compare-row">
+                        <td class="row-label">Chất liệu viền</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.BezelMaterial) ? "N/A" : product.BezelMaterial)</td>
+                        }
+                    </tr>
+
+                    <!-- Loại máy -->
+                    <tr class="compare-row">
+                        <td class="row-label">Loại máy</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.MovementType) ? "N/A" : product.MovementType)</td>
+                        }
+                    </tr>
+
+                    <!-- Calibre -->
+                    <tr class="compare-row">
+                        <td class="row-label">Calibre</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.Calibre) ? "N/A" : product.Calibre)</td>
+                        }
+                    </tr>
+
+                    <!-- Mặt số -->
+                    <tr class="compare-row">
+                        <td class="row-label">Mặt số</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.DialColor) ? "N/A" : product.DialColor)</td>
+                        }
+                    </tr>
+
+                    <!-- Màu sắc -->
+                    <tr class="compare-row">
+                        <td class="row-label">Màu sắc</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.Gender) ? "N/A" : product.Gender)</td>
+                        }
+                    </tr>
+
+                    <!-- Năm sản xuất -->
+                    <tr class="compare-row">
+                        <td class="row-label">Năm sản xuất</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(product.Year?.ToString() ?? "N/A")</td>
+                        }
+                    </tr>
+
+                    <!-- Bảo hành -->
+                    <tr class="compare-row">
+                        <td class="row-label">Bảo hành</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data">@(string.IsNullOrEmpty(product.WarrantyInfo) ? "N/A" : product.WarrantyInfo)</td>
+                        }
+                    </tr>
+
+                    <!-- Hành động -->
+                    <tr class="compare-row actions-row">
+                        <td class="row-label">Hành động</td>
+                        @foreach (var product in Model)
+                        {
+                            <td class="row-data actions">
+                                <a href="/Product/Detail/@product.Id" class="action-btn detail-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    Xem chi tiết
+                                </a>
+                                <button class="action-btn cart-btn" onclick="addToCart(@product.Id)">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0h6"/>
+                                    </svg>
+                                    Thêm vào giỏ
+                                </button>
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @section Styles {
@@ -294,7 +304,6 @@
                 .done(function (response) {
                     if (response.success) {
                         alert('Đã thêm sản phẩm vào giỏ hàng!');
-                        // Có thể cập nhật số lượng giỏ hàng ở đây
                     } else {
                         alert(response.message);
                     }
@@ -305,44 +314,3 @@
         }
     </script>
 }
-
-<style>
-    .compare-table th,
-    .compare-table td {
-        vertical-align: middle;
-        text-align: center;
-    }
-
-    .compare-table th:first-child,
-    .compare-table td:first-child {
-        text-align: left;
-        font-weight: bold;
-        background-color: #f8f9fa;
-    }
-
-    .product-compare-header {
-        padding: 10px;
-    }
-
-    .product-compare-header img {
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .compare-table tbody tr:nth-child(even) {
-        background-color: #f8f9fa;
-    }
-
-    .compare-table tbody tr:hover {
-        background-color: #e9ecef;
-    }
-
-    .btn-outline-danger {
-        border-width: 1px;
-    }
-
-    .btn-outline-danger:hover {
-        background-color: #dc3545;
-        border-color: #dc3545;
-    }
-</style>

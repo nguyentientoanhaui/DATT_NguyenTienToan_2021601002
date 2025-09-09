@@ -153,15 +153,17 @@
                                 <input type="radio" id="credit-card" name="payment">
                                 <label for="credit-card">
                                     <div class="payment-info">
-                                        <div class="payment-name">Thẻ Tín Dụng</div>
-                                        <div class="payment-description">Visa, Mastercard, JCB - Ưu đãi 0% lãi suất</div>
+                                        <div class="payment-name">Thẻ Tín Dụng (MoMo)</div>
+                                        <div class="payment-description">Visa, Mastercard, JCB qua MoMo - Bảo mật cao</div>
                                         <div class="payment-fee">Phí xử lý 2.5%</div>
                                         <div class="promotion-badge">🎁 Giảm 5% cho thẻ Premium</div>
+                                        <div class="momo-badge">🔒 MoMo - Cổng thanh toán uy tín</div>
                                     </div>
                                     <div class="card-icons">
                                         <span class="card-icon">💳</span>
                                         <span class="card-icon">💳</span>
                                         <span class="card-icon">💳</span>
+                                        <span class="momo-icon">💰</span>
                                     </div>
                                 </label>
                             </div>
@@ -383,7 +385,7 @@
                         feePercentage = 0;
                         break;
                     case 'credit-card':
-                        methodName = 'Thẻ Tín Dụng';
+                        methodName = 'Thẻ Tín Dụng (MoMo)';
                         processingFee = baseAmount * 0.025;
                         discount = baseAmount * 0.05; // 5% discount for premium cards
                         feePercentage = 2.5;
@@ -534,7 +536,16 @@
                             showBankTransferInfo(result);
                             break;
                         case 'credit-card':
-                            window.location.href = result.redirectUrl;
+                            // MoMo - Hiển thị modal với QR code hoặc chuyển hướng
+                            if (result.redirectUrl) {
+                                if (result.qrCodeUrl) {
+                                    showMomoQRCode(result);
+                                } else {
+                                    window.location.href = result.redirectUrl;
+                                }
+                            } else {
+                                alert('Lỗi: Không thể tạo URL thanh toán MoMo');
+                            }
                             break;
                         case 'installment':
                             showInstallmentInfo(result);
@@ -699,6 +710,94 @@
             };
         }
         
+        function showMomoQRCode(result) {
+            const modal = document.createElement('div');
+            modal.className = 'payment-modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-qrcode"></i> Thanh Toán MoMo</h3>
+                        <span class="close">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="momo-info">
+                            <h4><i class="fas fa-info-circle"></i> Thông Tin Giao Dịch</h4>
+                            <p><strong>Mã đơn hàng:</strong> <span style="background: #e3f2fd; padding: 5px; border-radius: 3px;">${result.orderId}</span></p>
+                            <p><strong>Số tiền:</strong> <span style="color: #e74c3c; font-size: 18px; font-weight: bold;">${result.amount.toLocaleString('vi-VN')}₫</span></p>
+                            <p><strong>Partner Code:</strong> ${result.momoInfo.partnerCode}</p>
+                            <p><strong>Merchant:</strong> ${result.momoInfo.merchantName}</p>
+                        </div>
+                        
+                        <div class="qr-code-section" style="text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                            <h4><i class="fas fa-qrcode"></i> Mã QR Thanh Toán MoMo</h4>
+                            <div class="qr-code-container">
+                                <div id="momo-qrcode" style="display: inline-block; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                    <img src="${result.qrCodeUrl}" alt="MoMo QR Code" style="max-width: 300px; border: 2px solid #007bff; border-radius: 8px;">
+                                </div>
+                                <p style="margin-top: 10px; color: #666; font-style: italic;">Quét mã QR bằng ứng dụng MoMo để thanh toán</p>
+                                <p style="margin-top: 5px; font-size: 12px; color: #999;">Hỗ trợ: MoMo App, Banking apps</p>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-options" style="display: flex; gap: 10px; justify-content: center; margin: 20px 0;">
+                            <button onclick="window.open('${result.redirectUrl}', '_blank')" class="test-button success" style="background: #27ae60; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-external-link-alt"></i> Mở MoMo
+                            </button>
+                            <button onclick="copyToClipboard('${result.redirectUrl}')" class="test-button" style="background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                                <i class="fas fa-copy"></i> Copy Link
+                            </button>
+                        </div>
+                        
+                        <div class="payment-instructions">
+                            <h4><i class="fas fa-list-ol"></i> Hướng dẫn thanh toán:</h4>
+                            <ol>
+                                <li>Mở ứng dụng ngân hàng trên điện thoại</li>
+                                <li>Chọn tính năng "Quét QR" hoặc "Thanh toán QR"</li>
+                                <li>Quét mã QR ở trên</li>
+                                <li>Kiểm tra thông tin giao dịch</li>
+                                <li>Nhập mật khẩu/OTP để xác nhận</li>
+                                <li>Chờ thông báo thanh toán thành công</li>
+                            </ol>
+                            
+                            <div style="background: #e8f5e8; border: 1px solid #4caf50; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                                <h5><i class="fas fa-mobile-alt"></i> Ứng Dụng Hỗ Trợ</h5>
+                                <p><strong>VietQR:</strong> Quét QR, thanh toán nhanh chóng</p>
+                                <p><strong>MoMo QR:</strong> Thanh toán bằng QR code</p>
+                                <p><strong>Banking Apps:</strong> Ứng dụng ngân hàng hỗ trợ VietQR</p>
+                            </div>
+                            
+                            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                                <p><strong>⚠️ Lưu ý quan trọng:</strong></p>
+                                <ul>
+                                    <li>Vui lòng thanh toán chính xác số tiền và nội dung</li>
+                                    <li>Sau khi thanh toán, giao dịch sẽ được xử lý tự động</li>
+                                    <li>Liên hệ hotline: ${result.momoInfo.supportPhone} nếu cần hỗ trợ</li>
+                                    <li>Email hỗ trợ: ${result.momoInfo.supportEmail}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Close modal
+            modal.querySelector('.close').onclick = () => modal.remove();
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Đã copy link thanh toán MoMo!');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Không thể copy link. Vui lòng thử lại.');
+            });
+        }
+
         function showCashPaymentInfo(result) {
             const modal = document.createElement('div');
             modal.className = 'payment-modal';

@@ -1,0 +1,269 @@
+@model ContactModel
+
+@{
+    ViewData["Title"] = "Thông Tin Liên Hệ";
+}
+
+<div class="admin-contact-container">
+    <div class="admin-header">
+        <h2>Thông Tin Liên Hệ</h2>
+        <p>Cập nhật thông tin cửa hàng</p>
+    </div>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="contact-form">
+        <div class="form-section">
+            <h3>Thông Tin Cơ Bản</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Name">Tên Cửa Hàng</label>
+                    <input asp-for="Name" class="form-input" placeholder="Nhập tên cửa hàng" />
+                    <span asp-validation-for="Name" class="error-message"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="Phone">Số Điện Thoại</label>
+                    <input asp-for="Phone" class="form-input" placeholder="Nhập số điện thoại" />
+                    <span asp-validation-for="Phone" class="error-message"></span>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Email">Email</label>
+                    <input asp-for="Email" class="form-input" placeholder="Nhập email" />
+                    <span asp-validation-for="Email" class="error-message"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label asp-for="ImageUpload">Logo Cửa Hàng</label>
+                    <input asp-for="ImageUpload" type="file" class="form-input file-input" accept="image/*" />
+                    <span asp-validation-for="ImageUpload" class="error-message"></span>
+                    @if (!string.IsNullOrEmpty(Model.LogoImage))
+                    {
+                        <div class="current-image">
+                            <img src="@Model.LogoImage" alt="Logo hiện tại" />
+                            <span>Logo hiện tại</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Mô Tả Cửa Hàng</h3>
+            <div class="form-group">
+                <label asp-for="Description">Nội Dung</label>
+                <textarea asp-for="Description" class="form-textarea" rows="4" placeholder="Nhập mô tả về cửa hàng"></textarea>
+                <span asp-validation-for="Description" class="error-message"></span>
+            </div>
+        </div>
+
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i>
+                Cập Nhật
+            </button>
+            <a asp-controller="Dashboard" asp-action="Index" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Quay Lại
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.admin-contact-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.admin-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.admin-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+
+.admin-header p {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.form-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 15px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row:last-child {
+    margin-bottom: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.form-input, .form-textarea {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.file-input {
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border: 1px dashed #ccc;
+}
+
+.current-image {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.current-image img {
+    max-width: 120px;
+    max-height: 80px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.current-image span {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.error-message {
+    font-size: 12px;
+    color: #dc3545;
+    margin-top: 3px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-primary {
+    background: #000;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #333;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    color: #fff;
+}
+
+@@media (max-width: 768px) {
+    .admin-contact-container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+

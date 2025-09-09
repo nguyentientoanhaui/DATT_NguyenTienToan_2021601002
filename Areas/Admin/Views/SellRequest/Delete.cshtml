@@ -1,0 +1,412 @@
+@model SellRequestModel
+@using Shopping_Demo.Models
+
+@{
+    ViewData["Title"] = "Xóa Đơn Thu Mua";
+}
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-trash"></i> Xóa Đơn Thu Mua #@Model.Id
+        </h1>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay Lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Warning Alert -->
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">
+            <i class="fas fa-exclamation-triangle"></i> Cảnh Báo!
+        </h4>
+        <p>Bạn đang chuẩn bị xóa đơn thu mua này. Hành động này <strong>không thể hoàn tác</strong> và sẽ xóa vĩnh viễn tất cả thông tin liên quan.</p>
+        <hr>
+        <p class="mb-0">Hãy chắc chắn rằng bạn muốn tiếp tục trước khi xác nhận xóa.</p>
+    </div>
+
+    <div class="row">
+        <!-- Customer Information -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-user"></i> Thông Tin Khách Hàng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <strong>Họ và tên:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            @Model.FullName
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <strong>Email:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            @Model.Email
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <strong>Số điện thoại:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            @Model.PhoneNumber
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <strong>Trạng thái:</strong>
+                        </div>
+                        <div class="col-sm-8">
+                            <span class="badge @GetStatusBadgeClass(Model.Status)">
+                                @GetStatusDisplayName(Model.Status)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Information -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-watch"></i> Thông Tin Sản Phẩm
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (Model.Product != null)
+                    {
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <strong>Tên sản phẩm:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                @Model.Product.Name
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <strong>Thương hiệu:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                @Model.Product.Brand?.Name
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <strong>Giá hiện tại:</strong>
+                            </div>
+                            <div class="col-sm-8">
+                                <span class="font-weight-bold text-success">
+                                    @Model.Product.Price.ToString("N0") VNĐ
+                                </span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Sản phẩm không tồn tại hoặc đã bị xóa.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watch Information -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-info-circle"></i> Thông Tin Đồng Hồ
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label><strong>Mô tả đồng hồ:</strong></label>
+                                <div class="border p-3 rounded bg-light">
+                                    @Model.WatchInfo
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label><strong>Tình trạng:</strong></label>
+                                        <div class="border p-2 rounded bg-light">
+                                            @(string.IsNullOrEmpty(Model.Condition) ? "Chưa cung cấp" : Model.Condition)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label><strong>Năm sản xuất:</strong></label>
+                                        <div class="border p-2 rounded bg-light">
+                                            @(Model.Year?.ToString() ?? "Chưa cung cấp")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="form-group">
+                            <label><strong>Ghi chú thêm:</strong></label>
+                            <div class="border p-3 rounded bg-light">
+                                @Model.Notes
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Information -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-dollar-sign"></i> Thông Tin Giá Cả
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <strong>Giá mong muốn:</strong>
+                        </div>
+                        <div class="col-sm-7">
+                            @if (Model.ExpectedPrice.HasValue)
+                            {
+                                <span class="font-weight-bold text-primary">
+                                    @Model.ExpectedPrice.Value.ToString("N0") VNĐ
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Chưa cung cấp</span>
+                            }
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <strong>Giá đề xuất:</strong>
+                        </div>
+                        <div class="col-sm-7">
+                            @if (Model.SuggestedPrice.HasValue)
+                            {
+                                <span class="font-weight-bold text-success">
+                                    @Model.SuggestedPrice.Value.ToString("N0") VNĐ
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Chưa có</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Response -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-comments"></i> Phản Hồi Admin
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.AdminResponse))
+                    {
+                        <div class="border p-3 rounded bg-light">
+                            @Model.AdminResponse
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted text-center py-3">
+                            <i class="fas fa-comment-slash fa-2x mb-2"></i>
+                            <p>Chưa có phản hồi từ admin</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-history"></i> Lịch Sử Đơn Hàng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Đơn hàng được tạo</h6>
+                                <p class="timeline-text">Khách hàng đã gửi yêu cầu thu mua</p>
+                                <small class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                            </div>
+                        </div>
+                        
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Cập nhật lần cuối</h6>
+                                    <p class="timeline-text">Trạng thái: @GetStatusDisplayName(Model.Status)</p>
+                                    <small class="text-muted">@Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4 border-danger">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-exclamation-triangle"></i> Xác Nhận Xóa
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h5 class="alert-heading">Bạn có chắc chắn muốn xóa đơn thu mua này không?</h5>
+                        <p>Hành động này sẽ xóa vĩnh viễn:</p>
+                        <ul>
+                            <li>Thông tin khách hàng trong đơn này</li>
+                            <li>Thông tin đồng hồ được yêu cầu thu mua</li>
+                            <li>Lịch sử phản hồi và thương lượng</li>
+                            <li>Tất cả dữ liệu liên quan</li>
+                        </ul>
+                        <hr>
+                        <p class="mb-0"><strong>Hành động này không thể hoàn tác!</strong></p>
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Quay Lại
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Bạn có chắc chắn muốn xóa đơn thu mua này? Hành động này không thể hoàn tác!')">
+                                <i class="fas fa-trash"></i> Xóa Vĩnh Viễn
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: -35px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .timeline-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #dc3545;
+        }
+
+        .timeline-title {
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .timeline-text {
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+    </style>
+}
+
+@functions {
+    string GetStatusBadgeClass(SellRequestStatus status)
+    {
+        return status switch
+        {
+            SellRequestStatus.Pending => "badge-warning",
+            SellRequestStatus.Reviewed => "badge-info",
+            SellRequestStatus.Contacted => "badge-primary",
+            SellRequestStatus.Agreed => "badge-success",
+            SellRequestStatus.Completed => "badge-success",
+            SellRequestStatus.Rejected => "badge-danger",
+            SellRequestStatus.Cancelled => "badge-secondary",
+            _ => "badge-secondary"
+        };
+    }
+
+    string GetStatusDisplayName(SellRequestStatus status)
+    {
+        return status switch
+        {
+            SellRequestStatus.Pending => "Chờ xử lý",
+            SellRequestStatus.Reviewed => "Đã xem",
+            SellRequestStatus.Contacted => "Đã liên hệ",
+            SellRequestStatus.Agreed => "Đã thỏa thuận",
+            SellRequestStatus.Completed => "Đã hoàn thành",
+            SellRequestStatus.Rejected => "Từ chối",
+            SellRequestStatus.Cancelled => "Hủy",
+            _ => status.ToString()
+        };
+    }
+}

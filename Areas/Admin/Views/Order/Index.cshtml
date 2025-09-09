@@ -21,26 +21,6 @@
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .delete-all-btn {
-        background: transparent;
-        color: var(--primary-black);
-        border: 1px solid var(--border-color);
-        padding: 8px 16px;
-        border-radius: 0;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        transition: all 0.2s ease;
-    }
-
-    .delete-all-btn:hover {
-        background: var(--light-gray);
-        color: var(--primary-black);
-        text-decoration: none;
-    }
 
     .table {
         background: var(--white);
@@ -84,11 +64,6 @@
 <div class="page-header">
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="page-title">Danh sách đơn hàng</h1>
-        <a href="@Url.Action("DeleteAllOrders", "Order")" class="delete-all-btn" 
-           onclick="return confirm('Bạn có chắc chắn muốn xóa TẤT CẢ dữ liệu đơn hàng cũ? Hành động này không thể hoàn tác!')">
-            <i class="fas fa-trash"></i>
-            Xóa tất cả đơn hàng
-        </a>
     </div>
 </div>
 
@@ -124,7 +99,7 @@
                     @(string.IsNullOrEmpty(item.ShippingCity) ? "-" : item.ShippingCity)
                 </td>
                 <td>@item.ShippingCost.ToString("#,##0 VNĐ")</td>
-                <td>@item.CouponCode</td>
+                <td>-</td>
                 <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>
                     @if (item.Status == 1)

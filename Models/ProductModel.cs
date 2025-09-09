@@ -10,11 +10,14 @@ namespace Shopping_Demo.Models
 		public int Id { get; set; }
 
 		[Required(ErrorMessage = "Yêu cầu nhập tên sản phầm")]
+		[StringLength(500, ErrorMessage = "Tên sản phẩm không được vượt quá 500 ký tự")]
 		public string Name { get; set; }
 
+		[StringLength(200, ErrorMessage = "Slug không được vượt quá 200 ký tự")]
 		public string Slug { get; set; }
 
 		[Required(ErrorMessage = "Yêu cầu nhập mô tả")]
+		[StringLength(2000, ErrorMessage = "Mô tả không được vượt quá 2000 ký tự")]
 		public string Description { get; set; }
         
         [Required(ErrorMessage = "Yêu cầu nhập giá")]
@@ -33,7 +36,10 @@ namespace Shopping_Demo.Models
 		[Required, Range(1, int.MaxValue, ErrorMessage = "Chọn một danh mục")]
 		public int CategoryId { get; set; }
 		
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn hoặc bằng 0")]
         public int Quantity { get; set; }
+        
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng đã bán phải lớn hơn hoặc bằng 0")]
         public int Sold { get; set; }
 
         public string Image { get; set; }
@@ -74,6 +80,11 @@ namespace Shopping_Demo.Models
         public CategoryModel Category { get; set; }
 		public BrandModel Brand { get; set; }
         public ICollection<ProductReviewModel> ProductReviews { get; set; }
+        public ICollection<CartItemModel> CartItems { get; set; }
+        public ICollection<WishlistModel> WishLists { get; set; }
+        public ICollection<CompareModel> Compares { get; set; }
+        public ICollection<SellRequestModel> SellRequests { get; set; }
+        public ICollection<StatisticalModel> Statisticals { get; set; }
 
         [NotMapped]
 		[FileExtension]
@@ -102,6 +113,11 @@ namespace Shopping_Demo.Models
         public ProductModel()
         {
             ProductReviews = new List<ProductReviewModel>();
+            CartItems = new List<CartItemModel>();
+            WishLists = new List<WishlistModel>();
+            Compares = new List<CompareModel>();
+            SellRequests = new List<SellRequestModel>();
+            Statisticals = new List<StatisticalModel>();
             ProductQuantities = new List<ProductQuantityModel>();
             IsActive = true;
         }

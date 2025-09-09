@@ -10,10 +10,13 @@ namespace Shopping_Demo.Repository
 	{
 		public static void SeedingData(DataContext _context)
 		{
-			_context.Database.Migrate();
+			// _context.Database.Migrate(); // Tạm thời tắt auto-migration để tránh lỗi
 			
 			// Create admin user and roles if they don't exist
 			CreateAdminUserAndRoles(_context);
+			
+			// Create contact information if it doesn't exist
+			CreateContactInfo(_context);
 			
 			if (!_context.Products.Any())
 			{
@@ -227,6 +230,30 @@ namespace Shopping_Demo.Repository
 					_context.UserRoles.Add(userRole);
 					_context.SaveChanges();
 				}
+			}
+		}
+		
+		private static void CreateContactInfo(DataContext _context)
+		{
+			if (!_context.Contact.Any())
+			{
+				var contact = new ContactModel
+				{
+					Name = "Aurum Watches",
+					Phone = "Đang cập nhật",
+					Email = "info@aurumwatches.vn",
+					Map = @"<div style=""width: 100%; height: 400px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 2px solid #000000;"">
+						<p style=""color: #666; font-size: 18px;"">Bản đồ sẽ được cập nhật</p>
+					</div>",
+					Description = @"Chào mừng bạn đến với Aurum Watches - Nơi Thời Gian Kể Lại Câu Chuyện. Đây không chỉ là một cửa hàng, mà là một giấc mơ đã thành hiện thực. Giấc mơ về một không gian nơi những chiếc đồng hồ được trân trọng đúng với giá trị của chúng.
+
+Mỗi chiếc đồng hồ, với chúng tôi, đều là một tác phẩm nghệ thuật có trái tim, một vật phẩm kể lại lịch sử, một di sản được truyền qua nhiều thế hệ. Chúng tôi hiểu rằng, để bạn an tâm sở hữu một di sản như vậy, cần có một nền tảng vững chắc. Đó chính là lý do Aurum Watches ra đời với ba giá trị cốt lõi: NIỀM TIN, TRUNG THỰC, và MINH BẠCH.
+
+Chúng tôi không chỉ bán đồng hồ, chúng tôi đang xây dựng một Cộng Đồng Dành Cho Người Yêu Đồng Hồ. Nơi bạn có thể chia sẻ, học hỏi và cùng nhau trân trọng vẻ đẹp của thời gian."
+				};
+				
+				_context.Contact.Add(contact);
+				_context.SaveChanges();
 			}
 		}
 	}

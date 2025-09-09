@@ -246,6 +246,14 @@ namespace Shopping_Demo.Controllers
                 {
                     var userCart = await GetOrCreateUserCartAsync();
                     var cartItem = userCart.CartItems.FirstOrDefault(x => x.ProductId == Id);
+                    var currentCartQuantity = cartItem?.Quantity ?? 0;
+
+                    // Kiểm tra tổng số lượng trong giỏ hàng không được vượt quá số lượng sản phẩm có sẵn
+                    if (currentCartQuantity >= product.Quantity)
+                    {
+                        TempData["error"] = $"Sản phẩm chỉ còn {product.Quantity} chiếc trong kho";
+                        return Redirect(Request.Headers["Referer"].ToString());
+                    }
 
                     if (cartItem == null)
                     {
@@ -275,6 +283,14 @@ namespace Shopping_Demo.Controllers
             {
                 List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
                 CartItemModel cartItem = cart.Where(x => x.ProductId == Id).FirstOrDefault();
+                var currentCartQuantity = cartItem?.Quantity ?? 0;
+
+                // Kiểm tra tổng số lượng trong giỏ hàng không được vượt quá số lượng sản phẩm có sẵn
+                if (currentCartQuantity >= product.Quantity)
+                {
+                    TempData["error"] = $"Sản phẩm chỉ còn {product.Quantity} chiếc trong kho";
+                    return Redirect(Request.Headers["Referer"].ToString());
+                }
 
                 if (cartItem == null)
                 {
@@ -808,20 +824,22 @@ namespace Shopping_Demo.Controllers
 
                         if (!string.IsNullOrEmpty(colorId))
                         {
-                            var color = await _dataContext.Colors.FindAsync(int.Parse(colorId));
-                            if (color != null)
-                            {
-                                cartItem.ColorName = color.Name;
-                            }
+                            // var color = await _dataContext.Colors.FindAsync(int.Parse(colorId));
+                            // if (color != null)
+                            // {
+                            //     cartItem.ColorName = color.Name;
+                            // }
+                            cartItem.ColorName = "Color " + colorId; // Temporary fallback
                         }
 
                         if (!string.IsNullOrEmpty(sizeId))
                         {
-                            var size = await _dataContext.Sizes.FindAsync(int.Parse(sizeId));
-                            if (size != null)
-                            {
-                                cartItem.SizeName = size.Name;
-                            }
+                            // var size = await _dataContext.Sizes.FindAsync(int.Parse(sizeId));
+                            // if (size != null)
+                            // {
+                            //     cartItem.SizeName = size.Name;
+                            // }
+                            cartItem.SizeName = "Size " + sizeId; // Temporary fallback
                         }
 
                         userCart.CartItems.Add(cartItem);
@@ -867,20 +885,22 @@ namespace Shopping_Demo.Controllers
 
                     if (!string.IsNullOrEmpty(colorId))
                     {
-                        var color = await _dataContext.Colors.FindAsync(int.Parse(colorId));
-                        if (color != null)
-                        {
-                            newItem.ColorName = color.Name;
-                        }
+                        // var color = await _dataContext.Colors.FindAsync(int.Parse(colorId));
+                        // if (color != null)
+                        // {
+                        //     newItem.ColorName = color.Name;
+                        // }
+                        newItem.ColorName = "Color " + colorId; // Temporary fallback
                     }
 
                     if (!string.IsNullOrEmpty(sizeId))
                     {
-                        var size = await _dataContext.Sizes.FindAsync(int.Parse(sizeId));
-                        if (size != null)
-                        {
-                            newItem.SizeName = size.Name;
-                        }
+                        // var size = await _dataContext.Sizes.FindAsync(int.Parse(sizeId));
+                        // if (size != null)
+                        // {
+                        //     newItem.SizeName = size.Name;
+                        // }
+                        newItem.SizeName = "Size " + sizeId; // Temporary fallback
                     }
 
                     cart.Add(newItem);

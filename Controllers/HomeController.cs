@@ -40,7 +40,8 @@ namespace Shopping_Demo.Controllers
                 _logger.LogInformation($"Product: {product.Name}, Image: {product.Image}, Category: {product.Category?.Name}, Brand: {product.Brand?.Name}");
             }
 
-            var sliders = _dataContext.Sliders.Where(s => s.Status == 1).ToList();
+            // var sliders = _dataContext.Sliders.Where(s => s.Status == 1).ToList();
+            var sliders = new List<SliderModel>(); // Temporary empty list since Sliders table was removed
 
             var bestSellingProducts = _dataContext.Products
                 .Where(p => p.IsActive)
@@ -320,6 +321,13 @@ namespace Shopping_Demo.Controllers
                 }
 
                 var cartItem = userCart.CartItems.FirstOrDefault(x => x.ProductId == productId);
+                var currentCartQuantity = cartItem?.Quantity ?? 0;
+
+                // Kiểm tra tổng số lượng trong giỏ hàng không được vượt quá số lượng sản phẩm có sẵn
+                if (currentCartQuantity >= product.Quantity)
+                {
+                    return Json(new { success = false, message = $"Sản phẩm chỉ còn {product.Quantity} chiếc trong kho" });
+                }
 
                 if (cartItem == null)
                 {
@@ -345,6 +353,13 @@ namespace Shopping_Demo.Controllers
                 var sessionCartItems = HttpContext.Session.GetJson<List<CartItemSessionDTO>>("Cart") ?? new List<CartItemSessionDTO>();
 
                 var existingItem = sessionCartItems.FirstOrDefault(x => x.ProductId == productId);
+                var currentCartQuantity = existingItem?.Quantity ?? 0;
+
+                // Kiểm tra tổng số lượng trong giỏ hàng không được vượt quá số lượng sản phẩm có sẵn
+                if (currentCartQuantity >= product.Quantity)
+                {
+                    return Json(new { success = false, message = $"Sản phẩm chỉ còn {product.Quantity} chiếc trong kho" });
+                }
 
                 if (existingItem == null)
                 {

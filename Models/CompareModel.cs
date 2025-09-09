@@ -11,5 +11,8 @@ namespace Shopping_Demo.Models
         public string UserId { get; set; }
         [ForeignKey("ProductId")]
         public ProductModel Product { get; set; }
+        
+        [ForeignKey("UserId")]
+        public AppUserModel User { get; set; }
     }
 }

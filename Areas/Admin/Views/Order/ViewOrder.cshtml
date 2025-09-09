@@ -16,18 +16,6 @@
         </div>
     </div>
 
-    @if (!string.IsNullOrEmpty(ViewBag.CouponCode))
-    {
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4>Thông Tin Giảm Giá</h4>
-            </div>
-            <div class="card-body">
-                <p><strong>Mã giảm giá:</strong> @ViewBag.CouponCode</p>
-                <p><strong>Số tiền giảm:</strong> @ViewBag.DiscountAmount.ToString("#,##0 VNĐ")</p>
-            </div>
-        </div>
-    }
 
     <div class="card mb-4">
         <div class="card-header">
@@ -243,24 +231,72 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
             $("#updateStatus").click(function () {
                 var status = $("#orderStatus").val();
                 var orderCode = "@Model.FirstOrDefault()?.OrderCode";
+                var currentStatus = @ViewBag.Status;
 
-                $.ajax({
-                    url: '@Url.Action("UpdateOrder", "Order")',
-                    type: 'POST',
-                    data: { ordercode: orderCode, status: status },
-                    success: function (result) {
-                        if (result.success) {
-                            alert("Cập nhật trạng thái đơn hàng thành công");
-                            location.reload();
-                        }
-                    },
-                    error: function () {
-                        alert("Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng");
+                // Kiểm tra nếu trạng thái không thay đổi
+                if (status == currentStatus) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Thông báo',
+                        text: 'Trạng thái đơn hàng không thay đổi'
+                    });
+                    return;
+                }
+
+                // Xác nhận trước khi cập nhật
+                Swal.fire({
+                    title: 'Xác nhận cập nhật',
+                    text: 'Bạn có chắc muốn cập nhật trạng thái đơn hàng?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#000',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Cập nhật',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Disable button để tránh double click
+                        $("#updateStatus").prop('disabled', true);
+                        
+                        $.ajax({
+                            url: '@Url.Action("UpdateOrder", "Order")',
+                            type: 'POST',
+                            data: { ordercode: orderCode, status: status },
+                            success: function (result) {
+                                if (result.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Thành công!',
+                                        text: 'Cập nhật trạng thái đơn hàng thành công',
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Lỗi!',
+                                        text: result.message || 'Có lỗi xảy ra khi cập nhật'
+                                    });
+                                    $("#updateStatus").prop('disabled', false);
+                                }
+                            },
+                            error: function () {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi!',
+                                    text: 'Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng'
+                                });
+                                $("#updateStatus").prop('disabled', false);
+                            }
+                        });
                     }
                 });
             });

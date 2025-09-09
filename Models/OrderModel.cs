@@ -23,6 +23,9 @@ namespace Shopping_Demo.Models
         public string? PaymentMethod { get; set; }
         public DateTime? DeliveredDate { get; set; }
         public virtual ICollection<OrderDetails> OrderDetails { get; set; }
+        public virtual ICollection<ProductReviewModel> ProductReviews { get; set; }
+        public virtual ICollection<PaymentModel> Payments { get; set; }
+        public virtual ICollection<MomoInfoModel> MomoInfos { get; set; }
         public string UserId { get; set; }
 
         [ForeignKey("UserId")]

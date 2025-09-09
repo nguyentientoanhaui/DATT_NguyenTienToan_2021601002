@@ -1,0 +1,174 @@
+@model IEnumerable<Shopping_Demo.Models.ProductReviewModel>
+@{
+    ViewData["Title"] = "Đánh giá sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        Đánh giá sản phẩm: @ViewBag.Product?.Name
+                    </h3>
+                    <div class="card-tools">
+                        <a href="@Url.Action("Index")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Product != null)
+                    {
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>Thông tin sản phẩm</h5>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <th width="120">ID:</th>
+                                        <td>@ViewBag.Product.Id</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tên sản phẩm:</th>
+                                        <td>@ViewBag.Product.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Giá:</th>
+                                        <td>@ViewBag.Product.Price.ToString("N0") VNĐ</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Thống kê đánh giá</h5>
+                                @{
+                                    var reviews = Model.ToList();
+                                    var totalReviews = reviews.Count;
+                                    var averageRating = totalReviews > 0 ? reviews.Average(r => r.Rating) : 0;
+                                    var ratingDistribution = Enumerable.Range(1, 5)
+                                        .Select(rating => new { Rating = rating, Count = reviews.Count(r => r.Rating == rating) })
+                                        .ToList();
+                                }
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="text-center">
+                                            <h3 class="text-warning">@averageRating.ToString("F1")</h3>
+                                            <div class="rating">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= Math.Round(averageRating))
+                                                    {
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="far fa-star text-muted"></i>
+                                                    }
+                                                }
+                                            </div>
+                                            <small class="text-muted">@totalReviews đánh giá</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        @foreach (var rating in ratingDistribution)
+                                        {
+                                            var percentage = totalReviews > 0 ? (rating.Count * 100.0 / totalReviews) : 0;
+                                            <div class="d-flex align-items-center mb-1">
+                                                <small class="mr-2">@rating.Rating <i class="fas fa-star text-warning"></i></small>
+                                                <div class="progress flex-grow-1" style="height: 8px;">
+                                                    <div class="progress-bar bg-warning" style="width: @percentage%"></div>
+                                                </div>
+                                                <small class="ml-2">@rating.Count</small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Người dùng</th>
+                                        <th>Đánh giá</th>
+                                        <th>Bình luận</th>
+                                        <th>Mã đơn hàng</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var review in Model)
+                                    {
+                                        <tr>
+                                            <td>@review.Id</td>
+                                            <td>@review.UserName</td>
+                                            <td>
+                                                <div class="rating">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= review.Rating)
+                                                        {
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="far fa-star text-muted"></i>
+                                                        }
+                                                    }
+                                                    <span class="ml-1">(@review.Rating/5)</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(review.Comment))
+                                                {
+                                                    <span title="@review.Comment">
+                                                        @(review.Comment.Length > 50 ? review.Comment.Substring(0, 50) + "..." : review.Comment)
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Không có bình luận</span>
+                                                }
+                                            </td>
+                                            <td>@review.OrderCode</td>
+                                            <td>@review.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("Details", new { id = review.Id })" 
+                                                       class="btn btn-sm btn-info" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <form asp-action="Delete" method="post" style="display: inline;">
+                                                        <input type="hidden" name="id" value="@review.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                                onclick="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?')" 
+                                                                title="Xóa">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-star text-muted" style="font-size: 48px;"></i>
+                            <h5 class="text-muted mt-2">Chưa có đánh giá nào cho sản phẩm này</h5>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

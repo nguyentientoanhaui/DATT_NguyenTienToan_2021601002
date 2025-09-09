@@ -4,15 +4,15 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Facebook;
 using Shopping_Demo.Areas.Admin.Repository;
 using Shopping_Demo.Models;
-using Shopping_Demo.Models.Momo;
 using Shopping_Demo.Repository;
 using Shopping_Demo.Services;
-using Shopping_Demo.Services.Momo;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<MomoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
-builder.Services.AddScoped<IMomoService, MomoService>();
+//Momo API Payment
+builder.Services.Configure<MoMoOptionModel>(builder.Configuration.GetSection("MomoAPI"));
+builder.Services.AddScoped<IMoMoService, MoMoService>();
+builder.Services.AddScoped<ILargePaymentService, LargePaymentService>();
 
 //connection db
 builder.Services.AddDbContext<DataContext>(options =>

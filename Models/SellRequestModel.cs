@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shopping_Demo.Models
 {
@@ -7,16 +8,19 @@ namespace Shopping_Demo.Models
         public int Id { get; set; }
         
         [Required(ErrorMessage = "Vui lòng nhập họ tên")]
+        [StringLength(200, ErrorMessage = "Họ tên không được vượt quá 200 ký tự")]
         [Display(Name = "Họ và tên")]
         public string FullName { get; set; }
         
         [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        [StringLength(20, ErrorMessage = "Số điện thoại không được vượt quá 20 ký tự")]
         [Display(Name = "Số điện thoại")]
         public string PhoneNumber { get; set; }
         
         [Required(ErrorMessage = "Vui lòng nhập email")]
         [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [StringLength(200, ErrorMessage = "Email không được vượt quá 200 ký tự")]
         [Display(Name = "Email")]
         public string Email { get; set; }
         
@@ -28,9 +32,11 @@ namespace Shopping_Demo.Models
         public ProductModel Product { get; set; }
         
         [Required(ErrorMessage = "Vui lòng nhập thông tin đồng hồ")]
+        [StringLength(1000, ErrorMessage = "Thông tin đồng hồ không được vượt quá 1000 ký tự")]
         [Display(Name = "Thông tin đồng hồ")]
         public string WatchInfo { get; set; }
         
+        [StringLength(200, ErrorMessage = "Tình trạng đồng hồ không được vượt quá 200 ký tự")]
         [Display(Name = "Tình trạng đồng hồ")]
         public string Condition { get; set; }
         
@@ -41,9 +47,11 @@ namespace Shopping_Demo.Models
         [Range(0, double.MaxValue, ErrorMessage = "Giá phải lớn hơn 0")]
         public decimal? ExpectedPrice { get; set; }
         
+        [StringLength(1000, ErrorMessage = "Ghi chú không được vượt quá 1000 ký tự")]
         [Display(Name = "Ghi chú thêm")]
         public string Notes { get; set; }
         
+        [StringLength(500, ErrorMessage = "URL hình ảnh không được vượt quá 500 ký tự")]
         [Display(Name = "Hình ảnh đồng hồ")]
         public string ImageUrl { get; set; }
         
@@ -56,6 +64,7 @@ namespace Shopping_Demo.Models
         [Display(Name = "Ngày cập nhật")]
         public DateTime? UpdatedAt { get; set; }
         
+        [StringLength(1000, ErrorMessage = "Phản hồi admin không được vượt quá 1000 ký tự")]
         [Display(Name = "Phản hồi từ admin")]
         public string AdminResponse { get; set; }
         
@@ -67,6 +76,10 @@ namespace Shopping_Demo.Models
         
         [Display(Name = "Session ID")]
         public string SessionId { get; set; }
+
+        // Navigation Properties
+        [ForeignKey("UserId")]
+        public virtual AppUserModel User { get; set; }
     }
     
     public enum SellRequestStatus

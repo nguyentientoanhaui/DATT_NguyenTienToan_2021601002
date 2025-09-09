@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Shopping_Demo.Areas.Admin.Repository;
 using Shopping_Demo.Models;
 using Shopping_Demo.Repository;
-using Shopping_Demo.Services.Momo;
+using Shopping_Demo.Services;
 using System.Security.Claims;
 
 namespace Shopping_Demo.Controllers
@@ -13,8 +13,8 @@ namespace Shopping_Demo.Controllers
     {
         private readonly DataContext _dataContext;
         private readonly IEmailSender _emailSender;
-        private IMomoService _momoService;
-        public CheckoutController(DataContext context, IEmailSender emailSender, IMomoService momoService)
+        private IMoMoService _momoService;
+        public CheckoutController(DataContext context, IEmailSender emailSender, IMoMoService momoService)
         {
             _dataContext = context;
             _emailSender = emailSender;
@@ -34,18 +34,14 @@ namespace Shopping_Demo.Controllers
             }
             else
             {
-                // Tạo mã đơn hàng ngắn gọn: ORD + timestamp + random 4 số
-                var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
-                var random = new Random();
-                var randomSuffix = random.Next(1000, 9999).ToString();
-                var orderCode = $"ORD{timestamp}{randomSuffix}";
                 var orderItem = new OrderModel();
-                orderItem.OrderCode = orderCode;
                 orderItem.UserName = userEmail;
                 if (OrderId != null)
                 {
-                    orderItem.PaymentMethod = OrderId;
-                    var momoTransaction = await _dataContext.MomoInfos.FirstOrDefaultAsync(m => m.OrderId == OrderId);
+                    // Sử dụng OrderId từ MoMo làm OrderCode
+                    orderItem.OrderCode = OrderId;
+                    orderItem.PaymentMethod = "MoMo";
+                    var momoTransaction = await _dataContext.MomoInfos.FirstOrDefaultAsync(m => m.OrderCode == OrderId);
                     if (momoTransaction != null)
                     {
                         decimal totalAmount = momoTransaction.Amount;
@@ -160,7 +156,7 @@ namespace Shopping_Demo.Controllers
                 {
                     var orderDetails = new OrderDetails();
                     orderDetails.UserName = userEmail;
-                    orderDetails.OrderCode = orderCode;
+                    orderDetails.OrderCode = orderItem.OrderCode;
                     orderDetails.ProductId = cart.ProductId;
                     orderDetails.Price = cart.Price;
                     orderDetails.Quantity = cart.Quantity;
@@ -189,13 +185,13 @@ namespace Shopping_Demo.Controllers
                 HttpContext.Session.Remove("Cart");
 
                 var receiver = userEmail;
-                var subject = "Đặt hàng thành công - Mã đơn hàng: " + orderCode;
+                var subject = "Đặt hàng thành công - Mã đơn hàng: " + orderItem.OrderCode;
 
                 // Tạo nội dung email chi tiết
                 var messageBuilder = new System.Text.StringBuilder();
                 messageBuilder.AppendLine("<h2>Xác nhận đơn hàng</h2>");
                 messageBuilder.AppendLine("<p>Cảm ơn bạn đã đặt hàng tại cửa hàng của chúng tôi.</p>");
-                messageBuilder.AppendLine("<p><strong>Mã đơn hàng:</strong> " + orderCode + "</p>");
+                messageBuilder.AppendLine("<p><strong>Mã đơn hàng:</strong> " + orderItem.OrderCode + "</p>");
                 messageBuilder.AppendLine("<p><strong>Ngày đặt hàng:</strong> " + orderItem.CreatedDate + "</p>");
                 messageBuilder.AppendLine("<h3>Chi tiết đơn hàng:</h3>");
                 
@@ -337,87 +333,87 @@ namespace Shopping_Demo.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> PaymentCallBack(MomoInfoModel model)
+        public async Task<IActionResult> PaymentCallBack()
         {
-            var allParams = HttpContext.Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString());
-            Console.WriteLine("MoMo Callback Parameters: " + JsonConvert.SerializeObject(allParams));
-
-            var requestQuery = HttpContext.Request.Query;
-
-            if (requestQuery.TryGetValue("resultCode", out var resultCodeValues) && resultCodeValues.Count > 0)
+            try
             {
-                string resultCodeStr = resultCodeValues.First();
+                var allParams = HttpContext.Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString());
+                Console.WriteLine("MoMo Callback Parameters: " + JsonConvert.SerializeObject(allParams));
 
-                if (int.TryParse(resultCodeStr, out int resultCode))
+                // Xử lý callback từ MoMo
+                var momoResponse = _momoService.ProcessCallback(HttpContext.Request.Query);
+                
+                Console.WriteLine($"MoMo Callback Response: {JsonConvert.SerializeObject(momoResponse)}");
+
+                if (momoResponse != null)
                 {
-                    if (resultCode == 0)
+                    // Lưu thông tin giao dịch thành công
+                    var newMomoInsert = new MomoInfoModel
                     {
-                        // Lưu thông tin giao dịch thành công
-                        var newMomoInsert = new MomoInfoModel
+                        OrderCode = momoResponse.OrderId,
+                        FullName = User?.FindFirstValue(ClaimTypes.Email) ?? "Guest",
+                        Amount = decimal.Parse(momoResponse.Amount),
+                        OrderInfo = momoResponse.OrderInfo,
+                        DatePaid = DateTime.Now,
+                        TransactionStatus = "Success"
+                    };
+
+                    _dataContext.Add(newMomoInsert);
+                    await _dataContext.SaveChangesAsync();
+
+                    // Gọi Checkout để tạo đơn hàng
+                    await Checkout(momoResponse.OrderId);
+
+                    HttpContext.Session.Remove("Cart");
+
+                    if (User.Identity.IsAuthenticated)
+                    {
+                        string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                        var userCart = await _dataContext.Carts
+                            .Include(c => c.CartItems)
+                            .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                        if (userCart != null && userCart.CartItems.Any())
                         {
-                            OrderId = requestQuery["orderId"],
-                            FullName = User.FindFirstValue(ClaimTypes.Email),
-                            Amount = decimal.Parse(requestQuery["amount"]),
-                            OrderInfo = requestQuery["orderInfo"],
-                            DatePaid = DateTime.Now,
-                            TransactionStatus = "Success"
-                        };
-
-                        _dataContext.Add(newMomoInsert);
-                        await _dataContext.SaveChangesAsync();
-
-                        // Gọi Checkout để tạo đơn hàng
-                        await Checkout(requestQuery["orderId"]);
-
-                        // Hiển thị view với thông tin giao dịch
-                        var response = _momoService.PaymentExecuteAsync(HttpContext.Request.Query);
-
-                        HttpContext.Session.Remove("Cart");
-
-                        if (User.Identity.IsAuthenticated)
-                        {
-                            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                            var userCart = await _dataContext.Carts
-                                .Include(c => c.CartItems)
-                                .FirstOrDefaultAsync(c => c.UserId == userId);
-
-                            if (userCart != null && userCart.CartItems.Any())
+                            foreach (var item in userCart.CartItems.ToList())
                             {
-                                foreach (var item in userCart.CartItems.ToList())
-                                {
-                                    _dataContext.Remove(item); 
-                                }
-
-                                await _dataContext.SaveChangesAsync();
+                                _dataContext.Remove(item); 
                             }
+
+                            await _dataContext.SaveChangesAsync();
                         }
-
-                        TempData["success"] = "Thanh toán thành công qua MoMo!";
-                        return View(response);
                     }
-                    else
+
+                    TempData["success"] = "Thanh toán thành công qua MoMo!";
+                    return View(momoResponse);
+                }
+                else
+                {
+                    // Thanh toán thất bại
+                    var newMomoInsert = new MomoInfoModel
                     {
-                        var newMomoInsert = new MomoInfoModel
-                        {
-                            OrderId = requestQuery["orderId"],
-                            FullName = User.FindFirstValue(ClaimTypes.Email),
-                            Amount = decimal.Parse(requestQuery["amount"]),
-                            OrderInfo = requestQuery["orderInfo"],
-                            DatePaid = DateTime.Now,
-                            TransactionStatus = "Failed"
-                        };
+                        OrderCode = momoResponse.OrderId,
+                        FullName = User?.FindFirstValue(ClaimTypes.Email) ?? "Guest",
+                        Amount = decimal.Parse(momoResponse.Amount),
+                        OrderInfo = momoResponse.OrderInfo,
+                        DatePaid = DateTime.Now,
+                        TransactionStatus = "Failed"
+                    };
 
-                        _dataContext.Add(newMomoInsert);
-                        await _dataContext.SaveChangesAsync();
+                    _dataContext.Add(newMomoInsert);
+                    await _dataContext.SaveChangesAsync();
 
-                        TempData["error"] = "Giao dịch MoMo thất bại. Mã lỗi: " + resultCode;
-                        return RedirectToAction("Index", "Cart");
-                    }
+                    TempData["error"] = "Giao dịch MoMo thất bại. Mã lỗi: " + momoResponse.ResponseCode;
+                    return RedirectToAction("Index", "Cart");
                 }
             }
-
-            TempData["error"] = "Không thể xác định trạng thái giao dịch MoMo.";
-            return RedirectToAction("Index", "Cart");
+            catch (Exception ex)
+            {
+                Console.WriteLine($"MoMo Callback Error: {ex.Message}");
+                TempData["error"] = "Lỗi xử lý thanh toán MoMo: " + ex.Message;
+                return RedirectToAction("Index", "Cart");
+            }
         }
+
     }
 }

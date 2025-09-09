@@ -2,29 +2,34 @@
 using Shopping_Demo.Models;
 using Shopping_Demo.Models.ViewModels;
 using Shopping_Demo.Repository;
-using Shopping_Demo.Services.Momo;
+using Shopping_Demo.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Newtonsoft.Json;
 
 namespace Shopping_Demo.Controllers
 {
     public class PaymentController : Controller
     {
         private readonly DataContext _context;
-        private readonly IMomoService _momoService;
+        private readonly IMoMoService _momoService;
+        private readonly ILargePaymentService _largePaymentService;
 
-        public PaymentController(DataContext context, IMomoService momoService)
+        public PaymentController(DataContext context, IMoMoService momoService, ILargePaymentService largePaymentService)
         {
             _context = context;
             _momoService = momoService;
+            _largePaymentService = largePaymentService;
         }
 
         [HttpPost]
-        public IActionResult ProcessPayment([FromBody] PaymentRequestModel request)
+        public async Task<IActionResult> ProcessPayment([FromBody] PaymentRequestModel request)
         {
             try
             {
+                Console.WriteLine($"Processing payment: {JsonConvert.SerializeObject(request)}");
+                
                 var payment = new PaymentModel
                 {
                     OrderId = GenerateOrderId(),
@@ -42,14 +47,18 @@ namespace Shopping_Demo.Controllers
                     UserAgent = HttpContext.Request.Headers["User-Agent"].ToString()
                 };
 
+                Console.WriteLine($"Created payment model: {JsonConvert.SerializeObject(payment)}");
+
                 // Lưu vào database
                 _context.Payments.Add(payment);
                 _context.SaveChanges();
+                
+                Console.WriteLine($"Payment saved to database with ID: {payment.OrderId}");
 
                 switch (request.PaymentMethod)
                 {
                     case "credit-card":
-                        return ProcessCreditCard(payment);
+                        return await ProcessCreditCard(payment);
                     case "bank-transfer":
                         return ProcessBankTransfer(payment);
                     case "installment":
@@ -68,23 +77,32 @@ namespace Shopping_Demo.Controllers
             }
         }
 
-        private IActionResult ProcessCreditCard(PaymentModel payment)
+        private async Task<IActionResult> ProcessCreditCard(PaymentModel payment)
         {
-            // Sử dụng MoMo thay vì VNPAY
+            // Sử dụng MoMo
             try
             {
+                Console.WriteLine($"Processing MoMo payment for amount: {payment.TotalAmount}");
+                
                 var momoRequest = new OrderInfoModel
                 {
-                    Amount = payment.TotalAmount
+                    OrderId = payment.OrderId,
+                    Amount = (long)payment.TotalAmount,
+                    OrderInfo = $"Thanh toan don hang {payment.OrderId}",
+                    FullName = payment.CustomerEmail
                 };
 
-                var momoResponse = _momoService.CreatePaymentMomo(momoRequest).Result;
+                Console.WriteLine($"Created MoMo request: {JsonConvert.SerializeObject(momoRequest)}");
+                
+                var momoResponse = await _momoService.CreatePaymentAsync(momoRequest);
+                
+                Console.WriteLine($"MoMo response: {JsonConvert.SerializeObject(momoResponse)}");
 
-                if (momoResponse != null && !string.IsNullOrEmpty(momoResponse.PayUrl))
+                if (momoResponse.IsSuccess && !string.IsNullOrEmpty(momoResponse.PayUrl))
                 {
                     payment.PaymentGateway = "momo";
                     payment.PaymentUrl = momoResponse.PayUrl;
-                    payment.ReturnUrl = Url.Action("PaymentCallback", "Payment", null, Request.Scheme);
+                    payment.TransactionId = momoResponse.TransactionId;
                     _context.SaveChanges();
 
                     return Json(new
@@ -94,12 +112,24 @@ namespace Shopping_Demo.Controllers
                         orderId = payment.OrderId,
                         amount = payment.TotalAmount,
                         redirectUrl = momoResponse.PayUrl,
-                        message = "Đang chuyển hướng đến cổng thanh toán MoMo"
+                        qrCodeUrl = momoResponse.QrCodeUrl,
+                        message = "Đang chuyển hướng đến cổng thanh toán MoMo",
+                        momoInfo = new
+                        {
+                            partnerCode = "MOMO",
+                            merchantName = "Shopping Demo",
+                            supportPhone = "1900 55 55 77",
+                            supportEmail = "support@momo.vn"
+                        }
                     });
                 }
                 else
                 {
-                    return Json(new { success = false, message = "Không thể tạo thanh toán MoMo" });
+                    Console.WriteLine($"MoMo payment failed: {momoResponse.ResponseMessage}");
+                    return Json(new { 
+                        success = false,
+                        message = $"Không thể tạo thanh toán MoMo: {momoResponse.ResponseMessage}"
+                    });
                 }
             }
             catch (Exception ex)
@@ -293,37 +323,29 @@ namespace Shopping_Demo.Controllers
         }
 
         [HttpGet]
-        public IActionResult PaymentCallback()
+        public IActionResult MomoCallback()
         {
             try
             {
-                // Lấy parameters từ MoMo
-                var partnerCode = Request.Query["partnerCode"].ToString();
-                var orderId = Request.Query["orderId"].ToString();
-                var requestId = Request.Query["requestId"].ToString();
-                var amount = Request.Query["amount"].ToString();
-                var orderInfo = Request.Query["orderInfo"].ToString();
-                var orderType = Request.Query["orderType"].ToString();
-                var transId = Request.Query["transId"].ToString();
-                var resultCode = Request.Query["resultCode"].ToString();
-                var message = Request.Query["message"].ToString();
-                var payType = Request.Query["payType"].ToString();
-                var signature = Request.Query["signature"].ToString();
+                // Xử lý callback từ MoMo
+                var momoResponse = _momoService.ProcessCallback(Request.Query);
+                
+                Console.WriteLine($"MoMo Callback Response: {JsonConvert.SerializeObject(momoResponse)}");
 
                 // Tìm payment trong database
-                var payment = _context.Payments.FirstOrDefault(p => p.OrderId == orderId);
+                var payment = _context.Payments.FirstOrDefault(p => p.OrderId == momoResponse.OrderId);
                 
                 if (payment != null)
                 {
-                    if (resultCode == "0")
+                    if (momoResponse.IsSuccess)
                     {
                         // Thanh toán thành công
                         payment.Status = "completed";
                         payment.CompletedAt = DateTime.Now;
-                        payment.TransactionId = transId;
+                        payment.TransactionId = momoResponse.TransactionId;
                         _context.SaveChanges();
 
-                        return RedirectToAction("PaymentSuccess", new { orderId = orderId });
+                        return RedirectToAction("PaymentSuccess", new { orderId = momoResponse.OrderId });
                     }
                     else
                     {
@@ -331,15 +353,15 @@ namespace Shopping_Demo.Controllers
                         payment.Status = "failed";
                         _context.SaveChanges();
 
-                        return RedirectToAction("PaymentFailed", new { orderId = orderId, errorCode = resultCode });
+                        return RedirectToAction("PaymentFailed", new { orderId = momoResponse.OrderId, errorCode = momoResponse.ResponseCode });
                     }
                 }
 
-                return RedirectToAction("PaymentFailed", new { orderId = orderId, errorCode = "ORDER_NOT_FOUND" });
+                return RedirectToAction("PaymentFailed", new { orderId = momoResponse.OrderId, errorCode = "ORDER_NOT_FOUND" });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"PaymentCallback Error: {ex.Message}");
+                Console.WriteLine($"MomoCallback Error: {ex.Message}");
                 return RedirectToAction("PaymentFailed", new { orderId = "", errorCode = "EXCEPTION" });
             }
         }
@@ -349,30 +371,22 @@ namespace Shopping_Demo.Controllers
         {
             try
             {
-                // Xử lý IPN từ MoMo
-                var partnerCode = Request.Form["partnerCode"].ToString();
-                var orderId = Request.Form["orderId"].ToString();
-                var requestId = Request.Form["requestId"].ToString();
-                var amount = Request.Form["amount"].ToString();
-                var orderInfo = Request.Form["orderInfo"].ToString();
-                var orderType = Request.Form["orderType"].ToString();
-                var transId = Request.Form["transId"].ToString();
-                var resultCode = Request.Form["resultCode"].ToString();
-                var message = Request.Form["message"].ToString();
-                var payType = Request.Form["payType"].ToString();
-                var signature = Request.Form["signature"].ToString();
+                // Xử lý notify từ MoMo
+                var momoResponse = _momoService.ProcessCallback(Request.Query);
+                
+                Console.WriteLine($"MoMo Notify Response: {JsonConvert.SerializeObject(momoResponse)}");
 
                 // Tìm payment trong database
-                var payment = _context.Payments.FirstOrDefault(p => p.OrderId == orderId);
+                var payment = _context.Payments.FirstOrDefault(p => p.OrderId == momoResponse.OrderId);
                 
                 if (payment != null)
                 {
-                    if (resultCode == "0")
+                    if (momoResponse.IsSuccess)
                     {
                         // Thanh toán thành công
                         payment.Status = "completed";
                         payment.CompletedAt = DateTime.Now;
-                        payment.TransactionId = transId;
+                        payment.TransactionId = momoResponse.TransactionId;
                         _context.SaveChanges();
                     }
                     else
@@ -383,13 +397,73 @@ namespace Shopping_Demo.Controllers
                     }
                 }
 
-                return Ok("OK");
+                return Ok();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"MomoNotify Error: {ex.Message}");
-                return BadRequest("ERROR");
+                return BadRequest();
             }
+        }
+
+
+        [HttpGet]
+        public IActionResult DebugPayment()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TestMomo()
+        {
+            try
+            {
+                var testRequest = new OrderInfoModel
+                {
+                    OrderId = "TEST_" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                    Amount = 50000, // 50,000 VND (hợp lệ)
+                    OrderInfo = "Test MoMo payment",
+                    FullName = "Test Customer"
+                };
+
+                Console.WriteLine("=== Testing MoMo API ===");
+                var momoResponse = await _momoService.CreatePaymentAsync(testRequest);
+                
+                if (momoResponse.IsSuccess && !string.IsNullOrEmpty(momoResponse.PayUrl))
+                {
+                    Console.WriteLine($"MoMo Test Success: {momoResponse.PayUrl}");
+                    return Json(new { 
+                        success = true, 
+                        message = "MoMo API test thành công",
+                        paymentUrl = momoResponse.PayUrl,
+                        qrCodeUrl = momoResponse.QrCodeUrl
+                    });
+                }
+                else
+                {
+                    Console.WriteLine($"MoMo Test Failed: {momoResponse.ResponseMessage}");
+                    return Json(new { 
+                        success = false, 
+                        message = $"MoMo API test thất bại: {momoResponse.ResponseMessage}" 
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"MoMo Test Exception: {ex.Message}");
+                return Json(new { 
+                    success = false, 
+                    message = "MoMo API test exception: " + ex.Message 
+                });
+            }
+        }
+
+        [HttpPost]
+        [Route("CreatePaymentUrl")]
+        public async Task<IActionResult> CreatePaymentUrl(OrderInfoModel model)
+        {
+            var response = await _momoService.CreatePaymentAsync(model);
+            return Redirect(response.PayUrl);
         }
 
         [HttpGet]
@@ -433,6 +507,84 @@ namespace Shopping_Demo.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> ProcessLargePayment([FromBody] LargePaymentRequestModel request)
+        {
+            try
+            {
+                Console.WriteLine($"Processing large payment: {request.Amount:N0} VND");
+                
+                var result = await _largePaymentService.ProcessLargePayment(
+                    request.Amount,
+                    request.OrderId ?? GenerateOrderId(),
+                    request.CustomerEmail,
+                    request.CustomerPhone,
+                    request.ShippingAddress
+                );
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Large payment error: {ex.Message}");
+                return Json(new LargePaymentResult
+                {
+                    Success = false,
+                    Message = $"Lỗi xử lý giao dịch lớn: {ex.Message}",
+                    OrderId = request.OrderId ?? "UNKNOWN",
+                    TotalAmount = request.Amount
+                });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult LargePaymentInfo()
+        {
+            var info = new
+            {
+                success = true,
+                message = "Thông tin xử lý giao dịch lớn",
+                momoLimit = new
+                {
+                    maxAmount = 50000000,
+                    minAmount = 5000,
+                    currency = "VND"
+                },
+                alternatives = new[]
+                {
+                    new
+                    {
+                        method = "bank-transfer",
+                        name = "Chuyển khoản ngân hàng",
+                        description = "Không giới hạn số tiền",
+                        processingTime = "Ngay lập tức"
+                    },
+                    new
+                    {
+                        method = "cash",
+                        name = "Thanh toán tiền mặt",
+                        description = "Tại cửa hàng Tràng Tiền Plaza",
+                        processingTime = "Ngay lập tức"
+                    },
+                    new
+                    {
+                        method = "installment",
+                        name = "Trả góp ngân hàng",
+                        description = "Liên hệ ngân hàng để làm thủ tục",
+                        processingTime = "1-3 ngày làm việc"
+                    }
+                },
+                splitPayment = new
+                {
+                    maxParts = 5,
+                    description = "Chia giao dịch lớn thành nhiều phần nhỏ để thanh toán qua MoMo"
+                }
+            };
+
+            return Json(info);
+        }
+
+
         private string GenerateOrderId()
         {
             return "ORDER_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + new Random().Next(1000, 9999);
@@ -442,6 +594,15 @@ namespace Shopping_Demo.Controllers
     public class PaymentRequestModel
     {
         public string PaymentMethod { get; set; }
+        public decimal Amount { get; set; }
+        public string CustomerEmail { get; set; }
+        public string CustomerPhone { get; set; }
+        public string ShippingAddress { get; set; }
+    }
+
+    public class LargePaymentRequestModel
+    {
+        public string OrderId { get; set; }
         public decimal Amount { get; set; }
         public string CustomerEmail { get; set; }
         public string CustomerPhone { get; set; }

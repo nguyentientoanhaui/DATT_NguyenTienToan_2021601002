@@ -1,0 +1,383 @@
+@model Shopping_Demo.Models.SellRequestModel
+
+@{
+    ViewData["Title"] = "Từ Chối Đơn Thu Mua";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .simple-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #ffffff;
+    }
+    
+    .simple-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #000000;
+    }
+    
+    .simple-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #000000;
+        margin: 0 0 10px 0;
+    }
+    
+    .simple-subtitle {
+        font-size: 16px;
+        color: #666666;
+        margin: 0;
+    }
+    
+    .simple-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .simple-card-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: 600;
+        color: #000000;
+    }
+    
+    .simple-card-body {
+        padding: 20px;
+    }
+    
+    .simple-form-group {
+        margin-bottom: 20px;
+    }
+    
+    .simple-form-label {
+        display: block;
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 8px;
+    }
+    
+    .simple-form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 14px;
+        background: #ffffff;
+        color: #000000;
+    }
+    
+    .simple-form-control:focus {
+        outline: none;
+        border-color: #000000;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .simple-btn {
+        background: #000000;
+        color: #ffffff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.2s;
+    }
+    
+    .simple-btn:hover {
+        background: #333333;
+        color: #ffffff;
+        text-decoration: none;
+    }
+    
+    .simple-btn-secondary {
+        background: #ffffff;
+        color: #000000;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .simple-btn-secondary:hover {
+        background: #f8f9fa;
+        color: #000000;
+    }
+    
+    .simple-btn-danger {
+        background: #dc3545;
+        color: #ffffff;
+    }
+    
+    .simple-btn-danger:hover {
+        background: #c82333;
+        color: #ffffff;
+    }
+    
+    .simple-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .simple-info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .simple-info-label {
+        font-weight: 600;
+        color: #000000;
+        min-width: 120px;
+    }
+    
+    .simple-info-value {
+        color: #666666;
+        flex: 1;
+        text-align: right;
+    }
+    
+    .simple-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .simple-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .badge-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .badge-reviewed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .badge-contacted {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .badge-completed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .badge-cancelled {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .warning-box {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .warning-box .warning-icon {
+        color: #856404;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+    
+    .warning-box .warning-text {
+        color: #856404;
+        font-weight: 600;
+    }
+</style>
+
+<div class="simple-container">
+    <!-- Page Header -->
+    <div class="simple-header">
+        <h1 class="simple-title">Từ Chối Đơn Thu Mua</h1>
+        <p class="simple-subtitle">Xác nhận từ chối đơn thu mua từ khách hàng</p>
+    </div>
+
+    <!-- Warning Box -->
+    <div class="warning-box">
+        <span class="warning-icon">⚠️</span>
+        <span class="warning-text">
+            Bạn đang thực hiện thao tác từ chối đơn thu mua. Hành động này không thể hoàn tác.
+        </span>
+    </div>
+
+    <!-- Customer Information -->
+    <div class="simple-card">
+        <div class="simple-card-header">
+            Thông Tin Khách Hàng
+        </div>
+        <div class="simple-card-body">
+            <div class="simple-info-row">
+                <span class="simple-info-label">Mã đơn:</span>
+                <span class="simple-info-value"><strong>#@Model.Id</strong></span>
+            </div>
+            <div class="simple-info-row">
+                <span class="simple-info-label">Họ tên:</span>
+                <span class="simple-info-value">@Model.FullName</span>
+            </div>
+            <div class="simple-info-row">
+                <span class="simple-info-label">Email:</span>
+                <span class="simple-info-value">@Model.Email</span>
+            </div>
+            <div class="simple-info-row">
+                <span class="simple-info-label">Số điện thoại:</span>
+                <span class="simple-info-value">@Model.PhoneNumber</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Information -->
+    <div class="simple-card">
+        <div class="simple-card-header">
+            Thông Tin Sản Phẩm
+        </div>
+        <div class="simple-card-body">
+            <div class="simple-info-row">
+                <span class="simple-info-label">Sản phẩm:</span>
+                <span class="simple-info-value">
+                    @if (Model.Product != null)
+                    {
+                        <strong>@Model.Product.Name</strong><br>
+                        <small>@Model.Product.Brand?.Name</small>
+                    }
+                    else
+                    {
+                        <span style="color: #999999;">Sản phẩm không tồn tại</span>
+                    }
+                </span>
+            </div>
+            <div class="simple-info-row">
+                <span class="simple-info-label">Thông tin đồng hồ:</span>
+                <span class="simple-info-value">@Model.WatchInfo</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Condition))
+            {
+                <div class="simple-info-row">
+                    <span class="simple-info-label">Tình trạng:</span>
+                    <span class="simple-info-value">
+                        <span class="simple-badge badge-reviewed">@Model.Condition</span>
+                    </span>
+                </div>
+            }
+            @if (Model.Year.HasValue)
+            {
+                <div class="simple-info-row">
+                    <span class="simple-info-label">Năm sản xuất:</span>
+                    <span class="simple-info-value">
+                        <span class="simple-badge badge-pending">@Model.Year</span>
+                    </span>
+                </div>
+            }
+            @if (Model.ExpectedPrice.HasValue)
+            {
+                <div class="simple-info-row">
+                    <span class="simple-info-label">Giá mong muốn:</span>
+                    <span class="simple-info-value">
+                        <strong style="color: #000000;">
+                            @Model.ExpectedPrice.Value.ToString("N0") VNĐ
+                        </strong>
+                    </span>
+                </div>
+            }
+            <div class="simple-info-row">
+                <span class="simple-info-label">Trạng thái hiện tại:</span>
+                <span class="simple-info-value">
+                    <span class="simple-badge @GetStatusBadgeClass(Model.Status)">
+                        @GetStatusDisplayName(Model.Status)
+                    </span>
+                </span>
+            </div>
+            <div class="simple-info-row">
+                <span class="simple-info-label">Ngày tạo:</span>
+                <span class="simple-info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Form -->
+    <div class="simple-card">
+        <div class="simple-card-header">
+            Lý Do Từ Chối
+        </div>
+        <div class="simple-card-body">
+            <form asp-action="Reject" method="post">
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="simple-form-group">
+                    <label class="simple-form-label" for="rejectReason">
+                        Lý do từ chối <span style="color: #dc3545;">*</span>:
+                    </label>
+                    <textarea id="rejectReason" name="rejectReason" class="simple-form-control" 
+                              rows="4" placeholder="Nhập lý do từ chối đơn thu mua này..." required></textarea>
+                    <small style="color: #666666; margin-top: 5px; display: block;">
+                        Vui lòng cung cấp lý do rõ ràng để khách hàng hiểu được quyết định.
+                    </small>
+                </div>
+                
+                <div class="simple-actions">
+                    <a href="@Url.Action("Index")" class="simple-btn simple-btn-secondary">
+                        Hủy Bỏ
+                    </a>
+                    <button type="submit" class="simple-btn simple-btn-danger">
+                        Xác Nhận Từ Chối
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusDisplayName(Shopping_Demo.Models.SellRequestStatus status)
+    {
+        return status switch
+        {
+            Shopping_Demo.Models.SellRequestStatus.Pending => "Chờ xử lý",
+            Shopping_Demo.Models.SellRequestStatus.Reviewed => "Đã xem xét",
+            Shopping_Demo.Models.SellRequestStatus.Contacted => "Đã liên hệ",
+            Shopping_Demo.Models.SellRequestStatus.Rejected => "Đã từ chối",
+            Shopping_Demo.Models.SellRequestStatus.Completed => "Hoàn thành",
+            Shopping_Demo.Models.SellRequestStatus.Cancelled => "Đã hủy",
+            _ => status.ToString()
+        };
+    }
+
+    private string GetStatusBadgeClass(Shopping_Demo.Models.SellRequestStatus status)
+    {
+        return status switch
+        {
+            Shopping_Demo.Models.SellRequestStatus.Pending => "badge-pending",
+            Shopping_Demo.Models.SellRequestStatus.Reviewed => "badge-reviewed",
+            Shopping_Demo.Models.SellRequestStatus.Contacted => "badge-contacted",
+            Shopping_Demo.Models.SellRequestStatus.Rejected => "badge-rejected",
+            Shopping_Demo.Models.SellRequestStatus.Completed => "badge-completed",
+            Shopping_Demo.Models.SellRequestStatus.Cancelled => "badge-cancelled",
+            _ => "badge-pending"
+        };
+    }
+}

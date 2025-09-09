@@ -131,7 +131,7 @@
 
     .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 1rem;
         margin-bottom: 2rem;
     }
@@ -191,6 +191,66 @@
         text-decoration: none;
     }
 
+    .stats-tabs {
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin-bottom: 2rem;
+        border: none;
+    }
+
+    .nav-tabs {
+        border-bottom: 1px solid var(--border-color);
+        padding: 0 1.5rem;
+        margin: 0;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        border-radius: 0;
+        padding: 1rem 1.5rem;
+        color: var(--medium-gray);
+        font-weight: 500;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        border-bottom-color: var(--primary-black);
+        color: var(--primary-black);
+        background: transparent;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: var(--primary-black);
+        background: transparent;
+        border-color: transparent;
+        border-bottom-color: var(--primary-black);
+        font-weight: 600;
+    }
+
+    .tab-content {
+        padding: 1.5rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .badge-primary {
+        background-color: #4F46E5;
+    }
+
+    .badge-info {
+        background-color: #06B6D4;
+    }
+
+    .badge-warning {
+        background-color: #F59E0B;
+    }
+
     @@media (max-width: 768px) {
         .stats-container {
             padding: 1rem;
@@ -203,6 +263,15 @@
         
         .stats-grid {
             grid-template-columns: 1fr;
+        }
+
+        .nav-tabs {
+            padding: 0 1rem;
+        }
+
+        .nav-tabs .nav-link {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
         }
     }
 </style>
@@ -239,6 +308,15 @@
         </div>
     </div>
 
+    <!-- No Data Alert -->
+    <div id="noDataAlert" class="alert alert-info" style="display: none;">
+        <i class="fas fa-info-circle"></i>
+        <strong>Thông báo:</strong> Không có dữ liệu trong khoảng thời gian được chọn. Vui lòng thử chọn khoảng thời gian khác hoặc kiểm tra dữ liệu trong database.
+    </div>
+
+                <!-- Action Buttons removed -->
+
+
     <!-- Key Metrics -->
     <div class="metrics-grid">
         <div class="metric-card">
@@ -257,9 +335,52 @@
             <div class="metric-value" id="avgOrderValue">0</div>
             <div class="metric-label">Giá trị đơn hàng TB</div>
         </div>
+        <div class="metric-card">
+            <div class="metric-value" id="deliveredOrders">0</div>
+            <div class="metric-label">Đơn hàng đã giao</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="cancelledOrders">0</div>
+            <div class="metric-label">Đơn hàng đã hủy</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="returnedOrders">0</div>
+            <div class="metric-label">Đơn hàng hoàn trả</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value" id="returnRate">0%</div>
+            <div class="metric-label">Tỷ lệ hoàn hàng</div>
+        </div>
     </div>
 
-    <!-- Charts Grid -->
+    <!-- Tabs for different statistics -->
+    <div class="stats-tabs">
+        <ul class="nav nav-tabs" id="statsTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="overview-tab" data-toggle="tab" href="#overview" role="tab">
+                    <i class="fas fa-chart-line"></i> Tổng Quan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="wishlist-tab" data-toggle="tab" href="#wishlist" role="tab">
+                    <i class="fas fa-heart"></i> WishList
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="gender-tab" data-toggle="tab" href="#gender" role="tab">
+                    <i class="fas fa-venus-mars"></i> Theo Giới Tính
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="age-tab" data-toggle="tab" href="#age" role="tab">
+                    <i class="fas fa-birthday-cake"></i> Theo Độ Tuổi
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="statsTabContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
     <div class="stats-grid">
         <!-- Sales Trend Chart -->
         <div class="chart-container">
@@ -271,7 +392,7 @@
 
         <!-- Brand Performance Chart -->
         <div class="chart-container">
-            <h5 class="chart-title">Hiệu suất theo thương hiệu</h5>
+                        <h5 class="chart-title">Số lượng sản phẩm đã bán theo thương hiệu</h5>
             <div class="chart-wrapper">
                 <canvas id="brandPerformanceChart"></canvas>
             </div>
@@ -287,9 +408,143 @@
 
         <!-- Price Range Analysis Chart -->
         <div class="chart-container">
-            <h5 class="chart-title">Phân tích khoảng giá</h5>
+                        <h5 class="chart-title">Số lượng đồng hồ bán theo khoảng giá</h5>
             <div class="chart-wrapper">
                 <canvas id="priceRangeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Order Status Chart -->
+                    <div class="chart-container">
+                        <h5 class="chart-title">Trạng thái đơn hàng</h5>
+                        <div class="chart-wrapper">
+                            <canvas id="orderStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WishList Tab -->
+            <div class="tab-pane fade" id="wishlist" role="tabpanel">
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Top Sản Phẩm Được Yêu Thích</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Sản Phẩm</th>
+                                            <th>Thương Hiệu</th>
+                                            <th>Danh Mục</th>
+                                            <th>Giá</th>
+                                            <th>Số Lượt Yêu Thích</th>
+                                            <th>Nam</th>
+                                            <th>Nữ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="wishlistTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-container">
+                            <h5 class="chart-title">WishList Theo Giới Tính</h5>
+                            <div class="chart-wrapper">
+                                <canvas id="wishlistGenderChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gender Stats Tab -->
+            <div class="tab-pane fade" id="gender" role="tabpanel">
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Thống Kê Theo Giới Tính</h5>
+                            <div class="chart-wrapper">
+                                <canvas id="genderStatsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Top Sản Phẩm Nam Mua</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Sản Phẩm</th>
+                                            <th>Thương Hiệu</th>
+                                            <th>Đã Bán</th>
+                                            <th>Doanh Thu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="maleProductsTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Top Sản Phẩm Nữ Mua</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Sản Phẩm</th>
+                                            <th>Thương Hiệu</th>
+                                            <th>Đã Bán</th>
+                                            <th>Doanh Thu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="femaleProductsTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Age Stats Tab -->
+            <div class="tab-pane fade" id="age" role="tabpanel">
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Thống Kê Theo Độ Tuổi</h5>
+                            <div class="chart-wrapper">
+                                <canvas id="ageStatsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5 class="chart-title">Chi Tiết Theo Nhóm Tuổi</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Nhóm Tuổi</th>
+                                            <th>Doanh Thu</th>
+                                            <th>Số Lượng</th>
+                                            <th>Đơn Hàng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ageStatsTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -306,20 +561,25 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Global chart variables
+        let salesTrendChart, brandPerformanceChart, categoryDistributionChart, priceRangeChart, orderStatusChart;
+        
         $(document).ready(function () {
-            let salesTrendChart, brandPerformanceChart, categoryDistributionChart, priceRangeChart;
 
             // Initialize charts
             function initializeCharts() {
                 // Sales Trend Chart
-                const salesCtx = document.getElementById('salesTrendChart').getContext('2d');
-                salesTrendChart = new Chart(salesCtx, {
+                const salesCtx = document.getElementById('salesTrendChart');
+                if (!salesCtx) {
+                    return;
+                }
+                salesTrendChart = new Chart(salesCtx.getContext('2d'), {
                     type: 'line',
                     data: {
-                        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                        labels: ['2025-08-30', '2025-08-31', '2025-09-01', '2025-09-02', '2025-09-03', '2025-09-04', '2025-09-05'],
                         datasets: [{
                             label: 'Doanh thu (triệu VNĐ)',
-                            data: [12, 19, 15, 25, 22, 30, 28],
+                            data: [0, 0, 0, 0, 0, 0, 0], // Sẽ được cập nhật từ dữ liệu thật
                             borderColor: '#4F46E5',
                             backgroundColor: 'rgba(79, 70, 229, 0.1)',
                             tension: 0.4,
@@ -392,7 +652,18 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                position: 'bottom'
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.parsed + ' sản phẩm đã bán';
+                                    }
+                                }
                             }
                         }
                     }
@@ -487,66 +758,357 @@
                         }
                     }
                 });
-            }
 
-            // Update metrics with real data
-            function updateMetrics() {
-                $.ajax({
-                    url: '@Url.Action("GetLuxuryWatchSalesStats", "ProductStats")',
-                    type: 'POST',
-                    success: function(response) {
-                        if (response.success) {
-                            $('#totalRevenue').text(response.metrics.totalRevenue.toLocaleString('vi-VN'));
-                            $('#totalOrders').text(response.metrics.totalOrders.toLocaleString('vi-VN'));
-                            $('#totalWatches').text(response.metrics.totalWatchesSold.toLocaleString('vi-VN'));
-                            $('#avgOrderValue').text(response.metrics.avgOrderValue.toLocaleString('vi-VN'));
-                            
-                            // Update charts with real data
-                            updateChartsWithRealData(response);
-                        }
+                // Order Status Chart
+                const orderStatusCtx = document.getElementById('orderStatusChart');
+                if (!orderStatusCtx) {
+                    return;
+                }
+                orderStatusChart = new Chart(orderStatusCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Đã giao hàng', 'Đơn hàng mới', 'Chờ xác nhận', 'Đã hủy', 'Đang giao hàng'],
+                        datasets: [{
+                            data: [0, 0, 0, 0, 0], // Sẽ được cập nhật từ dữ liệu thật
+                            backgroundColor: [
+                                '#10B981', // Green for delivered
+                                '#3B82F6', // Blue for processing
+                                '#F59E0B', // Amber for shipping
+                                '#EF4444', // Red for cancelled
+                                '#8B5CF6'  // Purple for returned
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
                     },
-                    error: function() {
-                        console.error('Failed to load sales statistics');
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                        return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
                     }
                 });
             }
 
-            // Update charts with real data
-            function updateChartsWithRealData(data) {
-                // Update brand performance chart
-                if (data.brandPerformance && data.brandPerformance.length > 0) {
-                    const brandLabels = data.brandPerformance.map(b => b.name);
-                    const brandData = data.brandPerformance.map(b => b.sales);
-                    
-                    brandPerformanceChart.data.labels = brandLabels;
-                    brandPerformanceChart.data.datasets[0].data = brandData;
-                    brandPerformanceChart.update();
+            // Update metrics with real data
+            function updateMetrics(startDate = null, endDate = null) {
+                // Get current filter dates if not provided
+                if (!startDate || !endDate) {
+                    startDate = $('#dateFrom').val();
+                    endDate = $('#dateTo').val();
                 }
+                
+                console.log('Updating metrics with dates:', startDate, 'to', endDate);
+                
+                const data = {};
+                if (startDate && endDate) {
+                    data.startDate = startDate;
+                    data.endDate = endDate;
+                }
+                
+                $.ajax({
+                    url: '@Url.Action("GetLuxuryWatchSalesStats", "Dashboard")',
+                    type: 'POST',
+                    data: data,
+                    success: function(response) {
+                        console.log('Response:', response); // Debug log
+                        if (response.success) {
+                            $('#totalRevenue').text(formatCurrency(response.metrics.totalRevenue));
+                            $('#totalOrders').text(response.metrics.totalOrders.toLocaleString('vi-VN'));
+                            $('#totalWatches').text(response.metrics.totalWatchesSold.toLocaleString('vi-VN'));
+                            $('#avgOrderValue').text(formatCurrency(response.metrics.avgOrderValue));
+                            $('#deliveredOrders').text(response.metrics.deliveredOrders.toLocaleString('vi-VN'));
+                            $('#cancelledOrders').text(response.metrics.cancelledOrders.toLocaleString('vi-VN'));
+                            $('#returnedOrders').text(response.metrics.returnedOrders.toLocaleString('vi-VN'));
+                            $('#returnRate').text(response.metrics.returnRate.toFixed(1) + '%');
+                            
+                            // Debug information
+                            if (response.debug) {
+                                console.log('=== METRICS DEBUG INFO ===');
+                                console.log('Debug Info:', response.debug);
+                                console.log('Total Orders in DB:', response.debug.allOrdersCount);
+                                console.log('Total Delivered Orders in DB:', response.debug.allDeliveredOrdersCount);
+                                console.log('Filtered Delivered Orders:', response.debug.filteredDeliveredOrdersCount);
+                                console.log('Sample Orders:', response.debug.allOrdersDebug);
+                                console.log('Message:', response.debug.message);
+                                
+                                // Hiển thị thông báo nếu không có dữ liệu
+                                if (response.debug.message) {
+                                    console.warn('Warning:', response.debug.message);
+                                    $('#noDataAlert').show();
+                                } else {
+                                    $('#noDataAlert').hide();
+                                }
+                            }
+                            
+                            // Update charts with real data
+                            updateChartsWithRealData(startDate, endDate);
+                        } else {
+                            console.error('API Error:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                        console.error('Response:', xhr.responseText);
+                    }
+                });
+            }
 
+            // Update charts with real data - GỌI CÁC API MỚI
+            function updateChartsWithRealData(startDate, endDate) {
+                // Update brand performance chart
+                updateBrandPerformanceChart(startDate, endDate);
+                
                 // Update category distribution chart
-                if (data.categoryDistribution && data.categoryDistribution.length > 0) {
-                    const categoryLabels = data.categoryDistribution.map(c => c.name);
-                    const categoryData = data.categoryDistribution.map(c => c.sales);
+                updateCategoryDistributionChart(startDate, endDate);
+                
+                // Update price range chart
+                updatePriceRangeChart(startDate, endDate);
+                
+                // Update order status chart
+                updateOrderStatusChart(startDate, endDate);
+            }
+
+            // Biểu đồ hiệu suất theo thương hiệu - DỮ LIỆU THẬT
+            function updateBrandPerformanceChart(startDate, endDate) {
+                console.log('=== UPDATING BRAND PERFORMANCE CHART ===');
+                console.log('Start Date:', startDate);
+                console.log('End Date:', endDate);
+                
+                $.ajax({
+                    url: '@Url.Action("GetBrandPerformanceStats", "Dashboard")',
+                    type: 'POST',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(response) {
+                        console.log('Brand Performance API Response:', response);
+                        console.log('Debug Info:', response.debug);
+                        
+                        if (response.success && response.data && response.data.length > 0) {
+                            console.log('Brand Data:', response.data);
+                            console.log('First Brand Object:', response.data[0]);
+                            console.log('Brand Object Keys:', Object.keys(response.data[0]));
+                            
+                            const labels = response.data.map(b => b.brandName);
+                            const data = response.data.map(b => b.totalQuantitySold);
+                            
+                            console.log('Chart Labels:', labels);
+                            console.log('Chart Data:', data);
+                            
+                            brandPerformanceChart.data.labels = labels;
+                            brandPerformanceChart.data.datasets[0].data = data;
+                            brandPerformanceChart.update();
+                            
+                            console.log('Brand Performance Chart updated successfully!');
+                        } else {
+                            console.log('No brand data found, showing empty chart');
+                            // Hiển thị dữ liệu rỗng nếu không có dữ liệu
+                            brandPerformanceChart.data.labels = ['Không có dữ liệu'];
+                            brandPerformanceChart.data.datasets[0].data = [0];
+                    brandPerformanceChart.update();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Brand Performance Chart Error:', error);
+                    }
+                });
+            }
+
+            // Update category distribution chart - API MỚI
+            function updateCategoryDistributionChart(startDate, endDate) {
+                $.ajax({
+                    url: '@Url.Action("GetCategoryDistributionStats", "Dashboard")',
+                    type: 'POST',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(response) {
+                        console.log('Category Distribution API Response:', response);
+                        
+                        if (response.success && response.data && response.data.length > 0) {
+                            console.log('Category Data:', response.data);
+                            console.log('First Category Object:', response.data[0]);
+                            console.log('Category Object Keys:', Object.keys(response.data[0]));
+                            
+                            const categoryLabels = response.data.map(c => c.categoryName);
+                            const categoryData = response.data.map(c => c.totalQuantitySold);
+                            
+                            console.log('Category Labels:', categoryLabels);
+                            console.log('Category Data:', categoryData);
                     
                     categoryDistributionChart.data.labels = categoryLabels;
                     categoryDistributionChart.data.datasets[0].data = categoryData;
                     categoryDistributionChart.update();
-                }
+                            
+                            console.log('Category Distribution Chart updated successfully!');
+                        } else {
+                            console.error('Category Distribution API Error:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Category Distribution AJAX Error:', error);
+                    }
+                });
+            }
 
-                // Update price range chart
-                if (data.priceRangeData && data.priceRangeData.length > 0) {
-                    const priceLabels = data.priceRangeData.map(p => p.range);
-                    const priceData = data.priceRangeData.map(p => p.count);
+            // Update price range chart - API MỚI
+            function updatePriceRangeChart(startDate, endDate) {
+                $.ajax({
+                    url: '@Url.Action("GetPriceRangeStats", "Dashboard")',
+                    type: 'POST',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(response) {
+                        console.log('Price Range API Response:', response);
+                        
+                        if (response.success && response.data && response.data.length > 0) {
+                            console.log('Price Range Data:', response.data);
+                            console.log('First Price Range Object:', response.data[0]);
+                            console.log('Price Range Object Keys:', Object.keys(response.data[0]));
+                            
+                            const priceLabels = response.data.map(p => p.range);
+                            const priceData = response.data.map(p => p.totalQuantitySold);
+                            
+                            console.log('Price Range Labels:', priceLabels);
+                            console.log('Price Range Data:', priceData);
                     
                     priceRangeChart.data.labels = priceLabels;
                     priceRangeChart.data.datasets[0].data = priceData;
                     priceRangeChart.update();
-                }
+                            
+                            console.log('Price Range Chart updated successfully!');
+                        } else {
+                            console.error('Price Range API Error:', response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Price Range AJAX Error:', error);
+                    }
+                });
             }
+
+            // Update order status chart - GỌI API MỚI
+            function updateOrderStatusChart(startDate, endDate) {
+                $.ajax({
+                    url: '@Url.Action("GetOrderStatusStats", "Dashboard")',
+                    type: 'POST',
+                    data: {
+                        startDate: startDate,
+                        endDate: endDate
+                    },
+                    success: function(response) {
+                        console.log('Order Status API Response:', response);
+                        
+                        if (response.success && response.data) {
+                            // Cập nhật biểu đồ với dữ liệu thật
+                            orderStatusChart.data.datasets[0].data = response.data;
+                            orderStatusChart.update();
+                            
+                            console.log('Order Status Chart updated with data:', response.data);
+                            console.log('Debug info:', response.debug);
+                        } else {
+                            console.error('Order Status API Error:', response.message);
+                            // Hiển thị dữ liệu rỗng nếu có lỗi
+                            const emptyStatusData = [0, 0, 0, 0, 0];
+                            orderStatusChart.data.datasets[0].data = emptyStatusData;
+                            orderStatusChart.update();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Order Status AJAX Error:', error);
+                        // Hiển thị dữ liệu rỗng nếu có lỗi
+                        const emptyStatusData = [0, 0, 0, 0, 0];
+                        orderStatusChart.data.datasets[0].data = emptyStatusData;
+                        orderStatusChart.update();
+                    }
+                });
+            }
+
+            // Kiểm tra dữ liệu database
 
             // Initialize everything
             initializeCharts();
             updateMetrics();
+            
+            // Auto refresh every 30 seconds to catch status changes
+            setInterval(function() {
+                console.log('Auto refreshing data...');
+                const fromDate = $('#dateFrom').val();
+                const toDate = $('#dateTo').val();
+                
+                // Chỉ refresh nếu có filter ngày
+                if (fromDate && toDate) {
+                    updateMetrics(fromDate, toDate);
+                    
+                    // Update sales trend chart
+                    $.ajax({
+                        url: '@Url.Action("GetSalesTrendData", "Dashboard")',
+                        type: 'POST',
+                        data: {
+                            startDate: fromDate,
+                            endDate: toDate
+                        },
+                        success: function(response) {
+                            console.log('Sales Trend Response:', response);
+                            if (response.success) {
+                                if (response.debug) {
+                                    console.log('Debug Info:', response.debug);
+                                    console.log('Total Delivered Orders:', response.debug.totalDeliveredOrders);
+                                    console.log('Sample Orders:', response.debug.sampleOrders);
+                                }
+                                if (response.dates && response.revenues) {
+                                    salesTrendChart.data.labels = response.dates;
+                                    salesTrendChart.data.datasets[0].data = response.revenues.map(r => r / 1000000);
+                                    salesTrendChart.update();
+                                }
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Failed to load trend data:', error);
+                        }
+                    });
+                }
+            }, 30000); // 30 seconds
+            
+
+            // Tab change events
+            $('#statsTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                const target = $(e.target).attr("href");
+                const fromDate = $('#dateFrom').val();
+                const toDate = $('#dateTo').val();
+                
+                switch(target) {
+                    case '#overview':
+                        updateMetrics(fromDate, toDate);
+                        break;
+                    case '#wishlist':
+                        loadWishlistStats();
+                        break;
+                    case '#gender':
+                        loadGenderStats();
+                        break;
+                    case '#age':
+                        loadAgeStats(fromDate, toDate);
+                        break;
+                }
+            });
 
             // Filter functionality
             $('#timeFilter').on('change', function() {
@@ -557,6 +1119,41 @@
                     
                     $('#dateFrom').val(startDate.toISOString().split('T')[0]);
                     $('#dateTo').val(endDate.toISOString().split('T')[0]);
+                    
+                    // Tự động áp dụng filter khi thay đổi dropdown
+                    const fromDate = $('#dateFrom').val();
+                    const toDate = $('#dateTo').val();
+                    
+                    // Update metrics
+                    updateMetrics(fromDate, toDate);
+                    
+                    // Update sales trend chart
+                    $.ajax({
+                        url: '@Url.Action("GetSalesTrendData", "Dashboard")',
+                        type: 'POST',
+                        data: {
+                            startDate: fromDate,
+                            endDate: toDate
+                        },
+                        success: function(response) {
+                            console.log('Sales Trend Response:', response);
+                            if (response.success) {
+                                if (response.debug) {
+                                    console.log('Debug Info:', response.debug);
+                                    console.log('Total Delivered Orders:', response.debug.totalDeliveredOrders);
+                                    console.log('Sample Orders:', response.debug.sampleOrders);
+                                }
+                                if (response.dates && response.revenues) {
+                                    salesTrendChart.data.labels = response.dates;
+                                    salesTrendChart.data.datasets[0].data = response.revenues.map(r => r / 1000000);
+                                    salesTrendChart.update();
+                                }
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Failed to load trend data:', error);
+                        }
+                    });
                 }
             });
 
@@ -573,7 +1170,7 @@
                 
                 // Get sales trend data for the selected date range
                 $.ajax({
-                    url: '@Url.Action("GetSalesTrendData", "ProductStats")',
+                    url: '@Url.Action("GetSalesTrendData", "Dashboard")',
                     type: 'POST',
                     data: {
                         startDate: fromDate,
@@ -582,14 +1179,27 @@
                     success: function(response) {
                         if (response.success) {
                             // Update sales trend chart
+                            if (response.dates && response.revenues) {
                             salesTrendChart.data.labels = response.dates;
                             salesTrendChart.data.datasets[0].data = response.revenues.map(r => r / 1000000); // Convert to millions
                             salesTrendChart.update();
+                            }
+                            
+                            // Also update metrics with filtered data
+                            updateMetrics(fromDate, toDate);
+                            
+                            // Update sales trend chart with filtered data
+                            if (response.dates && response.revenues) {
+                                salesTrendChart.data.labels = response.dates;
+                                salesTrendChart.data.datasets[0].data = response.revenues.map(r => r / 1000000);
+                                salesTrendChart.update();
+                            }
                         }
                         $('#applyFilter').text('Áp dụng');
                     },
-                    error: function() {
-                        console.error('Failed to load trend data');
+                    error: function(xhr, status, error) {
+                        console.error('Failed to load trend data:', error);
+                        console.error('Response:', xhr.responseText);
                         $('#applyFilter').text('Áp dụng');
                     }
                 });
@@ -600,7 +1210,315 @@
             const startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
             $('#dateFrom').val(startDate.toISOString().split('T')[0]);
             $('#dateTo').val(endDate.toISOString().split('T')[0]);
-            $('#applyFilter').click();
+            
+            // Load initial data without auto-clicking apply filter
+            updateMetrics();
+
+
         });
+
+        // Load Gender Statistics
+        function loadGenderStats() {
+            console.log('=== LOADING GENDER STATS ===');
+            $.ajax({
+                url: '/Admin/Dashboard/GetGenderStats',
+                type: 'POST',
+                data: {
+                    startDate: $('#startDate').val(),
+                    endDate: $('#endDate').val()
+                },
+                success: function(response) {
+                    console.log('Gender Stats Response:', response);
+                    if (response.success) {
+                        createGenderStatsChart(response.data.genderStats);
+                        populateGenderTables(response.data.maleProducts, response.data.femaleProducts);
+                    } else {
+                        console.error('Error loading gender stats:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error loading gender stats:', error);
+                }
+            });
+        }
+
+        // Populate gender tables
+        function populateGenderTables(maleProducts, femaleProducts) {
+            console.log('Populating gender tables:', { maleProducts, femaleProducts });
+            
+            // Populate male products table
+            const maleTbody = $('#maleProductsTableBody');
+            maleTbody.empty();
+            maleProducts.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.productName}</td>
+                        <td>${item.brandName}</td>
+                        <td>${item.totalQuantitySold}</td>
+                        <td>${formatCurrency(item.totalRevenue)}</td>
+                    </tr>
+                `;
+                maleTbody.append(row);
+            });
+
+            // Populate female products table
+            const femaleTbody = $('#femaleProductsTableBody');
+            femaleTbody.empty();
+            femaleProducts.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.productName}</td>
+                        <td>${item.brandName}</td>
+                        <td>${item.totalQuantitySold}</td>
+                        <td>${formatCurrency(item.totalRevenue)}</td>
+                    </tr>
+                `;
+                femaleTbody.append(row);
+            });
+        }
+
+
+        // Load WishList Statistics
+        function loadWishlistStats() {
+            console.log('=== LOADING WISHLIST STATS ===');
+            $.post('@Url.Action("GetWishlistStats", "Dashboard")', function(response) {
+                console.log('WishList API Response:', response);
+                if (response.success) {
+                    console.log('Top WishList Products:', response.topWishlistProducts);
+                    console.log('WishList by Gender:', response.wishlistByGender);
+                    populateWishlistTable(response.topWishlistProducts);
+                    createWishlistGenderChart(response.wishlistByGender);
+                } else {
+                    console.error('WishList API Error:', response.message);
+                }
+            });
+        }
+
+
+
+        // Load Age Statistics
+        function loadAgeStats(startDate = null, endDate = null) {
+            console.log('=== LOADING AGE STATS ===');
+            console.log('Start Date:', startDate);
+            console.log('End Date:', endDate);
+            
+            $.post('@Url.Action("GetPurchaseStatsByAge", "Dashboard")', {
+                startDate: startDate,
+                endDate: endDate
+            }, function(response) {
+                console.log('Age Stats Response:', response);
+                if (response.success) {
+                    console.log('Age Stats Data:', response.data);
+                    if (response.debug) {
+                        console.log('Age Stats Debug:', response.debug);
+                        console.log('Total Records:', response.debug.totalRecords);
+                        console.log('Filtered Records:', response.debug.filteredRecords);
+                        console.log('Sample Data:', response.debug.sampleData);
+                    }
+                    createAgeStatsChart(response.data);
+                    populateAgeStatsTable(response.data);
+                } else {
+                    console.error('Error loading age stats:', response.message);
+                }
+            });
+        }
+
+        // Create Age Stats Chart
+        function createAgeStatsChart(data) {
+            console.log('Creating Age Stats Chart with data:', data);
+            
+            // Destroy existing chart if it exists
+            const existingChart = Chart.getChart('ageStatsChart');
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            
+            const ctx = document.getElementById('ageStatsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.ageGroup),
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: data.map(item => item.totalRevenue),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Số lượng',
+                        data: data.map(item => item.totalQuantity),
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Doanh thu (VNĐ)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Số lượng'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chart creation functions
+        function createWishlistGenderChart(data) {
+            console.log('WishList Gender Data:', data);
+            const ctx = document.getElementById('wishlistGenderChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(item => item.gender),
+                    datasets: [{
+                        data: data.map(item => item.count),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function createGenderStatsChart(data) {
+            console.log('Creating Gender Stats Chart with data:', data);
+            
+            // Destroy existing chart if it exists
+            const existingChart = Chart.getChart('genderStatsChart');
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            
+            const ctx = document.getElementById('genderStatsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.gender),
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: data.map(item => item.totalRevenue),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Số lượng',
+                        data: data.map(item => item.totalQuantity),
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function createAgeStatsChart(data) {
+            const ctx = document.getElementById('ageStatsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.AgeGroup),
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: data.map(item => item.TotalRevenue),
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Table population functions
+        function populateWishlistTable(data) {
+            console.log('WishList Table Data:', data);
+            const tbody = $('#wishlistTableBody');
+            tbody.empty();
+            
+            data.forEach(item => {
+                console.log('WishList Item:', item);
+                const row = `
+                    <tr>
+                        <td>${item.productName}</td>
+                        <td>${item.brandName}</td>
+                        <td>${item.categoryName}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td><span class="badge badge-primary">${item.wishlistCount}</span></td>
+                        <td><span class="badge badge-info">${item.maleCount}</span></td>
+                        <td><span class="badge badge-warning">${item.femaleCount}</span></td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+
+
+        function populateAgeStatsTable(data) {
+            console.log('Populating Age Stats Table with data:', data);
+            const tbody = $('#ageStatsTableBody');
+            tbody.empty();
+            
+            data.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.ageGroup}</td>
+                        <td>${formatCurrency(item.totalRevenue)}</td>
+                        <td>${item.totalQuantity}</td>
+                        <td>${item.orderCount}</td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
     </script>
 }

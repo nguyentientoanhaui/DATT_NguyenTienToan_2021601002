@@ -1,0 +1,134 @@
+@{
+    ViewData["Title"] = "Debug Payment";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Debug Payment Process</h3>
+                </div>
+                <div class="card-body">
+                    <form id="debugPaymentForm">
+                        <div class="form-group mb-3">
+                            <label for="paymentMethod">Payment Method:</label>
+                            <select id="paymentMethod" class="form-control" required>
+                                <option value="credit-card">Credit Card (MoMo)</option>
+                                <option value="bank-transfer">Bank Transfer</option>
+                                <option value="cod">COD</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="amount">Amount (VNĐ):</label>
+                            <input type="number" id="amount" class="form-control" value="100000" min="1000" step="1000" required>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" class="form-control" value="test@example.com" required>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="phone">Phone:</label>
+                            <input type="tel" id="phone" class="form-control" value="0388672928" required>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="address">Address:</label>
+                            <input type="text" id="address" class="form-control" value="Test Address" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Test Payment</button>
+                    </form>
+                    
+                    <div id="result" class="mt-4" style="display: none;">
+                        <h5>Result:</h5>
+                        <div class="alert alert-info">
+                            <pre id="resultContent"></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="error" class="mt-4" style="display: none;">
+                        <h5>Error:</h5>
+                        <div class="alert alert-danger">
+                            <pre id="errorContent"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('debugPaymentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    const address = document.getElementById('address').value;
+    
+    const resultDiv = document.getElementById('result');
+    const errorDiv = document.getElementById('error');
+    const resultContent = document.getElementById('resultContent');
+    const errorContent = document.getElementById('errorContent');
+    
+    // Hide previous results
+    resultDiv.style.display = 'none';
+    errorDiv.style.display = 'none';
+    
+    const paymentData = {
+        paymentMethod: paymentMethod,
+        amount: amount,
+        customerEmail: email,
+        customerPhone: phone,
+        shippingAddress: address
+    };
+    
+    try {
+        console.log('Sending payment data:', paymentData);
+        
+        const response = await fetch('/Payment/ProcessPayment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(paymentData)
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        const result = await response.json();
+        console.log('Response data:', result);
+        
+        if (result.success) {
+            resultDiv.style.display = 'block';
+            resultContent.textContent = JSON.stringify(result, null, 2);
+            
+            if (result.redirectUrl) {
+                const redirectDiv = document.createElement('div');
+                redirectDiv.className = 'mt-3';
+                redirectDiv.innerHTML = `
+                    <a href="${result.redirectUrl}" target="_blank" class="btn btn-success">
+                        <i class="fas fa-external-link-alt"></i> Open Payment URL
+                    </a>
+                `;
+                resultDiv.appendChild(redirectDiv);
+            }
+        } else {
+            errorDiv.style.display = 'block';
+            errorContent.textContent = JSON.stringify(result, null, 2);
+        }
+        
+    } catch (error) {
+        console.error('Payment error:', error);
+        errorDiv.style.display = 'block';
+        errorContent.textContent = 'Error: ' + error.message + '\n\nStack: ' + error.stack;
+    }
+});
+</script>

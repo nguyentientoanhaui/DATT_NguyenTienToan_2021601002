@@ -1,0 +1,322 @@
+@model SellRequestModel
+@using Shopping_Demo.Models
+
+@{
+    ViewData["Title"] = "Chỉnh Sửa Đơn Thu Mua";
+    var statusOptions = ViewBag.StatusOptions as List<dynamic>;
+}
+
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-edit"></i> Chỉnh Sửa Đơn Thu Mua #@Model.Id
+        </h1>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay Lại
+            </a>
+            <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info">
+                <i class="fas fa-eye"></i> Xem Chi Tiết
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="Edit" method="post">
+        <div class="row">
+            <!-- Customer Information (Read-only) -->
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-user"></i> Thông Tin Khách Hàng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label><strong>Họ và tên:</strong></label>
+                            <div class="form-control-plaintext">@Model.FullName</div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Email:</strong></label>
+                            <div class="form-control-plaintext">@Model.Email</div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Số điện thoại:</strong></label>
+                            <div class="form-control-plaintext">@Model.PhoneNumber</div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Ngày tạo:</strong></label>
+                            <div class="form-control-plaintext">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Information (Read-only) -->
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-watch"></i> Thông Tin Sản Phẩm
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Product != null)
+                        {
+                            <div class="form-group">
+                                <label><strong>Tên sản phẩm:</strong></label>
+                                <div class="form-control-plaintext">@Model.Product.Name</div>
+                            </div>
+                            <div class="form-group">
+                                <label><strong>Thương hiệu:</strong></label>
+                                <div class="form-control-plaintext">@Model.Product.Brand?.Name</div>
+                            </div>
+                            <div class="form-group">
+                                <label><strong>Giá hiện tại:</strong></label>
+                                <div class="form-control-plaintext">
+                                    <span class="font-weight-bold text-success">
+                                        @Model.Product.Price.ToString("N0") VNĐ
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Sản phẩm không tồn tại hoặc đã bị xóa.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Watch Information (Read-only) -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-info-circle"></i> Thông Tin Đồng Hồ
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><strong>Mô tả đồng hồ:</strong></label>
+                                    <div class="border p-3 rounded bg-light">@Model.WatchInfo</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label><strong>Tình trạng:</strong></label>
+                                            <div class="border p-2 rounded bg-light">
+                                                @(string.IsNullOrEmpty(Model.Condition) ? "Chưa cung cấp" : Model.Condition)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label><strong>Năm sản xuất:</strong></label>
+                                            <div class="border p-2 rounded bg-light">
+                                                @(Model.Year?.ToString() ?? "Chưa cung cấp")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Notes))
+                        {
+                            <div class="form-group">
+                                <label><strong>Ghi chú thêm:</strong></label>
+                                <div class="border p-3 rounded bg-light">@Model.Notes</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Editable Fields -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-cogs"></i> Thông Tin Admin
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <input asp-for="Id" type="hidden" />
+                        <input asp-for="FullName" type="hidden" />
+                        <input asp-for="Email" type="hidden" />
+                        <input asp-for="PhoneNumber" type="hidden" />
+                        <input asp-for="ProductId" type="hidden" />
+                        <input asp-for="WatchInfo" type="hidden" />
+                        <input asp-for="Condition" type="hidden" />
+                        <input asp-for="Year" type="hidden" />
+                        <input asp-for="Notes" type="hidden" />
+                        <input asp-for="ImageUrl" type="hidden" />
+                        <input asp-for="CreatedAt" type="hidden" />
+                        <input asp-for="UserId" type="hidden" />
+                        <input asp-for="SessionId" type="hidden" />
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="Status" class="control-label"><strong>Trạng thái:</strong></label>
+                                    <select asp-for="Status" class="form-control" asp-items="@(new SelectList(statusOptions, "Value", "Text", (int)Model.Status))">
+                                    </select>
+                                    <span asp-validation-for="Status" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="ExpectedPrice" class="control-label"><strong>Giá mong muốn (VNĐ):</strong></label>
+                                    <div class="form-control-plaintext">
+                                        @if (Model.ExpectedPrice.HasValue)
+                                        {
+                                            <span class="font-weight-bold text-primary">
+                                                @Model.ExpectedPrice.Value.ToString("N0") VNĐ
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa cung cấp</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="SuggestedPrice" class="control-label"><strong>Giá đề xuất (VNĐ):</strong></label>
+                                    <input asp-for="SuggestedPrice" class="form-control" type="number" step="1000" min="0" />
+                                    <span asp-validation-for="SuggestedPrice" class="text-danger"></span>
+                                    <small class="form-text text-muted">Nhập giá đề xuất cho khách hàng</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="AdminResponse" class="control-label"><strong>Phản hồi từ admin:</strong></label>
+                            <textarea asp-for="AdminResponse" class="form-control" rows="4" 
+                                      placeholder="Nhập phản hồi cho khách hàng..."></textarea>
+                            <span asp-validation-for="AdminResponse" class="text-danger"></span>
+                            <small class="form-text text-muted">Phản hồi này sẽ được gửi cho khách hàng</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Lưu Thay Đổi
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Hủy
+                                </a>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                    <i class="fas fa-trash"></i> Xóa Đơn
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác Nhận Xóa</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa đơn thu mua này không?</p>
+                <p class="text-danger"><strong>Hành động này không thể hoàn tác!</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <form asp-action="Delete" method="post" style="display: inline;">
+                    <input asp-for="Id" type="hidden" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete() {
+            $('#deleteModal').modal('show');
+        }
+
+        // Auto-save draft functionality
+        let autoSaveTimeout;
+        function autoSave() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                const formData = new FormData(document.querySelector('form'));
+                const data = Object.fromEntries(formData);
+                
+                fetch('@Url.Action("UpdateStatus", "SellRequest")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: @Model.Id,
+                        status: data.Status,
+                        adminResponse: data.AdminResponse,
+                        suggestedPrice: data.SuggestedPrice
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        console.log('Auto-saved successfully');
+                    }
+                })
+                .catch(error => {
+                    console.error('Auto-save error:', error);
+                });
+            }, 2000); // Auto-save after 2 seconds of inactivity
+        }
+
+        // Add event listeners for auto-save
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.querySelector('select[name="Status"]');
+            const adminResponseTextarea = document.querySelector('textarea[name="AdminResponse"]');
+            const suggestedPriceInput = document.querySelector('input[name="SuggestedPrice"]');
+
+            if (statusSelect) statusSelect.addEventListener('change', autoSave);
+            if (adminResponseTextarea) adminResponseTextarea.addEventListener('input', autoSave);
+            if (suggestedPriceInput) suggestedPriceInput.addEventListener('input', autoSave);
+        });
+    </script>
+}
