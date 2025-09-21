@@ -345,7 +345,7 @@ namespace Shopping_Demo.Controllers
                         payment.TransactionId = momoResponse.TransactionId;
                         _context.SaveChanges();
 
-                        return RedirectToAction("PaymentSuccess", new { orderId = momoResponse.OrderId });
+                        return RedirectToAction("Index", "Invoice", new { orderCode = momoResponse.OrderId });
                     }
                     else
                     {

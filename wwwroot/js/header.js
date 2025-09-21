@@ -229,7 +229,7 @@ function updateCartCount() {
 }
 
 function loadCompareCount() {
-    fetch('/Compare/GetCompareCount')
+    fetch('/Home/GetCompareCount')
         .then(response => response.json())
         .then(data => {
             const compareCountElement = document.getElementById('compareCount');
@@ -325,21 +325,58 @@ function updateSearchSuggestions(data) {
     if (data.productSuggestions && data.productSuggestions.length > 0) {
         productItems.innerHTML = '';
         data.productSuggestions.forEach(product => {
+            console.log('Processing product:', product);
+            console.log('Product price:', product.price, typeof product.price);
+            
+            // Ensure price is a number
+            let displayPrice = product.price;
+            if (typeof product.price === 'string') {
+                displayPrice = parseFloat(product.price.replace(/[^\d.-]/g, ''));
+            }
+            
             const itemDiv = document.createElement('div');
             itemDiv.className = 'product-suggestion-item';
             itemDiv.innerHTML = `
-                <img src="${product.imageUrl}" alt="${product.name}" 
-                     class="product-suggestion-image" 
-                     onerror="this.src='/images/placeholder-product.jpg'; this.onerror=null;">
-                <div class="product-suggestion-info">
-                    <div class="product-suggestion-name">${product.name}</div>
-                    <div class="product-suggestion-details">${product.category} • ${product.brand}</div>
-                </div>
-                <div class="product-suggestion-price">$${product.price}</div>
+                <a href="/Product/Details/${product.id}" class="product-suggestion-link">
+                    <img src="${product.imageUrl}" alt="${product.name}" 
+                         class="product-suggestion-image" 
+                         onerror="this.src='/images/placeholder-product.jpg'; this.onerror=null;">
+                    <div class="product-suggestion-info">
+                        <div class="product-suggestion-name">${product.name}</div>
+                        <div class="product-suggestion-details">${product.category} • ${product.brand}</div>
+                    </div>
+                    <div class="product-suggestion-price">${displayPrice.toLocaleString('vi-VN')} VNĐ</div>
+                </a>
             `;
-            itemDiv.addEventListener('click', function() {
-                window.location.href = `/Product/Detail/${product.id}`;
+            itemDiv.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Product suggestion clicked:', product);
+                console.log('Navigating to:', `/Product/Details/${product.id}`);
+                
+                // Try multiple ways to navigate
+                try {
+                    window.location.href = `/Product/Details/${product.id}`;
+                } catch (error) {
+                    console.error('Error navigating:', error);
+                    // Fallback method
+                    window.open(`/Product/Details/${product.id}`, '_self');
+                }
             });
+            
+            // Also add a direct link as backup
+            itemDiv.style.cursor = 'pointer';
+            itemDiv.title = `Click to view ${product.name}`;
+            
+            // Add click event to the link as well
+            const link = itemDiv.querySelector('.product-suggestion-link');
+            if (link) {
+                link.addEventListener('click', function(e) {
+                    console.log('Link clicked for product:', product.id);
+                    // Let the default link behavior handle navigation
+                });
+            }
+            
             productItems.appendChild(itemDiv);
         });
         productSection.style.display = 'block';
@@ -439,11 +476,29 @@ function closeMobileMenu() {
     }
 }
 
-function formatPrice(price) {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND'
-    }).format(price);
+function formatPriceSimple(price) {
+    console.log('formatPriceSimple called with:', price, typeof price);
+    
+    try {
+        // Convert to number if it's a string
+        let numPrice;
+        if (typeof price === 'string') {
+            // Remove any non-numeric characters except decimal point
+            numPrice = parseFloat(price.replace(/[^\d.-]/g, ''));
+        } else {
+            numPrice = price;
+        }
+        
+        console.log('parsed price:', numPrice);
+        
+        // Simple formatting with commas
+        const formatted = numPrice.toLocaleString('vi-VN') + ' VNĐ';
+        console.log('formatted price:', formatted);
+        return formatted;
+    } catch (error) {
+        console.error('Error formatting price:', error);
+        return price + ' VNĐ';
+    }
 }
 
 // Global functions

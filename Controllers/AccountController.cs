@@ -163,6 +163,35 @@ namespace Shopping_Demo.Controllers
             return Redirect(returnUrl);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> HistoryPublic(string userEmail = "")
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Content("UserEmail is required");
+                }
+
+                var orders = await _dataContext.Orders
+                    .Where(od => od.UserName == userEmail)
+                    .OrderByDescending(od => od.CreatedDate)
+                    .Take(10)
+                    .Select(o => new { o.OrderCode, o.UserName, o.CreatedDate, o.Status })
+                    .ToListAsync();
+
+                return Json(new { 
+                    UserEmail = userEmail, 
+                    OrdersCount = orders.Count,
+                    Orders = orders 
+                });
+            }
+            catch (Exception ex)
+            {
+                return Content($"Error: {ex.Message}");
+            }
+        }
+
         public async Task<IActionResult> History(UserModel user)
         {
             if ((bool)!User.Identity?.IsAuthenticated)
@@ -173,6 +202,7 @@ namespace Shopping_Demo.Controllers
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
             var orders = await _dataContext.Orders
+                .Include(o => o.User)
                 .Where(od => od.UserName == userEmail)
                 .OrderByDescending(od => od.CreatedDate)
                 .ToListAsync();

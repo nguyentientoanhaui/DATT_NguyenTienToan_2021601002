@@ -19,7 +19,7 @@ namespace Shopping_Demo.Repository
         public DbSet<CompareModel> Compares { get; set; }
         public DbSet<ProductQuantityModel> ProductQuantities { get; set; }
         public DbSet<ShippingModel> Shippings { get; set; }
-        public DbSet<CouponModel> Coupons { get; set; }
+        // public DbSet<CouponModel> Coupons { get; set; } // Removed - table not exists in database
         public DbSet<StatisticalModel> Statisticals { get; set; }
         public DbSet<CartModel> Carts { get; set; }
         public DbSet<CartItemModel> CartItems { get; set; }
@@ -30,10 +30,12 @@ namespace Shopping_Demo.Repository
         // public DbSet<ProductColorModel> ProductColors { get; set; } // Removed - table deleted from database
         // public DbSet<ProductSizeModel> ProductSizes { get; set; } // Removed - table deleted from database
         // public DbSet<UserBehaviorModel> UserBehaviors { get; set; } // Removed - table deleted from database
-        // public DbSet<SearchHistoryModel> SearchHistories { get; set; } // Removed - table deleted from database
+        public DbSet<SearchHistoryModel> SearchHistories { get; set; }
         public DbSet<PaymentModel> Payments { get; set; }
         public DbSet<SellRequestModel> SellRequests { get; set; }
         public DbSet<LargePaymentModel> LargePayments { get; set; }
+        public DbSet<ChatSession> ChatSessions { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -130,12 +132,14 @@ namespace Shopping_Demo.Repository
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Orders -> Coupons
+            // Orders -> Coupons (Commented out - Coupon table not exists)
+            /*
             modelBuilder.Entity<OrderModel>()
                 .HasOne(o => o.Coupon)
                 .WithMany(c => c.Orders)
                 .HasForeignKey(o => o.CouponId)
                 .OnDelete(DeleteBehavior.SetNull);
+            */
 
             // Carts -> Users
             modelBuilder.Entity<CartModel>()
@@ -186,6 +190,20 @@ namespace Shopping_Demo.Repository
                 .HasOne(s => s.Product)
                 .WithMany(p => p.Statisticals)
                 .HasForeignKey(s => s.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // ChatSessions -> Users (optional)
+            modelBuilder.Entity<ChatSession>()
+                .HasOne<AppUserModel>()
+                .WithMany()
+                .HasForeignKey(cs => cs.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // ChatMessages -> ChatSessions
+            modelBuilder.Entity<ChatMessage>()
+                .HasOne<ChatSession>()
+                .WithMany()
+                .HasForeignKey(cm => cm.SessionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Contact -> Users (nếu có UserId) - DISABLED
@@ -249,6 +267,25 @@ namespace Shopping_Demo.Repository
                 .HasIndex(pr => pr.ProductId);
             modelBuilder.Entity<ProductReviewModel>()
                 .HasIndex(pr => pr.CreatedDate);
+
+            // ChatSessions
+            modelBuilder.Entity<ChatSession>()
+                .HasIndex(cs => cs.SessionId)
+                .IsUnique();
+            modelBuilder.Entity<ChatSession>()
+                .HasIndex(cs => cs.UserId);
+            modelBuilder.Entity<ChatSession>()
+                .HasIndex(cs => cs.CreatedAt);
+            modelBuilder.Entity<ChatSession>()
+                .HasIndex(cs => cs.IsActive);
+
+            // ChatMessages
+            modelBuilder.Entity<ChatMessage>()
+                .HasIndex(cm => cm.SessionId);
+            modelBuilder.Entity<ChatMessage>()
+                .HasIndex(cm => cm.Timestamp);
+            modelBuilder.Entity<ChatMessage>()
+                .HasIndex(cm => cm.SenderType);
 
             // ===== DATA VALIDATION =====
             

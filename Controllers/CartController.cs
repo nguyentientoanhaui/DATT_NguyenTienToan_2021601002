@@ -539,6 +539,10 @@ namespace Shopping_Demo.Controllers
         [HttpPost]
         public async Task<IActionResult> GetCoupon(string coupon_value)
         {
+            // Coupon functionality disabled - Coupons table not exists
+            return Json(new { success = false, message = "Tính năng coupon tạm thời không khả dụng" });
+            
+            /* Original code commented out:
             var validCoupon = await _dataContext.Coupons
                 .FirstOrDefaultAsync(x => x.Name == coupon_value && x.Quantity >= 1 && x.Status == 1);
 
@@ -611,6 +615,7 @@ namespace Shopping_Demo.Controllers
             {
                 return Json(new { success = false, message = "Có lỗi xảy ra khi áp dụng mã giảm giá" });
             }
+            */
         }
 
         // Cập nhật method GetShipping

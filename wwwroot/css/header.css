@@ -546,6 +546,20 @@
     color: #000000;
 }
 
+.product-suggestion-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-suggestion-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
 .product-suggestion-image {
     width: 40px;
     height: 40px;

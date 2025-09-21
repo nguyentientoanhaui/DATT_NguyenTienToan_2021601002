@@ -1,0 +1,234 @@
+@{
+    ViewData["Title"] = "Cấu hình Local AI Chatbot";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-desktop"></i> Cấu hình Local AI Chatbot
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-primary">
+                                    <i class="fas fa-cog"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">AI Provider hiện tại</span>
+                                    <span class="info-box-number">@ViewBag.CurrentProvider</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <span class="info-box-icon @(ViewBag.OllamaConfigured ? "bg-success" : "bg-warning")">
+                                    <i class="fas fa-server"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Ollama Local AI</span>
+                                    <span class="info-box-number">@(ViewBag.OllamaConfigured ? "Đã cấu hình" : "Chưa cấu hình")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info">
+                                    <i class="fas fa-heartbeat"></i>
+                                </span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Trạng thái Local AI</span>
+                                    <span class="info-box-number" id="aiStatus">Đang kiểm tra...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Thông tin cấu hình Local AI</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Ollama URL:</label>
+                                                <input type="text" class="form-control" value="@ViewBag.OllamaUrl" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Model Name:</label>
+                                                <input type="text" class="form-control" value="@ViewBag.OllamaModel" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Kiểm tra Local AI</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <button type="button" class="btn btn-primary btn-block" id="testAI">
+                                                <i class="fas fa-play"></i> Test AI Response
+                                            </button>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button type="button" class="btn btn-success btn-block" id="checkHealth">
+                                                <i class="fas fa-heartbeat"></i> Kiểm tra sức khỏe
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3" id="testResult" style="display: none;">
+                                        <div class="alert alert-info">
+                                            <h5>Kết quả test:</h5>
+                                            <div id="testResponse"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Hướng dẫn Local AI</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-success">
+                                        <h5><i class="fas fa-check-circle"></i> Local AI đã được cấu hình!</h5>
+                                        <p>Chatbot của bạn đang sử dụng <strong>Local AI</strong> - hoàn toàn miễn phí và không cần internet!</p>
+                                    </div>
+
+                                    <div class="alert alert-info">
+                                        <h5><i class="fas fa-info-circle"></i> Cấu hình Local AI</h5>
+                                        <p>Để thay đổi giữa các local AI providers, chỉnh sửa file <code>appsettings.json</code>:</p>
+                                        <pre><code>{
+  "AI": {
+    "Provider": "ONNX" // Các tùy chọn: ONNX, Ollama
+  },
+  "LocalAI": {
+    "OllamaUrl": "http://localhost:11434",
+    "ModelName": "llama3.2:3b"
+  }
+}</code></pre>
+                                    </div>
+
+                                    <div class="alert alert-warning">
+                                        <h5><i class="fas fa-exclamation-triangle"></i> Cài đặt Ollama (Tùy chọn)</h5>
+                                        <p>Nếu muốn sử dụng Ollama với chất lượng cao hơn:</p>
+                                        <ol>
+                                            <li>Cài đặt Ollama: <code>winget install Ollama.Ollama</code></li>
+                                            <li>Tải model: <code>ollama pull llama3.2:3b</code></li>
+                                            <li>Chạy Ollama: <code>ollama serve</code></li>
+                                            <li>Đổi provider thành "Ollama" trong appsettings.json</li>
+                                        </ol>
+                                    </div>
+
+                                    <div class="alert alert-primary">
+                                        <h5><i class="fas fa-lightbulb"></i> Lợi ích của Local AI</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>🚀 Tốc độ:</h6>
+                                                <ul>
+                                                    <li>50-100ms response time</li>
+                                                    <li>Không phụ thuộc internet</li>
+                                                    <li>Xử lý song song</li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>🔒 Bảo mật:</h6>
+                                                <ul>
+                                                    <li>Dữ liệu không rời khỏi máy</li>
+                                                    <li>Không cần API key</li>
+                                                    <li>Kiểm soát hoàn toàn</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Kiểm tra sức khỏe AI khi load trang
+            checkAIHealth();
+
+            $('#testAI').click(function() {
+                testAI();
+            });
+
+            $('#checkHealth').click(function() {
+                checkAIHealth();
+            });
+        });
+
+        function testAI() {
+            $('#testAI').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang test...');
+            
+            $.post('@Url.Action("TestAI")', function(data) {
+                if (data.success) {
+                    $('#testResponse').html('<strong>Provider:</strong> ' + data.provider + '<br><strong>Response:</strong> ' + data.response);
+                    $('#testResult').show();
+                } else {
+                    $('#testResponse').html('<strong>Lỗi:</strong> ' + data.error);
+                    $('#testResult').show();
+                }
+            }).fail(function() {
+                $('#testResponse').html('<strong>Lỗi:</strong> Không thể kết nối đến server');
+                $('#testResult').show();
+            }).always(function() {
+                $('#testAI').prop('disabled', false).html('<i class="fas fa-play"></i> Test AI Response');
+            });
+        }
+
+        function checkAIHealth() {
+            $('#checkHealth').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang kiểm tra...');
+            
+            $.post('@Url.Action("CheckHealth")', function(data) {
+                if (data.success) {
+                    if (data.healthy) {
+                        $('#aiStatus').html('<span class="badge badge-success">Local AI hoạt động tốt</span>');
+                    } else {
+                        $('#aiStatus').html('<span class="badge badge-warning">Local AI có vấn đề</span>');
+                    }
+                } else {
+                    $('#aiStatus').html('<span class="badge badge-danger">Lỗi: ' + data.error + '</span>');
+                }
+            }).fail(function() {
+                $('#aiStatus').html('<span class="badge badge-danger">Không thể kết nối</span>');
+            }).always(function() {
+                $('#checkHealth').prop('disabled', false).html('<i class="fas fa-heartbeat"></i> Kiểm tra sức khỏe');
+            });
+        }
+    </script>
+}

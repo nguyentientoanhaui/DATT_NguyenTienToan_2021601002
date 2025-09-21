@@ -1,4 +1,6 @@
 @model OrderModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<AppUserModel> UserManager
 
 <div class="order-card">
     <div class="order-header">
@@ -17,29 +19,59 @@
     <div class="order-content">
         <div class="order-info">
             <div class="info-item">
+                <div class="info-label">👤 Người nhận</div>
+                <div class="info-value">
+                    @{
+                        // Lấy thông tin user từ UserManager thay vì navigation property
+                        var userEmail = Model.UserName;
+                        var user = await UserManager.FindByEmailAsync(userEmail);
+                    }
+                    
+                    @if (user != null && !string.IsNullOrEmpty(user.FullName))
+                    {
+                        <div><strong>Họ và tên: @user.FullName</strong></div>
+                    }
+                    @if (user != null && !string.IsNullOrEmpty(user.PhoneNumber))
+                    {
+                        <div><i class="fas fa-phone"></i> Số điện thoại: @user.PhoneNumber</div>
+                    }
+                    @if (user != null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        <div><i class="fas fa-envelope"></i> Email: @user.Email</div>
+                    }
+                    @if (user == null || (string.IsNullOrEmpty(user.FullName) && string.IsNullOrEmpty(user.PhoneNumber) && string.IsNullOrEmpty(user.Email)))
+                    {
+                        <div style="color: #95a5a6;">Chưa có thông tin người nhận</div>
+                        <div style="color: #95a5a6; font-size: 0.8rem;">UserName: @(Model.UserName ?? "NULL")</div>
+                    }
+                </div>
+            </div>
+            <div class="info-item">
                 <div class="info-label">📍 Địa chỉ giao hàng</div>
                 <div class="info-value">
                     @if (!string.IsNullOrEmpty(Model.ShippingAddress))
                     {
-                        <div>@Model.ShippingAddress</div>
+                        <div><strong>@Model.ShippingAddress</strong></div>
                     }
-                    @if (!string.IsNullOrEmpty(Model.ShippingWard))
+                    @if (!string.IsNullOrEmpty(Model.ShippingWard) && Model.ShippingWard != "Chưa cập nhật")
                     {
                         <div>Phường/Xã: @Model.ShippingWard</div>
                     }
-                    @if (!string.IsNullOrEmpty(Model.ShippingDistrict))
+                    @if (!string.IsNullOrEmpty(Model.ShippingDistrict) && Model.ShippingDistrict != "Chưa cập nhật")
                     {
                         <div>Quận/Huyện: @Model.ShippingDistrict</div>
                     }
-                    @if (!string.IsNullOrEmpty(Model.ShippingCity))
+                    @if (!string.IsNullOrEmpty(Model.ShippingCity) && Model.ShippingCity != "Chưa cập nhật")
                     {
                         <div>Tỉnh/Thành: @Model.ShippingCity</div>
                     }
-                                         @if (string.IsNullOrEmpty(Model.ShippingAddress) && string.IsNullOrEmpty(Model.ShippingWard) && string.IsNullOrEmpty(Model.ShippingDistrict) && string.IsNullOrEmpty(Model.ShippingCity))
-                     {
-                         <div style="color: #95a5a6;">Chưa có thông tin địa chỉ giao hàng</div>
-                         <div style="color: #95a5a6; font-size: 0.8rem;">(Có thể do cookies bị xóa hoặc chưa được set)</div>
-                     }
+                    @if (string.IsNullOrEmpty(Model.ShippingAddress) && 
+                         (string.IsNullOrEmpty(Model.ShippingWard) || Model.ShippingWard == "Chưa cập nhật") && 
+                         (string.IsNullOrEmpty(Model.ShippingDistrict) || Model.ShippingDistrict == "Chưa cập nhật") && 
+                         (string.IsNullOrEmpty(Model.ShippingCity) || Model.ShippingCity == "Chưa cập nhật"))
+                    {
+                        <div style="color: #95a5a6;">Chưa có thông tin địa chỉ giao hàng</div>
+                    }
                 </div>
             </div>
             <div class="info-item">
@@ -54,22 +86,6 @@
                 <div class="info-label">🏷️ Mã giảm giá</div>
                 <div class="info-value">@(Model.CouponCode ?? "Không có")</div>
             </div>
-        </div>
-        
-        <!-- Debug Info -->
-        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 10px; margin: 15px 0; font-size: 0.8rem;">
-            <div style="font-weight: 600; color: #856404; margin-bottom: 5px;">Debug Info:</div>
-            <div>OrderCode: @Model.OrderCode</div>
-            <div>PaymentMethod: @(Model.PaymentMethod ?? "NULL")</div>
-            <div>ShippingAddress: @(Model.ShippingAddress ?? "NULL")</div>
-            <div>ShippingWard: @(Model.ShippingWard ?? "NULL")</div>
-            <div>ShippingDistrict: @(Model.ShippingDistrict ?? "NULL")</div>
-            <div>ShippingCity: @(Model.ShippingCity ?? "NULL")</div>
-            <div>ShippingCost: @Model.ShippingCost</div>
-            <div>CouponCode: @(Model.CouponCode ?? "NULL")</div>
-            <div>OrderDetails Count: @(GetOrderDetails(Model.OrderCode)?.Count() ?? 0)</div>
-            <div>CreatedDate: @Model.CreatedDate</div>
-            <div>Status: @Model.Status</div>
         </div>
         
         <!-- Products Section -->
@@ -125,6 +141,7 @@
         </div>
         
         <div class="order-actions">
+            
             @if (Model.Status == 1 || Model.Status == 2)
             {
                 <a onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')" 
@@ -201,4 +218,6 @@
         }
         return "~/images/placeholder-product.jpg";
     }
+}
+
 }

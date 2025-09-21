@@ -226,8 +226,10 @@ function getQuote(productId) {
 
 // Show notification function
 function showNotification(title, message, type) {
-    // Sử dụng SweetAlert nếu có, nếu không thì dùng alert đơn giản
-    if (typeof Swal !== 'undefined') {
+    // Use new center notification system if available
+    if (typeof showCenterNotification !== 'undefined') {
+        showCenterNotification(message, type, title);
+    } else if (typeof Swal !== 'undefined') {
         let icon = 'info';
         let swalTitle = title;
         

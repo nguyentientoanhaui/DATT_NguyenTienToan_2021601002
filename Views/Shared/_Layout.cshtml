@@ -25,6 +25,8 @@
     <link href="~/css/main.css" rel="stylesheet">
     <link href="~/css/product-listing.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/aurum-style.css">
+    <link rel="stylesheet" href="~/css/chatbot.css?v=20241215">
+    <link rel="stylesheet" href="~/css/simple-loading.css">
     @await RenderSectionAsync("Styles", required: false)
     <!--[if lt IE 9]>
     <script src="~/js/html5shiv.js"></script>
@@ -248,16 +250,15 @@
 
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v22.0"></script>
-    <script src="~/js/jquery.js"></script>
+    <!-- jQuery - Load only once -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="~/js/bootstrap.min.js"></script>
     <script src="~/js/jquery.scrollUp.min.js"></script>
     <script src="~/js/price-range.js"></script>
     <script src="~/js/jquery.prettyPhoto.js"></script>
     <script src="~/js/main.js"></script>
     <script src="~/js/sweetalert2.min.js"></script>
-    <script src="~/js/jquery-3.7.1.js"></script>
     <script src="~/js/jquery-ui.js"></script>
-    <script src="~/js/jquery.scrollUp.min.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/dataTables.buttons.js"></script>
     <script src="~/js/buttons.dataTables.js"></script>
@@ -269,6 +270,8 @@
     <script src="~/js/cart.js"></script>
     <script src="~/js/header.js"></script>
     <script src="~/js/order-notifications.js"></script>
+    <script src="https://unpkg.com/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+    <script src="~/js/chatbot.js?v=20241215"></script>
     <script>
         // Ensure scripts run after DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
@@ -317,8 +320,13 @@
             });
         });
     </script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Simple Loading Script -->
+    <script src="~/js/simple-loading.js"></script>
+    
+    <!-- Center Notification System -->
+    <script src="~/js/center-notification.js"></script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -3,7 +3,22 @@
 
 @{
     ViewData["Title"] = "Chỉnh Sửa Đơn Thu Mua";
-    var statusOptions = ViewBag.StatusOptions as List<dynamic>;
+    var statusOptions = ViewBag.StatusOptions as IEnumerable<dynamic>;
+    
+    // Fallback if ViewBag.StatusOptions is null
+    if (statusOptions == null)
+    {
+        statusOptions = new[]
+        {
+            new { Value = 0, Text = "Chờ xử lý" },
+            new { Value = 1, Text = "Đã xem" },
+            new { Value = 2, Text = "Đã liên hệ" },
+            new { Value = 3, Text = "Đã thỏa thuận" },
+            new { Value = 4, Text = "Đã hoàn thành" },
+            new { Value = 5, Text = "Từ chối" },
+            new { Value = 6, Text = "Hủy" }
+        };
+    }
 }
 
 <div class="container-fluid">
@@ -221,8 +236,8 @@
             <div class="col-lg-12">
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div>
+                        <div class="button-container">
+                            <div class="button-group-left">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save"></i> Lưu Thay Đổi
                                 </button>
@@ -230,7 +245,7 @@
                                     <i class="fas fa-times"></i> Hủy
                                 </a>
                             </div>
-                            <div>
+                            <div class="button-group-right">
                                 <button type="button" class="btn btn-danger" onclick="confirmDelete()">
                                     <i class="fas fa-trash"></i> Xóa Đơn
                                 </button>
@@ -269,6 +284,114 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Button alignment fixes using CSS Grid */
+    .button-container {
+        display: grid !important;
+        grid-template-columns: 1fr auto !important;
+        gap: 1rem !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-height: 60px !important;
+        padding: 0 !important;
+    }
+    
+    .button-group-left {
+        display: flex !important;
+        gap: 0.75rem !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+    }
+    
+    .button-group-right {
+        display: flex !important;
+        gap: 0.75rem !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+    }
+    
+    .btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+        min-height: 40px !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        line-height: 1.5 !important;
+        border-radius: 0.375rem !important;
+        border: 1px solid transparent !important;
+        text-decoration: none !important;
+        transition: all 0.15s ease-in-out !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .btn i {
+        font-size: 0.875rem !important;
+        line-height: 1 !important;
+    }
+    
+    /* Specific button styles */
+    .btn-primary {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+        color: #fff !important;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0b5ed7 !important;
+        border-color: #0a58ca !important;
+        color: #fff !important;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+        color: #fff !important;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5c636a !important;
+        border-color: #565e64 !important;
+        color: #fff !important;
+    }
+    
+    .btn-danger {
+        background-color: #dc3545 !important;
+        border-color: #dc3545 !important;
+        color: #fff !important;
+    }
+    
+    .btn-danger:hover {
+        background-color: #bb2d3b !important;
+        border-color: #b02a37 !important;
+        color: #fff !important;
+    }
+    
+    /* Responsive button layout */
+    @@media (max-width: 768px) {
+        .button-container {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+            min-height: auto !important;
+        }
+        
+        .button-group-left,
+        .button-group-right {
+            justify-content: center !important;
+            width: 100% !important;
+        }
+        
+        .btn {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+    }
+</style>
 
 @section Scripts {
     <script>

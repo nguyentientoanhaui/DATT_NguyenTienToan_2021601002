@@ -35,7 +35,7 @@
                         <div class="product-actions">
                             @if (item.Quantity > 0)
                             {
-                                <a href="#" class="buy-btn">MUA NGAY</a>
+                                <a href="javascript:void(0)" onclick="addToCart(@item.Id)" class="buy-btn">MUA NGAY</a>
                                 <div class="sell-container">
                                     <a href="javascript:void(0)" onclick="getQuote(@item.Id)" class="sell-btn">THU MUA</a>
                                     <div class="quote-text" onclick="getQuote(@item.Id)">Báo Giá</div>
@@ -55,7 +55,52 @@
 
 <script src="~/js/simple-wishlist.js"></script>
 <script>
+    function addToCart(productId) {
+        const formData = new FormData();
+        formData.append('productId', productId);
+        
+        fetch('/Home/AddToCart', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showNotification('Sản phẩm đã được thêm vào giỏ hàng!', 'success');
+                // Update cart count
+                if (typeof updateCartCount === 'function') {
+                    updateCartCount();
+                }
+            } else {
+                showNotification(data.message || 'Có lỗi xảy ra!', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Có lỗi xảy ra!', 'error');
+        });
+    }
+
     function getQuote(productId) {
         window.location.href = '/Sell/Create?productId=' + productId;
+    }
+
+    function showNotification(message, type = 'info') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: type === 'success' ? 'Thành công!' : type === 'error' ? 'Lỗi!' : 'Thông báo',
+                text: message,
+                icon: type,
+                timer: type === 'success' ? 2000 : undefined,
+                timerProgressBar: type === 'success'
+            });
+        } else {
+            alert(message);
+        }
     }
 </script>

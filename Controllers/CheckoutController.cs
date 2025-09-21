@@ -34,8 +34,10 @@ namespace Shopping_Demo.Controllers
             }
             else
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var orderItem = new OrderModel();
                 orderItem.UserName = userEmail;
+                orderItem.UserId = userId;
                 if (OrderId != null)
                 {
                     // Sử dụng OrderId từ MoMo làm OrderCode
@@ -50,6 +52,8 @@ namespace Shopping_Demo.Controllers
                 else
                 {
                     orderItem.PaymentMethod = "COD";
+                    // Generate OrderCode for COD payments
+                    orderItem.OrderCode = GenerateOrderCode();
                 }
 
                 var shippingCity = Request.Cookies["ShippingCity"];
@@ -94,7 +98,8 @@ namespace Shopping_Demo.Controllers
                     orderItem.DiscountAmount = discountAmount;
                 }
 
-                // Giảm số lượng coupon nếu có
+                // Giảm số lượng coupon nếu có (Disabled - Coupons table not exists)
+                /*
                 if (!string.IsNullOrEmpty(couponIdCookie) && int.TryParse(couponIdCookie, out int couponId))
                 {
                     var coupon = await _dataContext.Coupons.FindAsync(couponId);
@@ -104,6 +109,7 @@ namespace Shopping_Demo.Controllers
                         _dataContext.Update(coupon);
                     }
                 }
+                */
                 // Set shipping address from cookies, with fallback to user profile
                 if (!string.IsNullOrEmpty(shippingCity))
                 {
@@ -302,10 +308,10 @@ namespace Shopping_Demo.Controllers
 
                 if (User.Identity.IsAuthenticated)
                 {
-                    string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     var userCart = await _dataContext.Carts
                         .Include(c => c.CartItems)
-                        .FirstOrDefaultAsync(c => c.UserId == userId);
+                        .FirstOrDefaultAsync(c => c.UserId == currentUserId);
 
                     if (userCart != null && userCart.CartItems.Any())
                     {
@@ -385,7 +391,7 @@ namespace Shopping_Demo.Controllers
                     }
 
                     TempData["success"] = "Thanh toán thành công qua MoMo!";
-                    return View(momoResponse);
+                    return RedirectToAction("History", "Account");
                 }
                 else
                 {
@@ -415,5 +421,12 @@ namespace Shopping_Demo.Controllers
             }
         }
 
+        private string GenerateOrderCode()
+        {
+            // Generate a unique order code with timestamp and random number
+            var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+            var random = new Random().Next(1000, 9999);
+            return $"ORD{timestamp}{random}";
+        }
     }
 }

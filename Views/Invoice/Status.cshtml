@@ -1,0 +1,150 @@
+@{
+    ViewData["Title"] = "Invoice System Status";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-success">
+                <h4><i class="fas fa-check-circle"></i> Project đã chạy thành công!</h4>
+                <p>Hệ thống hóa đơn đã được sửa và sẵn sàng sử dụng.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-receipt"></i> Hóa đơn chính</h5>
+                </div>
+                <div class="card-body">
+                    <p>Sử dụng trang hóa đơn chính của hệ thống:</p>
+                    <a href="@Url.Action("Index", "Invoice", new { orderCode = "TEST123" })" class="btn btn-primary">
+                        Xem hóa đơn mẫu
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-simple"></i> Hóa đơn đơn giản</h5>
+                </div>
+                <div class="card-body">
+                    <p>Trang hóa đơn đơn giản với giao diện thân thiện:</p>
+                    <a href="@Url.Action("Simple", "Invoice")" class="btn btn-success">
+                        Sử dụng hóa đơn đơn giản
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5><i class="fas fa-bug"></i> Debug & Test</h5>
+                </div>
+                <div class="card-body">
+                    <p>Các công cụ debug và test hệ thống:</p>
+                    <a href="@Url.Action("Test", "Invoice")" class="btn btn-warning">
+                        Test hệ thống
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Hướng dẫn sử dụng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Để xem hóa đơn của bạn:</h6>
+                            <ol>
+                                <li>Đăng nhập vào hệ thống</li>
+                                <li>Vào "Lịch sử mua hàng"</li>
+                                <li>Click "Xem hóa đơn" trên đơn hàng bất kỳ</li>
+                            </ol>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Nếu gặp vấn đề:</h6>
+                            <ol>
+                                <li>Sử dụng trang "Hóa đơn đơn giản"</li>
+                                <li>Nhập mã đơn hàng thủ công</li>
+                                <li>Sử dụng trang "Test hệ thống" để debug</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Thông tin hệ thống</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Trạng thái:</strong> 
+                                <span class="badge bg-success">Hoạt động bình thường</span>
+                            </p>
+                            <p><strong>Thời gian:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Phiên bản:</strong> 1.0.0</p>
+                            <p><strong>Trạng thái đăng nhập:</strong> 
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <span class="badge bg-success">Đã đăng nhập</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Chưa đăng nhập</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Liên kết nhanh</h5>
+                </div>
+                <div class="card-body">
+                    <a href="@Url.Action("History", "Account")" class="btn btn-outline-primary">
+                        <i class="fas fa-history"></i> Lịch sử đơn hàng
+                    </a>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                        <i class="fas fa-home"></i> Trang chủ
+                    </a>
+                    @if (!User.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-outline-success">
+                            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

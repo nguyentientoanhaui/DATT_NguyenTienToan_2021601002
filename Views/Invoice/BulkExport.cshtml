@@ -1,0 +1,484 @@
+@{
+    ViewData["Title"] = "Xuất hóa đơn hàng loạt";
+}
+
+@section Styles {
+    <style>
+        .export-controls {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .filter-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .orders-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .table th {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .table td {
+            vertical-align: middle;
+            border-color: #dee2e6;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-confirmed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .export-actions {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-file-export text-success"></i> Xuất hóa đơn hàng loạt</h2>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Controls -->
+    <div class="export-controls">
+        <div class="row">
+            <div class="col-md-12">
+                <h4><i class="fas fa-filter text-primary"></i> Bộ lọc</h4>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="filter-section">
+                    <label class="form-label"><strong>Trạng thái</strong></label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Tất cả</option>
+                        <option value="0">Chờ xử lý</option>
+                        <option value="1">Đã xác nhận</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="filter-section">
+                    <label class="form-label"><strong>Từ ngày</strong></label>
+                    <input type="date" class="form-control" id="dateFromFilter">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="filter-section">
+                    <label class="form-label"><strong>Đến ngày</strong></label>
+                    <input type="date" class="form-control" id="dateToFilter">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="filter-section">
+                    <label class="form-label"><strong>Hành động</strong></label>
+                    <button class="btn btn-primary w-100" onclick="loadOrders()">
+                        <i class="fas fa-search"></i> Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="orders-table">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th width="5%">
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                        </th>
+                        <th width="15%">Mã đơn hàng</th>
+                        <th width="20%">Khách hàng</th>
+                        <th width="15%">Ngày tạo</th>
+                        <th width="10%">Trạng thái</th>
+                        <th width="15%">Tổng tiền</th>
+                        <th width="20%">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center p-3 border-top">
+            <div>
+                <span id="totalCount">Tổng: 0 đơn hàng</span>
+            </div>
+            <nav>
+                <ul class="pagination mb-0" id="pagination">
+                    <!-- Pagination will be generated by JavaScript -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Export Actions -->
+    <div class="export-actions">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="mb-0">
+                    <i class="fas fa-download"></i> 
+                    <span id="selectedCount">0</span> đơn hàng được chọn
+                </h5>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-file-export"></i> Xuất Excel
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportSelected('excel')">
+                            <i class="fas fa-file-excel text-success"></i> Xuất Excel
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportSelected('pdf')">
+                            <i class="fas fa-file-pdf text-danger"></i> Xuất PDF (ZIP)
+                        </a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-light ms-2" onclick="sendSelectedByEmail()">
+                    <i class="fas fa-envelope"></i> Gửi email
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5>Đang xử lý...</h5>
+        <p id="loadingText">Vui lòng chờ trong giây lát</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentPage = 1;
+        let pageSize = 10;
+        let selectedOrders = new Set();
+        let allOrders = [];
+
+        // Load orders on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrders();
+        });
+
+        function loadOrders() {
+            const status = document.getElementById('statusFilter').value;
+            const dateFrom = document.getElementById('dateFromFilter').value;
+            const dateTo = document.getElementById('dateToFilter').value;
+
+            showLoading('Đang tải danh sách đơn hàng...');
+
+            fetch(`@Url.Action("GetOrdersForExport", "Invoice")?page=${currentPage}&pageSize=${pageSize}&status=${status}&dateFrom=${dateFrom}&dateTo=${dateTo}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        allOrders = data.orders;
+                        renderOrdersTable(data.orders);
+                        renderPagination(data.totalPages, data.page);
+                        updateSelectedCount();
+                    } else {
+                        showError(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('Có lỗi xảy ra khi tải dữ liệu');
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+
+        function renderOrdersTable(orders) {
+            const tbody = document.getElementById('ordersTableBody');
+            
+            if (orders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-inbox"></i> Không có đơn hàng nào
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = orders.map(order => `
+                <tr>
+                    <td>
+                        <input type="checkbox" class="order-checkbox" value="${order.orderCode}" 
+                               onchange="toggleOrderSelection('${order.orderCode}')"
+                               ${selectedOrders.has(order.orderCode) ? 'checked' : ''}>
+                    </td>
+                    <td><strong>${order.orderCode}</strong></td>
+                    <td>${order.userName}</td>
+                    <td>${new Date(order.createdDate).toLocaleDateString('vi-VN')}</td>
+                    <td>
+                        <span class="status-badge ${order.status === 1 ? 'status-confirmed' : 'status-pending'}">
+                            ${order.statusText}
+                        </span>
+                    </td>
+                    <td><strong>${order.totalAmount.toLocaleString('vi-VN')}₫</strong></td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="@Url.Action("Index", "Invoice")?orderCode=${order.orderCode}" 
+                               class="btn btn-outline-primary" title="Xem hóa đơn">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="@Url.Action("Download", "Invoice")?orderCode=${order.orderCode}&format=pdf" 
+                               class="btn btn-outline-success" title="Tải PDF">
+                                <i class="fas fa-file-pdf"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPagination(totalPages, currentPageNum) {
+            const pagination = document.getElementById('pagination');
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <li class="page-item ${currentPageNum === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPageNum - 1})">Trước</a>
+                </li>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                paginationHTML += `
+                    <li class="page-item ${i === currentPageNum ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Next button
+            paginationHTML += `
+                <li class="page-item ${currentPageNum === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPageNum + 1})">Sau</a>
+                </li>
+            `;
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            if (page < 1) return;
+            currentPage = page;
+            loadOrders();
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.order-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+                if (selectAll.checked) {
+                    selectedOrders.add(checkbox.value);
+                } else {
+                    selectedOrders.delete(checkbox.value);
+                }
+            });
+            
+            updateSelectedCount();
+        }
+
+        function toggleOrderSelection(orderCode) {
+            if (selectedOrders.has(orderCode)) {
+                selectedOrders.delete(orderCode);
+            } else {
+                selectedOrders.add(orderCode);
+            }
+            
+            updateSelectedCount();
+            updateSelectAllCheckbox();
+        }
+
+        function updateSelectAllCheckbox() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.order-checkbox');
+            const checkedCount = document.querySelectorAll('.order-checkbox:checked').length;
+            
+            selectAll.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+            selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = selectedOrders.size;
+        }
+
+        function exportSelected(format) {
+            if (selectedOrders.size === 0) {
+                alert('Vui lòng chọn ít nhất một đơn hàng');
+                return;
+            }
+
+            showLoading(`Đang xuất ${selectedOrders.size} đơn hàng...`);
+
+            const orderCodes = Array.from(selectedOrders);
+            
+            fetch('@Url.Action("ExportMultiple", "Invoice")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `orderCodes=${orderCodes.join(',')}&format=${format}`
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error('Có lỗi xảy ra khi xuất file');
+                }
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `BaoCaoHoaDon_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.${format === 'excel' ? 'xlsx' : 'zip'}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xuất file');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+        }
+
+        function sendSelectedByEmail() {
+            if (selectedOrders.size === 0) {
+                alert('Vui lòng chọn ít nhất một đơn hàng');
+                return;
+            }
+
+            const email = prompt('Nhập địa chỉ email để gửi báo cáo:');
+            if (!email) return;
+
+            showLoading(`Đang gửi email cho ${selectedOrders.size} đơn hàng...`);
+
+            const orderCodes = Array.from(selectedOrders);
+            
+            fetch('@Url.Action("ExportMultiple", "Invoice")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `orderCodes=${orderCodes.join(',')}&format=excel&email=${email}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Email đã được gửi thành công!');
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi email');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+        }
+
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showError(message) {
+            alert(message);
+        }
+    </script>
+}

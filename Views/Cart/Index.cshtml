@@ -288,7 +288,7 @@
                                         <h3>@item.ProductName</h3>
                                         <p class="sku">Mã SP: @item.ProductId</p>
                                         <p class="price">@item.Price.ToString("N0").Replace(",", ".")₫</p>
-                                        <a class="remove-link" asp-action="Remove" asp-controller="Cart" asp-route-id="@item.ProductId">Xóa</a>
+                                        <a class="remove-link" href="javascript:void(0)" onclick="confirmRemove(@item.ProductId, '@item.ProductName')">Xóa</a>
                                     </div>
                                 </div>
                                 
@@ -893,3 +893,238 @@
 
 <!-- Include Address Suggestion Script -->
 <script src="~/js/address-suggestion.js"></script>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmationModal" class="delete-modal" style="display: none;">
+    <div class="delete-modal-content">
+        <div class="delete-modal-header">
+            <h3>Xác nhận xóa sản phẩm</h3>
+        </div>
+        <div class="delete-modal-body">
+            <p>Bạn có chắc chắn muốn xóa sản phẩm <strong id="productNameToDelete"></strong> khỏi giỏ hàng?</p>
+        </div>
+        <div class="delete-modal-footer">
+            <button type="button" class="btn-cancel" onclick="hideDeleteConfirmation()">Hủy</button>
+            <button type="button" class="btn-delete" onclick="removeProduct()">Xóa</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Delete Confirmation Modal Styles - Minimalist Black & White */
+.delete-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 10000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.delete-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.delete-modal-content {
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    max-width: 400px !important;
+    width: 90% !important;
+    margin: 0 !important;
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+    position: relative !important;
+}
+
+.delete-modal.show .delete-modal-content {
+    transform: scale(1);
+}
+
+.delete-modal-header {
+    padding: 24px 24px 16px 24px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.delete-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.delete-modal-body {
+    padding: 20px 24px;
+    text-align: center;
+}
+
+.delete-modal-body p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.delete-modal-body strong {
+    color: #333;
+    font-weight: 600;
+}
+
+.delete-modal-footer {
+    padding: 16px 24px 24px 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-cancel, .btn-delete {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+}
+
+.btn-cancel {
+    background-color: #f5f5f5;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.btn-cancel:hover {
+    background-color: #e5e5e5;
+    color: #333;
+}
+
+.btn-delete {
+    background-color: #333;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #000;
+}
+
+.btn-delete:active {
+    transform: translateY(1px);
+}
+
+/* Responsive */
+@@media (max-width: 480px) {
+    .delete-modal-content {
+        margin: 10px;
+        width: calc(100% - 20px);
+    }
+    
+    .delete-modal-header {
+        padding: 20px 20px 16px 20px;
+    }
+    
+    .delete-modal-body {
+        padding: 16px 20px;
+    }
+    
+    .delete-modal-footer {
+        padding: 16px 20px 20px 20px;
+        flex-direction: column;
+    }
+    
+    .btn-cancel, .btn-delete {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+    let productToDelete = null;
+
+    function confirmRemove(productId, productName) {
+        productToDelete = productId;
+        document.getElementById('productNameToDelete').textContent = productName;
+        showDeleteConfirmation();
+    }
+
+    function showDeleteConfirmation() {
+        const modal = document.getElementById('deleteConfirmationModal');
+        
+        // Debug: Log modal position
+        console.log('Modal element:', modal);
+        console.log('Modal computed styles:', window.getComputedStyle(modal));
+        
+        modal.style.display = 'flex';
+        
+        // Force center positioning
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        
+        // Show with animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+
+    function hideDeleteConfirmation() {
+        const modal = document.getElementById('deleteConfirmationModal');
+        modal.classList.remove('show');
+        
+        // Restore body scroll
+        document.body.style.overflow = 'auto';
+        
+        // Hide completely after animation
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        
+        productToDelete = null;
+    }
+
+    function removeProduct() {
+        if (productToDelete) {
+            // Show loading state
+            const deleteBtn = document.querySelector('.btn-delete');
+            const originalText = deleteBtn.textContent;
+            deleteBtn.textContent = 'Đang xóa...';
+            deleteBtn.disabled = true;
+            
+            // Redirect to remove action
+            window.location.href = `/Cart/Remove/${productToDelete}`;
+        }
+    }
+
+    // Close modal when clicking overlay
+    document.getElementById('deleteConfirmationModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideDeleteConfirmation();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideDeleteConfirmation();
+        }
+    });
+</script>

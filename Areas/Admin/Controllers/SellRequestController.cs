@@ -267,5 +267,107 @@ namespace Shopping_Demo.Areas.Admin.Controllers
                 _ => status.ToString()
             };
         }
+
+        // GET: Admin/SellRequest/Contact/5
+        public async Task<IActionResult> Contact(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var sellRequest = await _context.SellRequests
+                .Include(sr => sr.Product)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (sellRequest == null)
+            {
+                return NotFound();
+            }
+
+            return View(sellRequest);
+        }
+
+        // POST: Admin/SellRequest/Contact/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Contact(int id, string adminResponse)
+        {
+            try
+            {
+                var sellRequest = await _context.SellRequests.FindAsync(id);
+                if (sellRequest == null)
+                {
+                    return NotFound();
+                }
+
+                // Update status to Contacted
+                sellRequest.Status = SellRequestStatus.Contacted;
+                sellRequest.AdminResponse = adminResponse;
+                sellRequest.UpdatedAt = DateTime.Now;
+
+                _context.Update(sellRequest);
+                await _context.SaveChangesAsync();
+
+                TempData["success"] = "Đã cập nhật trạng thái thành 'Đã liên hệ' và gửi phản hồi cho khách hàng!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Có lỗi xảy ra: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // GET: Admin/SellRequest/Reject/5
+        public async Task<IActionResult> Reject(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var sellRequest = await _context.SellRequests
+                .Include(sr => sr.Product)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (sellRequest == null)
+            {
+                return NotFound();
+            }
+
+            return View(sellRequest);
+        }
+
+        // POST: Admin/SellRequest/Reject/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reject(int id, string adminResponse)
+        {
+            try
+            {
+                var sellRequest = await _context.SellRequests.FindAsync(id);
+                if (sellRequest == null)
+                {
+                    return NotFound();
+                }
+
+                // Update status to Rejected
+                sellRequest.Status = SellRequestStatus.Rejected;
+                sellRequest.AdminResponse = adminResponse;
+                sellRequest.UpdatedAt = DateTime.Now;
+
+                _context.Update(sellRequest);
+                await _context.SaveChangesAsync();
+
+                TempData["success"] = "Đã từ chối đơn thu mua và gửi phản hồi cho khách hàng!";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Có lỗi xảy ra: " + ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+        }
     }
 }

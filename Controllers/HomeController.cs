@@ -69,6 +69,11 @@ namespace Shopping_Demo.Controllers
             return View();
         }
 
+        public IActionResult ChatbotTest()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error(int statuscode)
         {

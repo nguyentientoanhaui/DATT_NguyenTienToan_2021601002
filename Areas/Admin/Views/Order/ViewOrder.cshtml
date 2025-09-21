@@ -227,7 +227,33 @@
             </div>
         </div>
     </div>
-    <a asp-action="Index" asp-controller="Order">Trở lại danh sách</a>
+    <div class="d-flex justify-content-between">
+        <a asp-action="Index" asp-controller="Order" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Trở lại danh sách
+        </a>
+        <div class="btn-group">
+            <a href="@Url.Action("Index", "Invoice", new { orderCode = Model.FirstOrDefault()?.OrderCode })" 
+               class="btn btn-primary">
+                <i class="fas fa-file-invoice"></i> Xem hóa đơn
+            </a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-download"></i> Tải xuống
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.FirstOrDefault()?.OrderCode, format = "pdf" })">
+                        <i class="fas fa-file-pdf text-danger"></i> PDF
+                    </a></li>
+                    <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.FirstOrDefault()?.OrderCode, format = "excel" })">
+                        <i class="fas fa-file-excel text-success"></i> Excel
+                    </a></li>
+                    <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.FirstOrDefault()?.OrderCode, format = "csv" })">
+                        <i class="fas fa-file-csv text-info"></i> CSV
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

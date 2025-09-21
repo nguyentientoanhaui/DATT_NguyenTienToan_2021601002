@@ -464,7 +464,10 @@ function getQuote(productId) {
 
 // Show notification function
 function showNotification(message, type = 'info') {
-    if (typeof Swal !== 'undefined') {
+    if (typeof showCenterNotification !== 'undefined') {
+        // Use new center notification system
+        showCenterNotification(message, type);
+    } else if (typeof Swal !== 'undefined') {
         Swal.fire({
             title: type === 'success' ? 'Thành công!' : type === 'error' ? 'Lỗi!' : 'Thông báo',
             text: message,

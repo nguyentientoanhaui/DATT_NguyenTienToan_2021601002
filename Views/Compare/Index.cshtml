@@ -3,7 +3,8 @@
     ViewData["Title"] = "So sánh sản phẩm";
 }
 
-<div class="compare-container">
+ 
+ <div class="compare-container">
     <div class="compare-header">
         <div class="compare-title">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -300,16 +301,34 @@
         });
 
         function addToCart(productId) {
-            $.post('/Cart/AddToCart', { productId: productId, quantity: 1 })
+            $.post('/Home/AddToCart', { productId: productId })
                 .done(function (response) {
                     if (response.success) {
-                        alert('Đã thêm sản phẩm vào giỏ hàng!');
+                        Swal.fire({
+                            title: 'Thành công!',
+                            text: response.message,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        // Update cart count
+                        if (typeof updateCartCount === 'function') {
+                            updateCartCount();
+                        }
                     } else {
-                        alert(response.message);
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: response.message,
+                            icon: 'error'
+                        });
                     }
                 })
                 .fail(function () {
-                    alert('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Không thể thêm sản phẩm vào giỏ hàng',
+                        icon: 'error'
+                    });
                 });
         }
     </script>

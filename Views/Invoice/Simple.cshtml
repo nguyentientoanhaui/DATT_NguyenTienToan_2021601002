@@ -1,0 +1,202 @@
+@{
+    ViewData["Title"] = "Hóa đơn đơn giản";
+}
+
+<div class="container mt-4">
+    <h2><i class="fas fa-receipt text-primary"></i> Hóa đơn thanh toán</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Tìm hóa đơn</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="orderCode">Mã đơn hàng:</label>
+                        <input type="text" id="orderCode" class="form-control" placeholder="Nhập mã đơn hàng">
+                    </div>
+                    <button onclick="loadInvoice()" class="btn btn-primary">Xem hóa đơn</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Thông tin đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div id="orderInfo" style="display: none;">
+                        <p><strong>Mã đơn hàng:</strong> <span id="orderCodeDisplay"></span></p>
+                        <p><strong>Ngày tạo:</strong> <span id="orderDate"></span></p>
+                        <p><strong>Trạng thái:</strong> <span id="orderStatus"></span></p>
+                        <p><strong>Tổng tiền:</strong> <span id="orderTotal"></span></p>
+                    </div>
+                    <div id="noOrderInfo" style="display: none;">
+                        <p class="text-muted">Chưa có thông tin đơn hàng</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Chi tiết sản phẩm</h5>
+                </div>
+                <div class="card-body">
+                    <div id="productDetails">
+                        <p class="text-muted">Chưa có thông tin sản phẩm</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Hành động</h5>
+                </div>
+                <div class="card-body">
+                    <button onclick="printInvoice()" class="btn btn-outline-primary" id="printBtn" style="display: none;">
+                        <i class="fas fa-print"></i> In hóa đơn
+                    </button>
+                    <a href="@Url.Action("History", "Account")" class="btn btn-info">
+                        <i class="fas fa-history"></i> Xem lịch sử đơn hàng
+                    </a>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> Về trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadInvoice() {
+    const orderCode = document.getElementById('orderCode').value;
+    
+    if (!orderCode) {
+        alert('Vui lòng nhập mã đơn hàng');
+        return;
+    }
+    
+    // Hiển thị loading
+    document.getElementById('orderInfo').style.display = 'none';
+    document.getElementById('noOrderInfo').style.display = 'block';
+    document.getElementById('productDetails').innerHTML = '<p class="text-muted">Đang tải...</p>';
+    
+    // Gọi API để lấy thông tin đơn hàng
+    fetch(`/Invoice/DebugInvoice?orderCode=${encodeURIComponent(orderCode)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayInvoice(data);
+            } else {
+                displayError(data.error);
+            }
+        })
+        .catch(error => {
+            displayError('Lỗi khi tải thông tin đơn hàng: ' + error.message);
+        });
+}
+
+function displayInvoice(data) {
+    const order = data.order;
+    
+    // Hiển thị thông tin đơn hàng
+    document.getElementById('orderCodeDisplay').textContent = order.orderCode;
+    document.getElementById('orderDate').textContent = new Date(order.createdDate).toLocaleString('vi-VN');
+    document.getElementById('orderStatus').textContent = getStatusText(order.status);
+    
+    // Tính tổng tiền
+    let total = 0;
+    if (order.orderDetails && order.orderDetails.length > 0) {
+        order.orderDetails.forEach(detail => {
+            total += detail.price * detail.quantity;
+        });
+    }
+    document.getElementById('orderTotal').textContent = total.toLocaleString('vi-VN') + ' ₫';
+    
+    // Hiển thị chi tiết sản phẩm
+    let productHtml = '';
+    if (order.orderDetails && order.orderDetails.length > 0) {
+        productHtml = '<table class="table table-bordered">';
+        productHtml += '<thead class="table-dark"><tr><th>STT</th><th>Tên sản phẩm</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>';
+        productHtml += '<tbody>';
+        
+        order.orderDetails.forEach((detail, index) => {
+            const subtotal = detail.price * detail.quantity;
+            productHtml += `<tr>
+                <td>${index + 1}</td>
+                <td>${detail.productName}</td>
+                <td>${detail.quantity}</td>
+                <td>${detail.price.toLocaleString('vi-VN')} ₫</td>
+                <td>${subtotal.toLocaleString('vi-VN')} ₫</td>
+            </tr>`;
+        });
+        
+        productHtml += '</tbody></table>';
+    } else {
+        productHtml = '<p class="text-muted">Không có thông tin sản phẩm</p>';
+    }
+    
+    document.getElementById('productDetails').innerHTML = productHtml;
+    
+    // Hiển thị các phần tử
+    document.getElementById('orderInfo').style.display = 'block';
+    document.getElementById('noOrderInfo').style.display = 'none';
+    document.getElementById('printBtn').style.display = 'inline-block';
+}
+
+function displayError(errorMessage) {
+    document.getElementById('orderInfo').style.display = 'none';
+    document.getElementById('noOrderInfo').style.display = 'block';
+    document.getElementById('productDetails').innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+    document.getElementById('printBtn').style.display = 'none';
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        0: 'Đã giao hàng',
+        1: 'Đơn hàng mới',
+        2: 'Chờ xác nhận',
+        3: 'Đã hủy',
+        4: 'Đang giao hàng',
+        5: 'Đang hoàn',
+        6: 'Hoàn thành'
+    };
+    return statusMap[status] || 'Không xác định';
+}
+
+function printInvoice() {
+    window.print();
+}
+</script>
+
+<style>
+@@media print {
+    .btn, .card-header, .container .row:last-child {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    body {
+        font-size: 12px;
+    }
+    
+    .table {
+        font-size: 11px;
+    }
+}
+</style>

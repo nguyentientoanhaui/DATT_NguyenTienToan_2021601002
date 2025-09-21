@@ -415,7 +415,13 @@ namespace Shopping_Demo.Controllers
         }
         public async Task<IActionResult> Details(int Id)
         {
-            if (Id == 0) return RedirectToAction("Index");
+            System.Diagnostics.Debug.WriteLine($"ProductController.Details called with Id: {Id}");
+            
+            if (Id == 0) 
+            {
+                System.Diagnostics.Debug.WriteLine("Id is 0, redirecting to Index");
+                return RedirectToAction("Index");
+            }
 
             // Track user behavior - Temporarily disabled due to missing UserBehaviors table
             // var sessionId = HttpContext.Session.Id;
@@ -454,7 +460,13 @@ namespace Shopping_Demo.Controllers
             //         .ToList();
             // }
 
-            if (productById == null) return NotFound();
+            if (productById == null) 
+            {
+                System.Diagnostics.Debug.WriteLine($"Product with Id {Id} not found in database");
+                return NotFound();
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"Found product: {productById.Name} (Id: {productById.Id}, IsActive: {productById.IsActive})");
 
             var relatedProducts = await _dataContext.Products
                 .Where(p => p.CategoryId == productById.CategoryId && p.Id != productById.Id)
@@ -631,6 +643,9 @@ namespace Shopping_Demo.Controllers
                 return RedirectToAction("Index","Home");
             }
 
+            // Lưu lịch sử tìm kiếm ngay từ đầu
+            await SaveSearchHistory(searchTerm);
+
             // Debug log
             System.Diagnostics.Debug.WriteLine($"Search term: {searchTerm}");
 
@@ -741,9 +756,6 @@ namespace Shopping_Demo.Controllers
                     return RedirectToAction("Index", new { models = new[] { matchingModel.Model } });
                 }
             }
-
-                        // Lưu lịch sử tìm kiếm
-            await SaveSearchHistory(searchTerm);
 
             // Tìm kiếm theo tên sản phẩm chính xác
             var searchQuery = _dataContext.Products
@@ -958,7 +970,7 @@ namespace Shopping_Demo.Controllers
                 id = p.Id,
                 name = p.Name,
                 imageUrl = Url.Action("GetProductImage", "Home", new { productId = p.Id }),
-                price = p.Price.ToString("#,##0"),
+                price = p.Price,
                 category = p.Category?.Name ?? "",
                 brand = p.Brand?.Name ?? ""
             }).ToList();
@@ -979,7 +991,7 @@ namespace Shopping_Demo.Controllers
                 id = p.Id,
                 name = p.Name,
                 imageUrl = Url.Action("GetProductImage", "Home", new { productId = p.Id }),
-                price = p.Price.ToString("#,##0"),
+                price = p.Price,
                 category = p.Category?.Name ?? "",
                 brand = p.Brand?.Name ?? ""
             }).ToList();
@@ -1003,15 +1015,14 @@ namespace Shopping_Demo.Controllers
             var userSessionId = HttpContext.Session.Id;
             var userCurrentId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
 
-            // Lấy lịch sử tìm kiếm gần đây - Disabled since SearchHistories table was removed
-            // var recentlySearched = await _dataContext.SearchHistories
-            //     .Where(sh => (userCurrentId != null && sh.UserId == userCurrentId) ||
-            //                 (userCurrentId == null && sh.SessionId == userSessionId))
-            //     .OrderByDescending(sh => sh.SearchedAt)
-            //     .Take(5)
-            //     .Select(sh => new { term = sh.SearchTerm })
-            //     .ToListAsync();
-            var recentlySearched = new List<object>(); // Empty list since table was removed
+            // Lấy lịch sử tìm kiếm gần đây
+            var recentlySearched = await _dataContext.SearchHistories
+                .Where(sh => (userCurrentId != null && sh.UserId == userCurrentId) ||
+                            (userCurrentId == null && sh.SessionId == userSessionId))
+                .OrderByDescending(sh => sh.SearchedAt)
+                .Take(5)
+                .Select(sh => new { term = sh.SearchTerm })
+                .ToListAsync();
 
             // Lấy gợi ý dựa trên model sản phẩm
             var topSuggestions = new List<object>();
@@ -1076,23 +1087,36 @@ namespace Shopping_Demo.Controllers
                 };
             }
 
-            // Get product suggestions - Simplified logic
+            // Get product suggestions based on search term
             var productSuggestions = await _dataContext.Products
-                .Where(p => p.IsActive)
+                .Where(p => p.IsActive && (
+                    p.Name.ToLower().Contains(searchTerm.ToLower()) ||
+                    p.Brand.Name.ToLower().Contains(searchTerm.ToLower()) ||
+                    p.Category.Name.ToLower().Contains(searchTerm.ToLower()) ||
+                    (p.Model != null && p.Model.ToLower().Contains(searchTerm.ToLower()))
+                ))
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.ProductImages)
+                .OrderByDescending(p => p.Name.ToLower().Contains(searchTerm.ToLower())) // Prioritize exact name matches
+                .ThenByDescending(p => p.Sold) // Then by popularity
                 .Take(8)
                 .Select(p => new
                 {
                     id = p.Id,
                     name = p.Name,
                     imageUrl = Url.Action("GetProductImage", "Home", new { productId = p.Id }),
-                    price = p.Price.ToString("#,##0"),
+                    price = p.Price,
                     category = p.Category.Name,
                     brand = p.Brand.Name
                 })
                 .ToListAsync();
+                
+            System.Diagnostics.Debug.WriteLine($"Found {productSuggestions.Count} product suggestions for '{searchTerm}':");
+            foreach (var product in productSuggestions)
+            {
+                System.Diagnostics.Debug.WriteLine($"  - ID: {product.id}, Name: {product.name}, Brand: {product.brand}");
+            }
 
             // Get personalized recommendations if user has viewing history
             var personalizedProducts = await _recommendationService.GetPersonalizedRecommendations(userSessionId, userCurrentId, 4);
@@ -1104,7 +1128,7 @@ namespace Shopping_Demo.Controllers
                     id = p.Id,
                     name = p.Name,
                     imageUrl = Url.Action("GetProductImage", "Home", new { productId = p.Id }),
-                    price = p.Price.ToString("#,##0"),
+                    price = p.Price,
                     category = p.Category?.Name ?? "",
                     brand = p.Brand?.Name ?? ""
                 })
@@ -1128,7 +1152,7 @@ namespace Shopping_Demo.Controllers
                         id = p.Id,
                         name = p.Name,
                         imageUrl = Url.Action("GetProductImage", "Home", new { productId = p.Id }),
-                        price = p.Price.ToString("#,##0"),
+                        price = p.Price,
                         category = p.Category.Name,
                         brand = p.Brand.Name
                     })
@@ -1167,13 +1191,13 @@ namespace Shopping_Demo.Controllers
                 var sessionId = HttpContext.Session.Id;
                 var currentUserId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
 
-                // var historiesToDelete = await _dataContext.SearchHistories
-                //     .Where(sh => (currentUserId != null && sh.UserId == currentUserId) ||
-                //                 (currentUserId == null && sh.SessionId == sessionId))
-                //     .ToListAsync();
+                var historiesToDelete = await _dataContext.SearchHistories
+                    .Where(sh => (currentUserId != null && sh.UserId == currentUserId) ||
+                                (currentUserId == null && sh.SessionId == sessionId))
+                    .ToListAsync();
 
-                // _dataContext.SearchHistories.RemoveRange(historiesToDelete);
-                // await _dataContext.SaveChangesAsync();
+                _dataContext.SearchHistories.RemoveRange(historiesToDelete);
+                await _dataContext.SaveChangesAsync();
 
                 return Json(new { success = true });
             }
@@ -1191,17 +1215,17 @@ namespace Shopping_Demo.Controllers
                 var sessionId = HttpContext.Session.Id;
                 var currentUserId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
 
-                // var historyToDelete = await _dataContext.SearchHistories
-                //     .FirstOrDefaultAsync(sh => 
-                //         sh.SearchTerm.ToLower() == searchTerm.ToLower() &&
-                //         ((currentUserId != null && sh.UserId == currentUserId) ||
-                //          (currentUserId == null && sh.SessionId == sessionId)));
+                var historyToDelete = await _dataContext.SearchHistories
+                    .FirstOrDefaultAsync(sh => 
+                        sh.SearchTerm.ToLower() == searchTerm.ToLower() &&
+                        ((currentUserId != null && sh.UserId == currentUserId) ||
+                         (currentUserId == null && sh.SessionId == sessionId)));
 
-                // if (historyToDelete != null)
-                // {
-                //     _dataContext.SearchHistories.Remove(historyToDelete);
-                //     await _dataContext.SaveChangesAsync();
-                // }
+                if (historyToDelete != null)
+                {
+                    _dataContext.SearchHistories.Remove(historyToDelete);
+                    await _dataContext.SaveChangesAsync();
+                }
 
                 return Json(new { success = true });
             }
@@ -1892,40 +1916,46 @@ namespace Shopping_Demo.Controllers
                 var sessionId = HttpContext.Session.Id;
                 var currentUserId = User.Identity.IsAuthenticated ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
 
-                // Kiểm tra xem đã có lịch sử tìm kiếm này chưa - Disabled since SearchHistories table was removed
-                // var existingHistory = await _dataContext.SearchHistories
-                //     .FirstOrDefaultAsync(sh => 
-                //         sh.SearchTerm.ToLower() == searchTerm.ToLower() &&
-                //         ((currentUserId != null && sh.UserId == currentUserId) ||
-                //          (currentUserId == null && sh.SessionId == sessionId)));
+                System.Diagnostics.Debug.WriteLine($"Saving search history: '{searchTerm}', SessionId: {sessionId}, UserId: {currentUserId}");
 
-                // if (existingHistory != null)
-                // {
-                //     // Cập nhật thời gian tìm kiếm và tăng số lần tìm kiếm
-                //     existingHistory.SearchedAt = DateTime.Now;
-                //     existingHistory.SearchCount++;
-                //     _dataContext.SearchHistories.Update(existingHistory);
-                // }
-                // else
-                // {
-                //     // Tạo lịch sử tìm kiếm mới
-                //     var newHistory = new SearchHistoryModel
-                //     {
-                //         SearchTerm = searchTerm,
-                //         SessionId = currentUserId == null ? sessionId : null,
-                //         UserId = currentUserId,
-                //         SearchedAt = DateTime.Now,
-                //         SearchCount = 1
-                //     };
-                //     _dataContext.SearchHistories.Add(newHistory);
-                // }
+                // Kiểm tra xem đã có lịch sử tìm kiếm này chưa
+                var existingHistory = await _dataContext.SearchHistories
+                    .FirstOrDefaultAsync(sh => 
+                        sh.SearchTerm.ToLower() == searchTerm.ToLower() &&
+                        ((currentUserId != null && sh.UserId == currentUserId) ||
+                         (currentUserId == null && sh.SessionId == sessionId)));
 
-                // await _dataContext.SaveChangesAsync();
+                if (existingHistory != null)
+                {
+                    // Cập nhật thời gian tìm kiếm và tăng số lần tìm kiếm
+                    existingHistory.SearchedAt = DateTime.Now;
+                    existingHistory.SearchCount++;
+                    _dataContext.SearchHistories.Update(existingHistory);
+                    System.Diagnostics.Debug.WriteLine($"Updated existing search history for: '{searchTerm}'");
+                }
+                else
+                {
+                    // Tạo lịch sử tìm kiếm mới
+                    var newHistory = new SearchHistoryModel
+                    {
+                        SearchTerm = searchTerm,
+                        SessionId = currentUserId == null ? sessionId : null,
+                        UserId = currentUserId,
+                        SearchedAt = DateTime.Now,
+                        SearchCount = 1
+                    };
+                    _dataContext.SearchHistories.Add(newHistory);
+                    System.Diagnostics.Debug.WriteLine($"Created new search history for: '{searchTerm}'");
+                }
+
+                await _dataContext.SaveChangesAsync();
+                System.Diagnostics.Debug.WriteLine($"Successfully saved search history for: '{searchTerm}'");
             }
             catch (Exception ex)
             {
                 // Log lỗi nhưng không làm gián đoạn chức năng tìm kiếm
                 System.Diagnostics.Debug.WriteLine($"Error saving search history: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
     }

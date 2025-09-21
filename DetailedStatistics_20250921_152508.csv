@@ -1,0 +1,55 @@
+﻿
+=== THỐNG KÊ CHI TIẾT HỆ THỐNG ===
+Ngày xuất: 21/09/2025 15:25
+
+1. THỐNG KÊ TRẠNG THÁI ĐƠN HÀNG
+Trạng thái,Số lượng,Tỷ lệ (%)
+Đã giao hàng,2,16.67
+Đơn hàng mới,4,33.33
+Đã hủy,3,25.00
+Đang hoàn,2,16.67
+Hoàn thành,1,8.33
+
+2. THỐNG KÊ HIỆU SUẤT THƯƠNG HIỆU
+Thương hiệu,Số lượng bán,Doanh thu,Lợi nhuận,Tỷ lệ lợi nhuận (%)
+Panerai,1,612377500.00,122475500.00,20.00
+Omega,1,159127500.00,31825500.00,20.00
+
+3. THỐNG KÊ PHÂN BỐ DANH MỤC
+Danh mục,Số lượng bán,Doanh thu,Tỷ lệ doanh thu (%)
+Radiomir,1,612377500.00,79.37
+Speedmaster,1,159127500.00,20.63
+
+4. THỐNG KÊ XU HƯỚNG BÁN HÀNG
+Ngày,Số đơn hàng,Doanh thu,Số lượng sản phẩm,Doanh thu trung bình/đơn
+2025-09-05,2,771505000.00,2,385752500.00
+
+5. THỐNG KÊ WISHLIST
+5.1. Top sản phẩm được yêu thích nhất
+Sản phẩm,Thương hiệu,Danh mục,Giá,Số lượt yêu thích,Nam,Nữ,Tỷ lệ Nam (%)
+Rolex Datejust 116244 Stainless Steel Silver Index Dial,Breitling,Avenger,360027500.00,1,1,0,100.00
+Rolex Milgauss Ref 116400V Black Dial,Rolex,Milgauss,293877500.00,1,1,0,100.00
+Omega Seamaster Titanium 007 Edition,Omega,Seamaster,178727500.00,1,1,0,100.00
+Rolex Oyster Perpetual 39MM 114300 Blue Dial,Rolex,Oyster Perpetual 39,195877500.00,1,1,0,100.00
+Vintage Rolex Oyster Perpetual 1005 Silver Dial,Rolex,Oyster Perpetual 34,195877500.00,1,1,0,100.00
+Pre-Owned Rolex Datejust 16234 Roman Dial,Rolex,Datejust 36,159127500.00,1,1,0,100.00
+Ladies Rolex Date 69160 Black Dial,Rolex,Date,110127500.00,1,1,0,100.00
+Rolex Datejust II 116300 Silver Dial,Rolex,Datejust II,208127500.00,1,1,0,100.00
+Rolex Datejust II 116334 Diamond Dial,Rolex,Datejust II,269377500.00,1,1,0,100.00
+PreOwned Rolex Datejust 116203 White Dial,Rolex,Datejust 36,244877500.00,1,1,0,100.00
+Omega Seamaster Diver 300M 36.25MM Blue Dial,Omega,Seamaster,80727500.00,1,1,0,100.00
+
+5.2. Thống kê WishList theo giới tính
+Giới tính,Số lượng,Tỷ lệ (%)
+Nam,11,100.00
+
+6. THỐNG KÊ MUA HÀNG THEO GIỚI TÍNH
+Giới tính,Tổng doanh thu,Số lượng sản phẩm,Số đơn hàng,Doanh thu trung bình/đơn
+
+7. THỐNG KÊ MUA HÀNG THEO ĐỘ TUỔI
+Nhóm tuổi,Tổng doanh thu,Số lượng sản phẩm,Số đơn hàng,Doanh thu trung bình/đơn
+
+8. THỐNG KÊ THEO KHOẢNG GIÁ
+Khoảng giá,Số sản phẩm,Tổng doanh thu,Số lượng bán,Giá trung bình
+100M-200M,1,159127500.00,1,159127500.00
+> 500M,1,612377500.00,1,612377500.00

@@ -13,7 +13,7 @@ namespace Shopping_Demo.Models
 
         // Thay thế CouponCode bằng CouponId
         public string? CouponCode { get; set; }
-        public int? CouponId { get; set; } // Thêm CouponId làm khóa ngoại
+        // public int? CouponId { get; set; } // Removed - Coupon table not exists
 
         public decimal DiscountAmount { get; set; }
         public string ShippingCity { get; set; }
@@ -31,7 +31,7 @@ namespace Shopping_Demo.Models
         [ForeignKey("UserId")]
         public AppUserModel User { get; set; }
 
-        [ForeignKey("CouponId")]
-        public virtual CouponModel? Coupon { get; set; }
+        // [ForeignKey("CouponId")] // Removed - Coupon table not exists
+        // public virtual CouponModel? Coupon { get; set; } // Removed - Coupon table not exists
     }
 }

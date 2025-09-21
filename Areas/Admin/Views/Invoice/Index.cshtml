@@ -1,0 +1,336 @@
+@model Shopping_Demo.Models.InvoiceViewModel
+@{
+    ViewData["Title"] = "Hóa Đơn";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-file-invoice"></i> Hóa đơn đơn hàng: @Model.Order.OrderCode
+                    </h4>
+                    <div class="btn-group">
+                        <!-- Dropdown Download -->
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-download"></i> Tải xuống
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "pdf" })">
+                                    <i class="fas fa-file-pdf text-danger"></i> PDF
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "excel" })">
+                                    <i class="fas fa-file-excel text-success"></i> Excel
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "csv" })">
+                                    <i class="fas fa-file-csv text-info"></i> CSV
+                                </a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Email Button -->
+                        <button type="button" class="btn btn-outline-info me-2" data-bs-toggle="modal" data-bs-target="#emailModal">
+                            <i class="fas fa-envelope"></i> Gửi email
+                        </button>
+
+                        <!-- Back Button -->
+                        <a href="@Url.Action("Index", "Order")" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Company Header -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <h2 class="text-primary mb-1">CỬA HÀNG ĐỒNG HỒ CAO CẤP</h2>
+                            <p class="mb-1"><strong>Địa chỉ:</strong> 123 Đường ABC, Quận 1, TP.HCM</p>
+                            <p class="mb-1"><strong>Điện thoại:</strong> (028) 1234-5678</p>
+                            <p class="mb-0"><strong>Email:</strong> info@watchstore.com</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <h3 class="text-primary mb-1">HÓA ĐƠN BÁN HÀNG</h3>
+                            <p class="mb-1"><strong>Mã đơn hàng:</strong> @Model.Order.OrderCode</p>
+                            <p class="mb-1"><strong>Ngày tạo:</strong> @Model.Order.CreatedDate.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p class="mb-0"><strong>Trạng thái:</strong> 
+                                @switch (Model.Order.Status)
+                                {
+                                    case 0: <span class="badge bg-success">Đã giao hàng</span>; break;
+                                    case 1: <span class="badge bg-primary">Đơn hàng mới</span>; break;
+                                    case 2: <span class="badge bg-warning">Chờ xác nhận</span>; break;
+                                    case 3: <span class="badge bg-danger">Đã hủy</span>; break;
+                                    case 4: <span class="badge bg-info">Đang giao hàng</span>; break;
+                                    case 5: <span class="badge bg-warning">Yêu cầu hoàn hàng</span>; break;
+                                    case 6: <span class="badge bg-secondary">Hoàn hàng thành công</span>; break;
+                                    default: <span class="badge bg-secondary">Không xác định</span>; break;
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-user"></i> Thông tin khách hàng</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Tên:</strong> @Model.Order.UserName</p>
+                                    <p class="mb-1"><strong>Email:</strong> @Model.Order.UserName</p>
+                                    <p class="mb-0"><strong>Địa chỉ:</strong> @Model.Order.ShippingAddress, @Model.Order.ShippingWard, @Model.Order.ShippingDistrict, @Model.Order.ShippingCity</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="fas fa-credit-card"></i> Thông tin thanh toán</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Phương thức:</strong> @(Model.Order.PaymentMethod == "COD" ? "Thanh toán khi nhận hàng" : "Thanh toán online")</p>
+                                    @if (Model.PaymentInfo != null)
+                                    {
+                                        <p class="mb-1"><strong>Mã giao dịch:</strong> @Model.PaymentInfo.Id</p>
+                                        <p class="mb-0"><strong>Trạng thái:</strong> @Model.PaymentInfo.TransactionStatus</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Table -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> Chi tiết sản phẩm</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th width="5%">STT</th>
+                                            <th width="15%">Hình ảnh</th>
+                                            <th width="35%">Tên sản phẩm</th>
+                                            <th width="15%">Model</th>
+                                            <th width="10%">Số lượng</th>
+                                            <th width="10%">Đơn giá</th>
+                                            <th width="10%">Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int stt = 1;
+                                        }
+                                        @foreach (var item in Model.Order.OrderDetails ?? new List<OrderDetails>())
+                                        {
+                                            <tr>
+                                                <td>@stt</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(item.Product?.Image))
+                                                    {
+                                                        <img src="@item.Product.Image" alt="@item.Product.Name" class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                            <i class="fas fa-image text-muted"></i>
+                                                        </div>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <strong>@item.Product?.Name</strong>
+                                                    @if (!string.IsNullOrEmpty(item.Product?.Description))
+                                                    {
+                                                        <br><small class="text-muted">@item.Product.Description</small>
+                                                    }
+                                                </td>
+                                                <td>@item.Product?.Model</td>
+                                                <td class="text-center">@item.Quantity</td>
+                                                <td class="text-end">@item.Price.ToString("N0")₫</td>
+                                                <td class="text-end"><strong>@((item.Quantity * item.Price).ToString("N0"))₫</strong></td>
+                                            </tr>
+                                            stt++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="row">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="fas fa-calculator"></i> Tổng kết</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Tạm tính:</span>
+                                        <span>@Model.Subtotal.ToString("N0")₫</span>
+                                    </div>
+                                    @if (Model.DiscountAmount > 0)
+                                    {
+                                        <div class="d-flex justify-content-between mb-2 text-danger">
+                                            <span>Giảm giá:</span>
+                                            <span>-@Model.DiscountAmount.ToString("N0")₫</span>
+                                        </div>
+                                    }
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Phí vận chuyển:</span>
+                                        <span>@Model.ShippingCost.ToString("N0")₫</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="h5">TỔNG CỘNG:</strong>
+                                        <strong class="h5 text-success">@Model.TotalAmount.ToString("N0")₫</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Điều khoản và điều kiện</h6>
+                                </div>
+                                <div class="card-body">
+                                    <small>
+                                        <ul class="mb-0">
+                                            <li>Sản phẩm được bảo hành theo chính sách của nhà sản xuất</li>
+                                            <li>Khách hàng có thể đổi trả trong vòng 7 ngày</li>
+                                            <li>Liên hệ hotline để được hỗ trợ</li>
+                                        </ul>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-secondary">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="mb-0"><i class="fas fa-signature"></i> Xác nhận</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <p class="mb-2"><strong>Người bán</strong></p>
+                                    <div style="height: 50px;"></div>
+                                    <p class="mb-0"><strong>Ký tên</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Modal -->
+<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailModalLabel">
+                    <i class="fas fa-envelope"></i> Gửi hóa đơn qua email
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="emailForm">
+                    <div class="mb-3">
+                        <label for="recipientEmail" class="form-label">Email người nhận</label>
+                        <input type="email" class="form-control" id="recipientEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailFormat" class="form-label">Định dạng file</label>
+                        <select class="form-select" id="emailFormat">
+                            <option value="pdf">PDF</option>
+                            <option value="excel">Excel</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="sendInvoiceEmail()">
+                    <i class="fas fa-paper-plane"></i> Gửi email
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function sendInvoiceEmail() {
+            const email = document.getElementById('recipientEmail').value;
+            const format = document.getElementById('emailFormat').value;
+            const orderCode = '@Model.Order.OrderCode';
+
+            if (!email) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: 'Vui lòng nhập email người nhận'
+                });
+                return;
+            }
+
+            // Show loading
+            Swal.fire({
+                title: 'Đang gửi email...',
+                text: 'Vui lòng chờ',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch('@Url.Action("SendEmail", "Invoice")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `orderCode=${orderCode}&email=${email}&format=${format}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close();
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: data.message
+                    }).then(() => {
+                        $('#emailModal').modal('hide');
+                        document.getElementById('emailForm').reset();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: 'Có lỗi xảy ra khi gửi email'
+                });
+            });
+        }
+    </script>
+}

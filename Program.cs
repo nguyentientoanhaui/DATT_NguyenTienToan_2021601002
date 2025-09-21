@@ -6,6 +6,7 @@ using Shopping_Demo.Areas.Admin.Repository;
 using Shopping_Demo.Models;
 using Shopping_Demo.Repository;
 using Shopping_Demo.Services;
+using Shopping_Demo.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +25,43 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddSingleton<IBadWordsService, BadWordsService>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IDatabaseVietnamizationService, DatabaseVietnamizationService>();
+builder.Services.AddScoped<ChatService>();
+
+// Invoice Export Services
+builder.Services.AddScoped<InvoiceExportService>();
+builder.Services.AddScoped<EmailService>();
+
+// AI Services - chỉ sử dụng local AI
+var aiProvider = builder.Configuration["AI:Provider"] ?? "ONNX";
+
+switch (aiProvider.ToLower())
+{
+    case "onnx":
+        builder.Services.AddScoped<IAIService, ONNXAIService>();
+        break;
+    case "ollama":
+    case "local":
+        builder.Services.AddScoped<IAIService, LocalAIService>();
+        builder.Services.AddHttpClient<LocalAIService>();
+        break;
+    default:
+        builder.Services.AddScoped<IAIService, ONNXAIService>();
+        break;
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -92,6 +127,9 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddRazorPages();
 
+// Add SignalR
+builder.Services.AddSignalR();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
 	// Password settings.
@@ -109,6 +147,10 @@ var app = builder.Build();
 app.UseStatusCodePagesWithRedirects("/Home/Error?statuscode={0}");
 
 app.UseSession();
+
+// Use CORS
+app.UseCors("AllowAll");
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -142,6 +184,9 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map SignalR Hub
+app.MapHub<ChatHub>("/chathub");
 
 //Seeding Data
 var context = app.Services.CreateScope().ServiceProvider.GetRequiredService<DataContext>();

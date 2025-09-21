@@ -1,0 +1,293 @@
+@model Shopping_Demo.Models.InvoiceViewModel
+@{
+    ViewData["Title"] = "Hóa đơn thanh toán";
+    var isPrintMode = ViewBag.IsPrintMode as bool? ?? false;
+    var isDownloadMode = ViewBag.IsDownloadMode as bool? ?? false;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/invoice.css" />
+}
+
+@if (!isPrintMode && !isDownloadMode)
+{
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-receipt text-primary"></i> Hóa đơn thanh toán</h2>
+                    <div>
+                        <a href="@Url.Action("Print", "Invoice", new { orderCode = Model.Order.OrderCode })" target="_blank" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-print"></i> In hóa đơn
+                        </a>
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-download"></i> Tải xuống
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "pdf" })">
+                                    <i class="fas fa-file-pdf text-danger"></i> PDF
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "excel" })">
+                                    <i class="fas fa-file-excel text-success"></i> Excel
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "csv" })">
+                                    <i class="fas fa-file-csv text-info"></i> CSV
+                                </a></li>
+                            </ul>
+                        </div>
+                        <a href="@Url.Action("BulkExport", "Invoice")" class="btn btn-outline-warning">
+                            <i class="fas fa-file-export"></i> Xuất hàng loạt
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="invoice-container @(isPrintMode ? "print-mode" : "")">
+    <div class="invoice-header">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="company-info">
+                    <h1 class="company-name">CỬA HÀNG ĐỒNG HỒ CAO CẤP</h1>
+                    <p class="company-details">
+                        <strong>Địa chỉ:</strong> 01-05, Tầng 1 Tràng Tiền Plaza<br>
+                        24 Hai Bà Trưng, Phường Cửa Nam<br>
+                        Quận Hoàn Kiếm, Thành phố Hà Nội<br>
+                        <strong>Điện thoại:</strong> 0388672928<br>
+                        <strong>Email:</strong> support@donghocaocap.com
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="invoice-info">
+                    <h2 class="invoice-title">HÓA ĐƠN BÁN HÀNG</h2>
+                    <div class="invoice-details">
+                        <p><strong>Mã hóa đơn:</strong> @Model.Order.OrderCode</p>
+                        <p><strong>Ngày tạo:</strong> @Model.Order.CreatedDate.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p><strong>Trạng thái:</strong> 
+                            <span class="badge @(Model.Order.Status == 1 ? "bg-success" : "bg-warning")">
+                                @(Model.Order.Status == 1 ? "Đã xác nhận" : "Chờ xử lý")
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="invoice-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="customer-info">
+                    <h4><i class="fas fa-user"></i> Thông tin khách hàng</h4>
+                    <div class="customer-details">
+                        <p><strong>Tên khách hàng:</strong> @Model.Order.UserName</p>
+                        <p><strong>Địa chỉ giao hàng:</strong></p>
+                        <p class="address-details">
+                            @Model.Order.ShippingAddress<br>
+                            @Model.Order.ShippingWard, @Model.Order.ShippingDistrict<br>
+                            @Model.Order.ShippingCity
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="payment-info">
+                    <h4><i class="fas fa-credit-card"></i> Thông tin thanh toán</h4>
+                    <div class="payment-details">
+                        <p><strong>Phương thức thanh toán:</strong> 
+                            @if (Model.Order.PaymentMethod == "MoMo")
+                            {
+                                <span class="badge bg-primary">MoMo</span>
+                            }
+                            else if (Model.Order.PaymentMethod == "COD")
+                            {
+                                <span class="badge bg-warning">Thanh toán khi nhận hàng</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.Order.PaymentMethod</span>
+                            }
+                        </p>
+                        @if (Model.PaymentInfo != null)
+                        {
+                            <p><strong>Mã giao dịch:</strong> @Model.PaymentInfo.OrderCode</p>
+                            <p><strong>Ngày thanh toán:</strong> @Model.PaymentInfo.DatePaid.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p><strong>Trạng thái:</strong> 
+                                <span class="badge @(Model.PaymentInfo.TransactionStatus == "Success" ? "bg-success" : "bg-danger")">
+                                    @(Model.PaymentInfo.TransactionStatus == "Success" ? "Thành công" : "Thất bại")
+                                </span>
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="products-section">
+            <h4><i class="fas fa-shopping-cart"></i> Chi tiết sản phẩm</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered products-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="5%">STT</th>
+                            <th width="15%">Hình ảnh</th>
+                            <th width="30%">Tên sản phẩm</th>
+                            <th width="10%">Màu sắc</th>
+                            <th width="10%">Kích thước</th>
+                            <th width="10%">Số lượng</th>
+                            <th width="10%">Đơn giá</th>
+                            <th width="10%">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int index = 1;
+                        }
+                        @foreach (var item in Model.Order.OrderDetails)
+                        {
+                            <tr>
+                                <td class="text-center">@index</td>
+                                <td class="text-center">
+                                    @if (item.Product != null && !string.IsNullOrEmpty(item.Product.Image))
+                                    {
+                                        <img src="@item.Product.Image" alt="@item.Product.Name" class="product-image">
+                                    }
+                                    else
+                                    {
+                                        <div class="no-image">N/A</div>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@(item.Product?.Name ?? "Sản phẩm không tồn tại")</strong>
+                                    @if (item.Product != null && !string.IsNullOrEmpty(item.Product.Model))
+                                    {
+                                        <br><small class="text-muted">Model: @item.Product.Model</small>
+                                    }
+                                </td>
+                                <td class="text-center">@(item.ColorName ?? "N/A")</td>
+                                <td class="text-center">@(item.SizeName ?? "N/A")</td>
+                                <td class="text-center">@item.Quantity</td>
+                                <td class="text-end">@item.Price.ToString("N0")₫</td>
+                                <td class="text-end"><strong>@((item.Price * item.Quantity).ToString("N0"))₫</strong></td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="invoice-summary">
+            <div class="row">
+                <div class="col-md-8"></div>
+                <div class="col-md-4">
+                    <div class="summary-table">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Tạm tính:</strong></td>
+                                <td class="text-end">@Model.Subtotal.ToString("N0")₫</td>
+                            </tr>
+                            @if (Model.DiscountAmount > 0)
+                            {
+                                <tr class="text-success">
+                                    <td><strong>Giảm giá:</strong></td>
+                                    <td class="text-end">-@Model.DiscountAmount.ToString("N0")₫</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td><strong>Phí vận chuyển:</strong></td>
+                                <td class="text-end">@Model.ShippingCost.ToString("N0")₫</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>TỔNG CỘNG:</strong></td>
+                                <td class="text-end"><strong>@Model.TotalAmount.ToString("N0")₫</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="invoice-footer">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="terms-conditions">
+                    <h5>Điều khoản và điều kiện:</h5>
+                    <ul>
+                        <li>Sản phẩm được bảo hành chính hãng theo chính sách của nhà sản xuất</li>
+                        <li>Khách hàng có thể đổi trả trong vòng 7 ngày nếu sản phẩm có lỗi</li>
+                        <li>Hóa đơn này là chứng từ hợp lệ để bảo hành và đổi trả</li>
+                        <li>Mọi thắc mắc vui lòng liên hệ hotline: 0388672928</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p class="text-center mb-4">
+                            <strong>Cảm ơn quý khách!</strong><br>
+                            Hẹn gặp lại quý khách lần sau
+                        </p>
+                        <div class="signature-line">
+                            <p class="text-center">
+                                <strong>Người lập hóa đơn</strong><br>
+                                <em>(Ký và ghi rõ họ tên)</em>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!isPrintMode && !isDownloadMode)
+{
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between">
+                    <a href="@Url.Action("History", "Account")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại lịch sử đơn hàng
+                    </a>
+                    <div class="btn-group">
+                        <!-- Dropdown Download -->
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-download"></i> Tải xuống
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "pdf" })">
+                                    <i class="fas fa-file-pdf text-danger"></i> PDF
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "excel" })">
+                                    <i class="fas fa-file-excel text-success"></i> Excel
+                                </a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Download", "Invoice", new { orderCode = Model.Order.OrderCode, format = "csv" })">
+                                    <i class="fas fa-file-csv text-info"></i> CSV
+                                </a></li>
+                            </ul>
+                        </div>
+
+
+                        <a href="@Url.Action("Print", "Invoice", new { orderCode = Model.Order.OrderCode })" target="_blank" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-print"></i> In hóa đơn
+                        </a>
+
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                            <i class="fas fa-home"></i> Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+

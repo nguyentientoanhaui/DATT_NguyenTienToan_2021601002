@@ -1,343 +1,328 @@
-@model Shopping_Demo.Models.SellRequestModel
+@model SellRequestModel
+@using Shopping_Demo.Models
 
 @{
     ViewData["Title"] = "Liên Hệ Khách Hàng";
-    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
 }
 
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-envelope"></i> Liên Hệ Khách Hàng - Đơn #@Model.Id
+        </h1>
+        <div class="d-flex gap-2">
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay Lại
+            </a>
+            <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-info">
+                <i class="fas fa-eye"></i> Xem Chi Tiết
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="Contact" method="post">
+        <div class="row">
+            <!-- Customer Information (Read-only) -->
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-user"></i> Thông Tin Khách Hàng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label><strong>Họ và tên:</strong></label>
+                            <div class="form-control-plaintext">@Model.FullName</div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Email:</strong></label>
+                            <div class="form-control-plaintext">@Model.Email</div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Số điện thoại:</strong></label>
+                            <div class="form-control-plaintext">@Model.PhoneNumber</div>
+                        </div>
+                        <div class="form-group">
+                            <label><strong>Ngày tạo:</strong></label>
+                            <div class="form-control-plaintext">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Information (Read-only) -->
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-watch"></i> Thông Tin Sản Phẩm
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Product != null)
+                        {
+                            <div class="form-group">
+                                <label><strong>Tên sản phẩm:</strong></label>
+                                <div class="form-control-plaintext">@Model.Product.Name</div>
+                            </div>
+                            <div class="form-group">
+                                <label><strong>Thương hiệu:</strong></label>
+                                <div class="form-control-plaintext">@Model.Product.Brand?.Name</div>
+                            </div>
+                            <div class="form-group">
+                                <label><strong>Giá hiện tại:</strong></label>
+                                <div class="form-control-plaintext">
+                                    <span class="font-weight-bold text-success">
+                                        @Model.Product.Price.ToString("N0") VNĐ
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Sản phẩm không tồn tại hoặc đã bị xóa.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Watch Information (Read-only) -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-info-circle"></i> Thông Tin Đồng Hồ
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><strong>Mô tả đồng hồ:</strong></label>
+                                    <div class="border p-3 rounded bg-light">@Model.WatchInfo</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label><strong>Tình trạng:</strong></label>
+                                            <div class="border p-2 rounded bg-light">
+                                                @(string.IsNullOrEmpty(Model.Condition) ? "Chưa cung cấp" : Model.Condition)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label><strong>Năm sản xuất:</strong></label>
+                                            <div class="border p-2 rounded bg-light">
+                                                @(Model.Year?.ToString() ?? "Chưa cung cấp")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Notes))
+                        {
+                            <div class="form-group">
+                                <label><strong>Ghi chú thêm:</strong></label>
+                                <div class="border p-3 rounded bg-light">@Model.Notes</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-comment"></i> Phản Hồi Cho Khách Hàng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <input asp-for="Id" type="hidden" />
+                        
+                        <div class="form-group">
+                            <label asp-for="AdminResponse" class="control-label"><strong>Nội dung phản hồi:</strong></label>
+                            <textarea asp-for="AdminResponse" class="form-control" rows="6" 
+                                      placeholder="Nhập nội dung phản hồi cho khách hàng..."></textarea>
+                            <span asp-validation-for="AdminResponse" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                Phản hồi này sẽ được gửi cho khách hàng và trạng thái đơn sẽ được cập nhật thành "Đã liên hệ"
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="SuggestedPrice" class="control-label"><strong>Giá đề xuất (VNĐ):</strong></label>
+                            <input asp-for="SuggestedPrice" class="form-control" type="number" step="1000" min="0" 
+                                   placeholder="Nhập giá đề xuất cho khách hàng..." />
+                            <span asp-validation-for="SuggestedPrice" class="text-danger"></span>
+                            <small class="form-text text-muted">Giá đề xuất này sẽ được gửi kèm với phản hồi</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <div class="button-container">
+                            <div class="button-group-left">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Gửi Phản Hồi
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i> Hủy
+                                </a>
+                            </div>
+                            <div class="button-group-right">
+                                <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-info">
+                                    <i class="fas fa-edit"></i> Chỉnh Sửa Đơn
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
 <style>
-    .simple-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        background: #ffffff;
+    /* Button alignment fixes using CSS Grid */
+    .button-container {
+        display: grid !important;
+        grid-template-columns: 1fr auto !important;
+        gap: 1rem !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-height: 60px !important;
+        padding: 0 !important;
     }
     
-    .simple-header {
-        text-align: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #000000;
+    .button-group-left {
+        display: flex !important;
+        gap: 0.75rem !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
     }
     
-    .simple-title {
-        font-size: 28px;
-        font-weight: 700;
-        color: #000000;
-        margin: 0 0 10px 0;
+    .button-group-right {
+        display: flex !important;
+        gap: 0.75rem !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
     }
     
-    .simple-subtitle {
-        font-size: 16px;
-        color: #666666;
-        margin: 0;
+    .btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        white-space: nowrap !important;
+        vertical-align: middle !important;
+        min-height: 40px !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        line-height: 1.5 !important;
+        border-radius: 0.375rem !important;
+        border: 1px solid transparent !important;
+        text-decoration: none !important;
+        transition: all 0.15s ease-in-out !important;
+        flex-shrink: 0 !important;
     }
     
-    .simple-card {
-        background: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        overflow: hidden;
+    .btn i {
+        font-size: 0.875rem !important;
+        line-height: 1 !important;
     }
     
-    .simple-card-header {
-        background: #f8f9fa;
-        padding: 15px 20px;
-        border-bottom: 1px solid #e0e0e0;
-        font-weight: 600;
-        color: #000000;
+    /* Specific button styles */
+    .btn-primary {
+        background-color: #0d6efd !important;
+        border-color: #0d6efd !important;
+        color: #fff !important;
     }
     
-    .simple-card-body {
-        padding: 20px;
+    .btn-primary:hover {
+        background-color: #0b5ed7 !important;
+        border-color: #0a58ca !important;
+        color: #fff !important;
     }
     
-    .simple-form-group {
-        margin-bottom: 20px;
+    .btn-secondary {
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+        color: #fff !important;
     }
     
-    .simple-form-label {
-        display: block;
-        font-weight: 600;
-        color: #000000;
-        margin-bottom: 8px;
+    .btn-secondary:hover {
+        background-color: #5c636a !important;
+        border-color: #565e64 !important;
+        color: #fff !important;
     }
     
-    .simple-form-control {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #e0e0e0;
-        border-radius: 4px;
-        font-size: 14px;
-        background: #ffffff;
-        color: #000000;
+    .btn-info {
+        background-color: #0dcaf0 !important;
+        border-color: #0dcaf0 !important;
+        color: #000 !important;
     }
     
-    .simple-form-control:focus {
-        outline: none;
-        border-color: #000000;
-        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    .btn-info:hover {
+        background-color: #3dd5f3 !important;
+        border-color: #25cff2 !important;
+        color: #000 !important;
     }
     
-    .simple-btn {
-        background: #000000;
-        color: #ffffff;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 4px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
-        transition: background-color 0.2s;
-    }
-    
-    .simple-btn:hover {
-        background: #333333;
-        color: #ffffff;
-        text-decoration: none;
-    }
-    
-    .simple-btn-secondary {
-        background: #ffffff;
-        color: #000000;
-        border: 1px solid #e0e0e0;
-    }
-    
-    .simple-btn-secondary:hover {
-        background: #f8f9fa;
-        color: #000000;
-    }
-    
-    .simple-info-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .simple-info-row:last-child {
-        border-bottom: none;
-    }
-    
-    .simple-info-label {
-        font-weight: 600;
-        color: #000000;
-        min-width: 120px;
-    }
-    
-    .simple-info-value {
-        color: #666666;
-        flex: 1;
-        text-align: right;
-    }
-    
-    .simple-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #e0e0e0;
-    }
-    
-    .simple-badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    
-    .badge-pending {
-        background: #fff3cd;
-        color: #856404;
-    }
-    
-    .badge-reviewed {
-        background: #d1ecf1;
-        color: #0c5460;
-    }
-    
-    .badge-contacted {
-        background: #d4edda;
-        color: #155724;
-    }
-    
-    .badge-rejected {
-        background: #f8d7da;
-        color: #721c24;
-    }
-    
-    .badge-completed {
-        background: #d1ecf1;
-        color: #0c5460;
-    }
-    
-    .badge-cancelled {
-        background: #e2e3e5;
-        color: #383d41;
+    /* Responsive button layout */
+    @@media (max-width: 768px) {
+        .button-container {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+            min-height: auto !important;
+        }
+        
+        .button-group-left,
+        .button-group-right {
+            justify-content: center !important;
+            width: 100% !important;
+        }
+        
+        .btn {
+            width: 100% !important;
+            justify-content: center !important;
+        }
     }
 </style>
 
-<div class="simple-container">
-    <!-- Page Header -->
-    <div class="simple-header">
-        <h1 class="simple-title">Liên Hệ Khách Hàng</h1>
-        <p class="simple-subtitle">Đánh dấu đã liên hệ với khách hàng về đơn thu mua</p>
-    </div>
-
-    <!-- Customer Information -->
-    <div class="simple-card">
-        <div class="simple-card-header">
-            Thông Tin Khách Hàng
-        </div>
-        <div class="simple-card-body">
-            <div class="simple-info-row">
-                <span class="simple-info-label">Mã đơn:</span>
-                <span class="simple-info-value"><strong>#@Model.Id</strong></span>
-            </div>
-            <div class="simple-info-row">
-                <span class="simple-info-label">Họ tên:</span>
-                <span class="simple-info-value">@Model.FullName</span>
-            </div>
-            <div class="simple-info-row">
-                <span class="simple-info-label">Email:</span>
-                <span class="simple-info-value">@Model.Email</span>
-            </div>
-            <div class="simple-info-row">
-                <span class="simple-info-label">Số điện thoại:</span>
-                <span class="simple-info-value">@Model.PhoneNumber</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Product Information -->
-    <div class="simple-card">
-        <div class="simple-card-header">
-            Thông Tin Sản Phẩm
-        </div>
-        <div class="simple-card-body">
-            <div class="simple-info-row">
-                <span class="simple-info-label">Sản phẩm:</span>
-                <span class="simple-info-value">
-                    @if (Model.Product != null)
-                    {
-                        <strong>@Model.Product.Name</strong><br>
-                        <small>@Model.Product.Brand?.Name</small>
-                    }
-                    else
-                    {
-                        <span style="color: #999999;">Sản phẩm không tồn tại</span>
-                    }
-                </span>
-            </div>
-            <div class="simple-info-row">
-                <span class="simple-info-label">Thông tin đồng hồ:</span>
-                <span class="simple-info-value">@Model.WatchInfo</span>
-            </div>
-            @if (!string.IsNullOrEmpty(Model.Condition))
-            {
-                <div class="simple-info-row">
-                    <span class="simple-info-label">Tình trạng:</span>
-                    <span class="simple-info-value">
-                        <span class="simple-badge badge-reviewed">@Model.Condition</span>
-                    </span>
-                </div>
+@section Scripts {
+    <script>
+        // Auto-resize textarea
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.querySelector('textarea[name="AdminResponse"]');
+            if (textarea) {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = this.scrollHeight + 'px';
+                });
             }
-            @if (Model.Year.HasValue)
-            {
-                <div class="simple-info-row">
-                    <span class="simple-info-label">Năm sản xuất:</span>
-                    <span class="simple-info-value">
-                        <span class="simple-badge badge-pending">@Model.Year</span>
-                    </span>
-                </div>
-            }
-            @if (Model.ExpectedPrice.HasValue)
-            {
-                <div class="simple-info-row">
-                    <span class="simple-info-label">Giá mong muốn:</span>
-                    <span class="simple-info-value">
-                        <strong style="color: #000000;">
-                            @Model.ExpectedPrice.Value.ToString("N0") VNĐ
-                        </strong>
-                    </span>
-                </div>
-            }
-            <div class="simple-info-row">
-                <span class="simple-info-label">Trạng thái hiện tại:</span>
-                <span class="simple-info-value">
-                    <span class="simple-badge @GetStatusBadgeClass(Model.Status)">
-                        @GetStatusDisplayName(Model.Status)
-                    </span>
-                </span>
-            </div>
-            <div class="simple-info-row">
-                <span class="simple-info-label">Ngày tạo:</span>
-                <span class="simple-info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contact Form -->
-    <div class="simple-card">
-        <div class="simple-card-header">
-            Xác Nhận Liên Hệ
-        </div>
-        <div class="simple-card-body">
-            <form asp-action="Contact" method="post">
-                <input type="hidden" asp-for="Id" />
-                
-                <div class="simple-form-group">
-                    <label class="simple-form-label" for="contactNotes">
-                        Ghi chú liên hệ (tùy chọn):
-                    </label>
-                    <textarea id="contactNotes" name="contactNotes" class="simple-form-control" 
-                              rows="4" placeholder="Nhập ghi chú về cuộc liên hệ với khách hàng..."></textarea>
-                </div>
-                
-                <div class="simple-actions">
-                    <a href="@Url.Action("Index")" class="simple-btn simple-btn-secondary">
-                        Quay Lại
-                    </a>
-                    <button type="submit" class="simple-btn">
-                        Xác Nhận Đã Liên Hệ
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@functions {
-    private string GetStatusDisplayName(Shopping_Demo.Models.SellRequestStatus status)
-    {
-        return status switch
-        {
-            Shopping_Demo.Models.SellRequestStatus.Pending => "Chờ xử lý",
-            Shopping_Demo.Models.SellRequestStatus.Reviewed => "Đã xem xét",
-            Shopping_Demo.Models.SellRequestStatus.Contacted => "Đã liên hệ",
-            Shopping_Demo.Models.SellRequestStatus.Rejected => "Đã từ chối",
-            Shopping_Demo.Models.SellRequestStatus.Completed => "Hoàn thành",
-            Shopping_Demo.Models.SellRequestStatus.Cancelled => "Đã hủy",
-            _ => status.ToString()
-        };
-    }
-
-    private string GetStatusBadgeClass(Shopping_Demo.Models.SellRequestStatus status)
-    {
-        return status switch
-        {
-            Shopping_Demo.Models.SellRequestStatus.Pending => "badge-pending",
-            Shopping_Demo.Models.SellRequestStatus.Reviewed => "badge-reviewed",
-            Shopping_Demo.Models.SellRequestStatus.Contacted => "badge-contacted",
-            Shopping_Demo.Models.SellRequestStatus.Rejected => "badge-rejected",
-            Shopping_Demo.Models.SellRequestStatus.Completed => "badge-completed",
-            Shopping_Demo.Models.SellRequestStatus.Cancelled => "badge-cancelled",
-            _ => "badge-pending"
-        };
-    }
+        });
+    </script>
 }

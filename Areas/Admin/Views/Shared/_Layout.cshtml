@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="~/css/buttons.dataTables.min.css" />
     <link rel="stylesheet" href="~/css/morris.css" />
     <link rel="stylesheet" href="~/css/jquery-ui.css" />
+    <link rel="stylesheet" href="~/css/simple-loading.css" />
 
     @await RenderSectionAsync("Styles", required: false)
 
@@ -293,6 +294,12 @@
                     <span>Thông tin liên hệ</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Export" asp-action="Index">
+                    <i class="fas fa-fw fa-download"></i>
+                    <span>Xuất dữ liệu</span>
+                </a>
+            </li>
 
 
             <!-- Divider -->
@@ -529,6 +536,9 @@
             });
         });
     </script>
+
+    <!-- Simple Loading Script -->
+    <script src="~/js/simple-loading.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

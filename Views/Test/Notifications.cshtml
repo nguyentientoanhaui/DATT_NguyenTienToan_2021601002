@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Test Center Notifications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container" style="margin-top: 100px;">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center mb-0">Test Center Notifications</h2>
+                    <p class="text-center text-muted mb-0">Hệ thống thông báo hiển thị ở giữa màn hình</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-success w-100" onclick="showSuccess('Sản phẩm đã được thêm vào giỏ hàng thành công!')">
+                                <i class="fas fa-check"></i> Success Notification
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-danger w-100" onclick="showError('Có lỗi xảy ra khi xử lý yêu cầu của bạn!')">
+                                <i class="fas fa-times"></i> Error Notification
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-warning w-100" onclick="showWarning('Vui lòng kiểm tra lại thông tin trước khi tiếp tục!')">
+                                <i class="fas fa-exclamation-triangle"></i> Warning Notification
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-info w-100" onclick="showInfo('Thông tin này có thể hữu ích cho bạn!')">
+                                <i class="fas fa-info"></i> Info Notification
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Custom Notifications:</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-outline-primary w-100" onclick="showCenterNotification('Đây là thông báo tùy chỉnh với tiêu đề', 'info', 'Tiêu đề tùy chỉnh')">
+                                <i class="fas fa-cog"></i> Custom Title
+                            </button>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <button class="btn btn-outline-secondary w-100" onclick="showCenterNotification('Thông báo này sẽ hiển thị lâu hơn', 'success', null, 5000)">
+                                <i class="fas fa-clock"></i> Long Duration
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>Multiple Notifications:</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <button class="btn btn-primary w-100" onclick="showMultipleNotifications()">
+                                <i class="fas fa-layer-group"></i> Show Multiple
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="btn btn-secondary w-100" onclick="centerNotification.clear()">
+                                <i class="fas fa-trash"></i> Clear All
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <button class="btn btn-dark w-100" onclick="testCartNotifications()">
+                                <i class="fas fa-shopping-cart"></i> Test Cart
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Hướng dẫn sử dụng:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Success:</strong> Thông báo thành công (màu xanh lá)</li>
+                            <li><strong>Error:</strong> Thông báo lỗi (màu đỏ)</li>
+                            <li><strong>Warning:</strong> Thông báo cảnh báo (màu vàng)</li>
+                            <li><strong>Info:</strong> Thông báo thông tin (màu xanh dương)</li>
+                            <li><strong>Custom:</strong> Thông báo tùy chỉnh với tiêu đề và thời gian</li>
+                            <li><strong>Multiple:</strong> Hiển thị nhiều thông báo cùng lúc</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showMultipleNotifications() {
+        showSuccess('Thông báo đầu tiên!');
+        setTimeout(() => showError('Thông báo thứ hai!'), 500);
+        setTimeout(() => showWarning('Thông báo thứ ba!'), 1000);
+        setTimeout(() => showInfo('Thông báo cuối cùng!'), 1500);
+    }
+    
+    function testCartNotifications() {
+        // Simulate cart operations
+        showSuccess('Sản phẩm đã được thêm vào giỏ hàng!');
+        setTimeout(() => showInfo('Giỏ hàng của bạn có 3 sản phẩm'), 2000);
+        setTimeout(() => showWarning('Một số sản phẩm sắp hết hàng'), 4000);
+    }
+</script>

@@ -1,0 +1,682 @@
+@{
+    ViewData["Title"] = "Xuất dữ liệu";
+}
+
+<style>
+    :root {
+        --primary-black: #000000;
+        --secondary-black: #1a1a1a;
+        --dark-gray: #2d2d2d;
+        --medium-gray: #666666;
+        --light-gray: #f5f5f5;
+        --white: #ffffff;
+        --accent-gray: #e0e0e0;
+        --border-color: #e8e8e8;
+        --shadow-light: rgba(0, 0, 0, 0.05);
+        --shadow-medium: rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+        background: var(--white);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .export-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .page-title {
+        color: var(--primary-black);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    .page-subtitle {
+        color: var(--medium-gray);
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+
+    .export-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .export-card {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px var(--shadow-light);
+    }
+
+    .export-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px var(--shadow-medium);
+        border-color: var(--primary-black);
+    }
+
+    .card-header {
+        background: var(--primary-black);
+        color: var(--white);
+        padding: 1.5rem;
+        border: none;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-title i {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .card-description {
+        color: var(--medium-gray);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+    }
+
+    .date-filter {
+        background: var(--light-gray);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .date-filter label {
+        color: var(--primary-black);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .date-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .form-control {
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-black);
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        outline: none;
+    }
+
+    .export-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-excel {
+        background: var(--primary-black);
+        color: var(--white);
+    }
+
+    .btn-excel:hover {
+        background: var(--secondary-black);
+        color: var(--white);
+        transform: translateY(-1px);
+    }
+
+    .btn-csv {
+        background: var(--white);
+        color: var(--primary-black);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-csv:hover {
+        background: var(--light-gray);
+        color: var(--primary-black);
+        transform: translateY(-1px);
+    }
+
+    .special-section {
+        background: var(--light-gray);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .special-title {
+        color: var(--primary-black);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .special-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-special {
+        background: var(--primary-black);
+        color: var(--white);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-special:hover {
+        background: var(--secondary-black);
+        color: var(--white);
+        transform: translateY(-2px);
+    }
+
+    .instructions {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .instructions-title {
+        color: var(--primary-black);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .instructions-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .instructions-list li {
+        padding: 0.5rem 0;
+        color: var(--medium-gray);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .instructions-list li:last-child {
+        border-bottom: none;
+    }
+
+    .instructions-list strong {
+        color: var(--primary-black);
+        font-weight: 600;
+    }
+
+    @@media (max-width: 768px) {
+        .export-container {
+            padding: 1rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .export-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .date-inputs {
+            grid-template-columns: 1fr;
+        }
+        
+        .export-buttons {
+            grid-template-columns: 1fr;
+        }
+        
+        .special-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="export-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Xuất dữ liệu hệ thống</h1>
+        <p class="page-subtitle">Tải xuống dữ liệu dưới dạng Excel hoặc CSV</p>
+    </div>
+
+    <!-- Export Grid -->
+    <div class="export-grid">
+        <!-- Orders Export -->
+        <div class="export-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-shopping-cart"></i>
+                    Đơn hàng
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-description">Xuất danh sách đơn hàng với thông tin chi tiết và sản phẩm</p>
+                
+                <div class="date-filter">
+                    <label>Lọc theo ngày:</label>
+                    <div class="date-inputs">
+                        <input type="date" id="orderStartDate" class="form-control" placeholder="Từ ngày">
+                        <input type="date" id="orderEndDate" class="form-control" placeholder="Đến ngày">
+                    </div>
+                </div>
+                
+                <div class="export-buttons">
+                    <button class="btn btn-excel" onclick="exportData('orders', 'excel')">
+                        <i class="fas fa-file-excel"></i>
+                        Excel
+                    </button>
+                    <button class="btn btn-csv" onclick="exportData('orders', 'csv')">
+                        <i class="fas fa-file-csv"></i>
+                        CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Export -->
+        <div class="export-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-box"></i>
+                    Sản phẩm
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-description">Xuất danh sách sản phẩm với thông tin kỹ thuật chi tiết</p>
+                <div class="export-buttons">
+                    <button class="btn btn-excel" onclick="exportData('products', 'excel')">
+                        <i class="fas fa-file-excel"></i>
+                        Excel
+                    </button>
+                    <button class="btn btn-csv" onclick="exportData('products', 'csv')">
+                        <i class="fas fa-file-csv"></i>
+                        CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Export -->
+        <div class="export-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-users"></i>
+                    Người dùng
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-description">Xuất danh sách người dùng đã đăng ký trong hệ thống</p>
+                <div class="export-buttons">
+                    <button class="btn btn-excel" onclick="exportData('users', 'excel')">
+                        <i class="fas fa-file-excel"></i>
+                        Excel
+                    </button>
+                    <button class="btn btn-csv" onclick="exportData('users', 'csv')">
+                        <i class="fas fa-file-csv"></i>
+                        CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Export -->
+        <div class="export-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    Thống kê
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-description">Xuất dữ liệu thống kê doanh thu và bán hàng theo ngày</p>
+                
+                <div class="date-filter">
+                    <label>Lọc theo ngày:</label>
+                    <div class="date-inputs">
+                        <input type="date" id="statStartDate" class="form-control" placeholder="Từ ngày">
+                        <input type="date" id="statEndDate" class="form-control" placeholder="Đến ngày">
+                    </div>
+                </div>
+                
+                <div class="export-buttons">
+                    <button class="btn btn-excel" onclick="exportData('statistics', 'excel')">
+                        <i class="fas fa-file-excel"></i>
+                        Excel
+                    </button>
+                    <button class="btn btn-csv" onclick="exportData('statistics', 'csv')">
+                        <i class="fas fa-file-csv"></i>
+                        CSV
+                    </button>
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-special" onclick="exportDetailedStatistics()" style="width: 100%; font-size: 0.9rem; padding: 0.75rem;">
+                        <i class="fas fa-chart-bar"></i>
+                        Xuất thống kê chi tiết (Tất cả biểu đồ)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Export -->
+        <div class="export-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-tags"></i>
+                    Danh mục
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-description">Xuất danh sách danh mục sản phẩm và cấu trúc phân cấp</p>
+                <div class="export-buttons">
+                    <button class="btn btn-excel" onclick="exportData('categories', 'excel')">
+                        <i class="fas fa-file-excel"></i>
+                        Excel
+                    </button>
+                    <button class="btn btn-csv" onclick="exportData('categories', 'csv')">
+                        <i class="fas fa-file-csv"></i>
+                        CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brands Export -->
+        <div class="export-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-star"></i>
+                    Thương hiệu
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-description">Xuất danh sách thương hiệu sản phẩm và thông tin mô tả</p>
+                <div class="export-buttons">
+                    <button class="btn btn-excel" onclick="exportData('brands', 'excel')">
+                        <i class="fas fa-file-excel"></i>
+                        Excel
+                    </button>
+                    <button class="btn btn-csv" onclick="exportData('brands', 'csv')">
+                        <i class="fas fa-file-csv"></i>
+                        CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Special Actions -->
+    <div class="special-section">
+        <h3 class="special-title">
+            <i class="fas fa-download"></i>
+            Tùy chọn nâng cao
+        </h3>
+        <div class="special-buttons">
+            <button class="btn-special" onclick="exportAllData()">
+                <i class="fas fa-file-archive"></i>
+                Xuất tất cả dữ liệu (ZIP)
+            </button>
+            <button class="btn-special" onclick="showExportHistory()">
+                <i class="fas fa-history"></i>
+                Lịch sử xuất dữ liệu
+            </button>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+        <h3 class="instructions-title">
+            <i class="fas fa-info-circle"></i>
+            Hướng dẫn sử dụng
+        </h3>
+        <ul class="instructions-list">
+            <li><strong>Excel:</strong> File CSV tương thích với Microsoft Excel, có thể mở trực tiếp</li>
+            <li><strong>CSV:</strong> File CSV thuần túy, có thể mở bằng bất kỳ ứng dụng nào</li>
+            <li><strong>Lọc ngày:</strong> Chỉ áp dụng cho đơn hàng và thống kê</li>
+            <li><strong>Dữ liệu:</strong> Tất cả dữ liệu sẽ được xuất theo thời gian thực</li>
+            <li><strong>Bảo mật:</strong> Chỉ Admin và Manager mới có quyền xuất dữ liệu</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Simple Loading sẽ được tạo động bằng JavaScript -->
+
+<script>
+    // Fallback loading functions nếu simple-loading.js chưa load
+    if (typeof showLoading === 'undefined') {
+        window.showLoading = function(id, options) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'fallback-loading-' + id;
+            loadingDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                backdrop-filter: blur(2px);
+            `;
+            
+            const container = document.createElement('div');
+            container.style.cssText = `
+                text-align: center;
+                padding: 30px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                border: 1px solid #e0e0e0;
+            `;
+            
+            const spinner = document.createElement('div');
+            spinner.style.cssText = `
+                width: 40px;
+                height: 40px;
+                border: 3px solid #f3f3f3;
+                border-top: 3px solid #000;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            `;
+            
+            const text = document.createElement('div');
+            text.textContent = options.text || 'Đang tải...';
+            text.style.cssText = `
+                color: #000;
+                font-size: 14px;
+                font-weight: 500;
+            `;
+            
+            container.appendChild(spinner);
+            container.appendChild(text);
+            loadingDiv.appendChild(container);
+            document.body.appendChild(loadingDiv);
+            
+            // Add CSS animation
+            if (!document.getElementById('fallback-loading-styles')) {
+                const style = document.createElement('style');
+                style.id = 'fallback-loading-styles';
+                style.textContent = `
+                    @@keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        };
+        
+        window.hideLoading = function(id) {
+            const loadingDiv = document.getElementById('fallback-loading-' + id);
+            if (loadingDiv && loadingDiv.parentNode) {
+                loadingDiv.parentNode.removeChild(loadingDiv);
+            }
+        };
+    }
+
+    function exportData(type, format) {
+        // Show loading
+        showLoading('export', {
+            type: 'dots',
+            text: `Đang xuất ${type} (${format.toUpperCase()})...`,
+            overlay: true
+        });
+        
+        // Build URL with parameters
+        let url = `/Admin/Export/Export${capitalizeFirst(type)}?format=${format}`;
+        
+        // Add date filters for orders and statistics
+        if (type === 'orders') {
+            const startDate = document.getElementById('orderStartDate').value;
+            const endDate = document.getElementById('orderEndDate').value;
+            if (startDate) url += `&startDate=${startDate}`;
+            if (endDate) url += `&endDate=${endDate}`;
+        } else if (type === 'statistics') {
+            const startDate = document.getElementById('statStartDate').value;
+            const endDate = document.getElementById('statEndDate').value;
+            if (startDate) url += `&startDate=${startDate}`;
+            if (endDate) url += `&endDate=${endDate}`;
+        }
+        
+        // Create temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Hide loading after a short delay
+        setTimeout(() => {
+            hideLoading('export');
+        }, 2000);
+    }
+    
+    function exportAllData() {
+        showLoading('export-all', {
+            type: 'circle',
+            text: 'Đang chuẩn bị xuất tất cả dữ liệu...',
+            overlay: true
+        });
+        
+        // This would need to be implemented as a separate action
+        // For now, we'll show a message
+        setTimeout(() => {
+            hideLoading('export-all');
+            alert('Tính năng xuất tất cả dữ liệu sẽ được phát triển trong phiên bản tiếp theo.');
+        }, 2000);
+    }
+    
+    function showExportHistory() {
+        alert('Tính năng lịch sử xuất dữ liệu sẽ được phát triển trong phiên bản tiếp theo.');
+    }
+    
+    function exportDetailedStatistics() {
+        // Show loading
+        showLoading('detailed-stats', {
+            type: 'pulse',
+            text: 'Đang xuất thống kê chi tiết...',
+            overlay: true
+        });
+        
+        // Build URL with parameters
+        let url = `/Admin/Export/ExportDetailedStatistics?format=excel`;
+        
+        // Add date filters
+        const startDate = document.getElementById('statStartDate').value;
+        const endDate = document.getElementById('statEndDate').value;
+        if (startDate) url += `&startDate=${startDate}`;
+        if (endDate) url += `&endDate=${endDate}`;
+        
+        // Create temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = url;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Hide loading after a short delay
+        setTimeout(() => {
+            hideLoading('detailed-stats');
+        }, 3000);
+    }
+    
+    function capitalizeFirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+    
+    // Set default date range (last 30 days)
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+        
+        document.getElementById('orderStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+        document.getElementById('orderEndDate').value = today.toISOString().split('T')[0];
+        document.getElementById('statStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+        document.getElementById('statEndDate').value = today.toISOString().split('T')[0];
+    });
+</script>
