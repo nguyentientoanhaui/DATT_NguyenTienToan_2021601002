@@ -89,7 +89,7 @@ Shopping_Demo/
 
 ## Tác giả
 **Nguyễn Tiến Toàn** - 2021601002
-- Trường Đại học Công nghệ Thông tin - ĐHQG-HCM
+- Trường Đại học Công nghiệp Hà Nội
 - Đồ án tốt nghiệp ngành Công nghệ thông tin
 
 ## License
